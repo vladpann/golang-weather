@@ -3,7 +3,7 @@ CREATE SCHEMA weather;
 CREATE TABLE weather.users (
     id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     login         VARCHAR(255)    NOT NULL    UNIQUE,
-    password_hash VARCHAR(255)    NOT NULL
+    password      VARCHAR(255)    NOT NULL
 );
 
 CREATE TABLE weather.locations (

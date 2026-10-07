@@ -1,6 +1,16 @@
 package domain
 
 type User struct {
-	Login        string
-	PasswordHash string
+	ID    int64
+	Login string
+}
+
+func NewUser(
+	id int64,
+	login string,
+) User {
+	return User{
+		ID:    id,
+		Login: login,
+	}
 }
