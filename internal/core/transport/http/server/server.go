@@ -5,18 +5,27 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type HTTPServer struct {
-	mux    *http.ServeMux
+	router chi.Router
 	config Config
 }
 
 func NewHTTPServer(
 	config Config,
 ) *HTTPServer {
+	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestID)
+
 	return &HTTPServer{
-		mux:    http.NewServeMux(),
+		router: r,
 		config: config,
 	}
 }
@@ -24,18 +33,14 @@ func NewHTTPServer(
 func (s *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	for _, router := range routers {
 		prefix := "/api/" + string(router.apiVersion)
-
-		s.mux.Handle(
-			prefix+"/",
-			http.StripPrefix(prefix, router),
-		)
+		s.router.Mount(prefix, router.Router)
 	}
 }
 
 func (s *HTTPServer) Run(ctx context.Context) error {
 	server := &http.Server{
 		Addr:    s.config.Addr,
-		Handler: s.mux,
+		Handler: s.router,
 	}
 
 	ch := make(chan error, 1)
