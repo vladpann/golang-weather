@@ -16,9 +16,13 @@ func (s *UsersService) CreateUser(
 	password string,
 	repeatPassword string,
 ) (domain.User, error) {
-	// TODO: fix with Err
-	if password != repeatPassword {
-		return domain.User{}, fmt.Errorf("password do not match")
+	input := CreateUserInput{
+		Login:          login,
+		Password:       password,
+		RepeatPassword: repeatPassword,
+	}
+	if err := input.Validate(); err != nil {
+		return domain.User{}, fmt.Errorf("validate input: %w", err)
 	}
 
 	passwordHash, err := s.passwordHasher.Hash(password)

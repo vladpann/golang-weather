@@ -7,4 +7,5 @@ var (
 	ErrInvalidArgument    = errors.New("invalid argument")
 	ErrConflict           = errors.New("conflict")
 	ErrLoginAlreadyExists = errors.New("login already exists")
+	ErrPasswordDoNotMatch = errors.New("password do not match")
 )

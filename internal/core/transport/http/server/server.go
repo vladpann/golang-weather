@@ -7,26 +7,34 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+
+	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
+	core_http_middleware "github.com/vladpann/golang-weather/internal/core/transport/http/middleware"
 )
 
 type HTTPServer struct {
-	router chi.Router
-	config Config
+	router     chi.Router
+	config     Config
+	log        *core_logger.Logger
+	middleware []core_http_middleware.Middleware
 }
 
 func NewHTTPServer(
 	config Config,
+	log *core_logger.Logger,
+	middleware ...core_http_middleware.Middleware,
 ) *HTTPServer {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.RequestID)
+	for _, mw := range middleware {
+		r.Use(mw)
+	}
 
 	return &HTTPServer{
-		router: r,
-		config: config,
+		router:     r,
+		config:     config,
+		log:        log,
+		middleware: middleware,
 	}
 }
 
@@ -61,7 +69,6 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 			return fmt.Errorf("listen and serve HTTP: %w", err)
 		}
 	case <-ctx.Done():
-
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
 			s.config.ShutdownTimeout,
@@ -73,7 +80,6 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 
 			return fmt.Errorf("shutdown HTTP server: %w", err)
 		}
-
 	}
 
 	return nil
