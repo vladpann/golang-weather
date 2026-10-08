@@ -1,3 +1,8 @@
 .env
+.env.test
 out
 .DS_STORE
+
+# Test coverage files
+coverage.out
+coverage.html

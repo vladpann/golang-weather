@@ -22,7 +22,7 @@ func (i *CreateUserInput) CreateUserValidate() error {
 	}
 
 	if i.Password != i.RepeatPassword {
-		return fmt.Errorf("passwords do not match")
+		return fmt.Errorf("password do not match")
 	}
 
 	return nil
