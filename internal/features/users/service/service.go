@@ -22,6 +22,11 @@ type UsersRepository interface {
 		login string,
 		passwordHash []byte,
 	) (domain.User, error)
+
+	GetUser(
+		ctx context.Context,
+		login string,
+	) (user domain.User, passwordHash []byte, err error)
 }
 
 func NewUsersService(

@@ -9,7 +9,8 @@ import (
 )
 
 type UsersHTTPHandler struct {
-	usersService UsersService
+	usersService    UsersService
+	sessionsService SessionsService
 }
 
 type UsersService interface {
@@ -19,13 +20,28 @@ type UsersService interface {
 		password string,
 		repeatPassword string,
 	) (domain.User, error)
+
+	GetUser(
+		ctx context.Context,
+		login string,
+		password string,
+	) (domain.User, error)
+}
+
+type SessionsService interface {
+	CreateSession(
+		ctx context.Context,
+		userID int64,
+	) (domain.Session, error)
 }
 
 func NewUsersHTTPHandler(
 	usersService UsersService,
+	sessionsService SessionsService,
 ) *UsersHTTPHandler {
 	return &UsersHTTPHandler{
-		usersService: usersService,
+		usersService:    usersService,
+		sessionsService: sessionsService,
 	}
 }
 
@@ -35,6 +51,11 @@ func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodPost,
 			Path:    "/auth/sign-up",
 			Handler: h.CreateUser,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/auth/sign-in",
+			Handler: h.SignInUser,
 		},
 	}
 }

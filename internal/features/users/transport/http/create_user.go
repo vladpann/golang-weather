@@ -14,10 +14,7 @@ type CreateUserRequest struct {
 	RepeatPassword string `json:"repeat_password"`
 }
 
-type CreateUserResponse struct {
-	ID    int64  `json:"id"`
-	Login string `json:"login"`
-}
+type CreateUserResponse UserDTOResponse
 
 func (h *UsersHTTPHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
