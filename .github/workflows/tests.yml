@@ -1,0 +1,83 @@
+# GitHub Actions Workflow для интеграционных тестов
+# Использует переменные окружения из .env.test файла
+# Примечание: секция services не может использовать переменные из .env.test,
+# поэтому значения там должны быть синхронизированы вручную
+
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          # Эти значения должны соответствовать .env.test
+          # В секции services нельзя использовать переменные из файла
+          POSTGRES_DB: weather_db_test
+          POSTGRES_USER: weather_user
+          POSTGRES_PASSWORD: weather_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+          cache: true
+
+      - name: Load environment variables
+        run: |
+          # Загрузить переменные из .env.test
+          if [ -f .env.test ]; then
+            echo "Loading variables from .env.test"
+            export $(grep -v '^#' .env.test | xargs)
+            # Сохранить переменные для последующих steps
+            grep -v '^#' .env.test | grep '=' | while IFS='=' read -r key value; do
+              echo "$key=$value" >> $GITHUB_ENV
+            done
+          fi
+
+      - name: Verify PostgreSQL connection
+        run: |
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c "SELECT version();"
+
+      - name: Setup test database schema
+        run: |
+          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -f scripts/setup_test_db.sql
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run integration tests
+        run: |
+          go test ./internal/features/users/service -v -count=1
+          go test ./internal/features/sessions/service -v -count=1
+
+      - name: Run all tests with coverage
+        run: |
+          go test ./... -v -coverprofile=coverage.out -covermode=atomic
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.out
+          flags: integration
+          name: codecov-umbrella
