@@ -12,6 +12,8 @@ import (
 	core_pgx_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/vladpann/golang-weather/internal/core/transport/http/middleware"
 	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
+	sessions_repository_postgres "github.com/vladpann/golang-weather/internal/features/sessions/repository/postgres"
+	sessions_service "github.com/vladpann/golang-weather/internal/features/sessions/service"
 	users_repository_postgres "github.com/vladpann/golang-weather/internal/features/users/repository/postgres"
 	users_service "github.com/vladpann/golang-weather/internal/features/users/service"
 	users_transport_http "github.com/vladpann/golang-weather/internal/features/users/transport/http"
@@ -50,7 +52,13 @@ func main() {
 	usersRepository := users_repository_postgres.NewUsersRepository(pool)
 	passwordHasher := users_service.NewPasswordHasher()
 	usersService := users_service.NewUsersService(usersRepository, passwordHasher)
-	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService)
+
+	logger.Debug("initializing feature", zap.String("feature", "sessions"))
+	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
+	sessionsConfig := sessions_service.NewConfigMust()
+	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
+
+	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService)
 
 	logger.Debug("initializing HTTP server")
 	httpConfig := core_http_server.NewConfigMust()

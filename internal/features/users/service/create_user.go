@@ -16,18 +16,20 @@ func (s *UsersService) CreateUser(
 	password string,
 	repeatPassword string,
 ) (domain.User, error) {
+	var op = "create user"
+
 	input := CreateUserInput{
 		Login:          login,
 		Password:       password,
 		RepeatPassword: repeatPassword,
 	}
-	if err := input.Validate(); err != nil {
-		return domain.User{}, fmt.Errorf("validate input: %w", err)
+	if err := input.CreateUserValidate(); err != nil {
+		return domain.User{}, fmt.Errorf("%s validate input: %w", op, err)
 	}
 
 	passwordHash, err := s.passwordHasher.Hash(password)
 	if err != nil {
-		return domain.User{}, fmt.Errorf("hash password: %w", err)
+		return domain.User{}, fmt.Errorf("%s password hash: %w", op, err)
 	}
 
 	user, err := s.usersRepository.CreateUser(ctx, login, passwordHash)
@@ -36,7 +38,7 @@ func (s *UsersService) CreateUser(
 			return domain.User{}, core_errors.ErrLoginAlreadyExists
 		}
 
-		return domain.User{}, fmt.Errorf("create user: %w", err)
+		return domain.User{}, fmt.Errorf("%s %w:", op, err)
 	}
 
 	return user, nil

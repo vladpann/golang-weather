@@ -8,6 +8,7 @@ import (
 
 type SessionsService struct {
 	sessionsRepository SessionsRepository
+	config             Config
 }
 
 type SessionsRepository interface {
@@ -19,8 +20,10 @@ type SessionsRepository interface {
 
 func NewSessionsService(
 	sessionsRepository SessionsRepository,
+	config Config,
 ) *SessionsService {
 	return &SessionsService{
 		sessionsRepository: sessionsRepository,
+		config:             config,
 	}
 }

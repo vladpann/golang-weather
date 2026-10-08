@@ -8,7 +8,7 @@ type CreateUserInput struct {
 	RepeatPassword string
 }
 
-func (i *CreateUserInput) Validate() error {
+func (i *CreateUserInput) CreateUserValidate() error {
 	if i.Login == "" {
 		return fmt.Errorf("login is required")
 	}

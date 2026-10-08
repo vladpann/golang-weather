@@ -13,14 +13,11 @@ func (s *SessionsService) CreateSession(
 	ctx context.Context,
 	userID int64,
 ) (domain.Session, error) {
-	// TODO: validator
-	// TODO: заменить 24 * time.Hour на .env
-
-	session := domain.Session{
-		ID:        uuid.New(),
-		UserID:    userID,
-		ExpiresAt: time.Now().Add(24 * time.Hour),
-	}
+	session := domain.NewSession(
+		uuid.New(),
+		userID,
+		time.Now().Add(s.config.TTL),
+	)
 
 	session, err := s.sessionsRepository.CreateSession(ctx, session)
 	if err != nil {
