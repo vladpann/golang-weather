@@ -10,9 +10,8 @@ help: ## Показать справку
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 run: ## Запустить проект
-	@echo "🚀 Запуск проекта..."
-	@go run ./cmd/weather/main.go
 	@echo "✅ Проект запущен"
+	@go run ./cmd/weather/main.go
 
 setup-db: ## Настроить production базу данных
 	@echo "🗄️ Настройка production базы данных..."

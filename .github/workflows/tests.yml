@@ -1,7 +1,10 @@
 # GitHub Actions Workflow для интеграционных тестов
-# Использует переменные окружения из .env.test файла
-# Примечание: секция services не может использовать переменные из .env.test,
-# поэтому значения там должны быть синхронизированы вручную
+# Использует GitHub Secrets для безопасного хранения конфиденциальных данных
+#
+# Необходимые secrets (Settings -> Secrets and variables -> Actions):
+# - POSTGRES_USER: имя пользователя БД для тестов
+# - POSTGRES_PASSWORD: пароль пользователя БД для тестов
+# - POSTGRES_DB: имя тестовой базы данных
 
 name: Integration Tests
 
@@ -16,15 +19,30 @@ jobs:
     name: Run Integration Tests
     runs-on: ubuntu-latest
 
+    # Переменные окружения для тестов
+    # Используем GitHub Secrets для конфиденциальных данных
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_TIMEOUT: 5s
+      HTTP_ADDR: ':5050'
+      HTTP_SHUTDOWN_TIMEOUT: 30s
+      ALLOWED_ORIGINS: 'http://localhost'
+      LOGGER_LEVEL: DEBUG
+      LOGGER_FOLDER: out
+      SESSION_TTL: 24h
+
     services:
       postgres:
         image: postgres:15
         env:
-          # Эти значения должны соответствовать .env.test
-          # В секции services нельзя использовать переменные из файла
-          POSTGRES_DB: weather_db_test
-          POSTGRES_USER: weather_user
-          POSTGRES_PASSWORD: weather_password
+          # Используем те же secrets для создания БД в контейнере
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -43,25 +61,13 @@ jobs:
           go-version: '1.26'
           cache: true
 
-      - name: Load environment variables
-        run: |
-          # Загрузить переменные из .env.test
-          if [ -f .env.test ]; then
-            echo "Loading variables from .env.test"
-            export $(grep -v '^#' .env.test | xargs)
-            # Сохранить переменные для последующих steps
-            grep -v '^#' .env.test | grep '=' | while IFS='=' read -r key value; do
-              echo "$key=$value" >> $GITHUB_ENV
-            done
-          fi
-
       - name: Verify PostgreSQL connection
         run: |
-          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -c "SELECT version();"
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT version();"
 
       - name: Setup test database schema
         run: |
-          PGPASSWORD=${{ env.POSTGRES_PASSWORD }} psql -h localhost -U ${{ env.POSTGRES_USER }} -d ${{ env.POSTGRES_DB }} -f scripts/setup_test_db.sql
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -f scripts/setup_test_db.sql
 
       - name: Download dependencies
         run: go mod download
