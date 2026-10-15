@@ -60,42 +60,16 @@ func TestUsersService_CreateUser_Integration(t *testing.T) {
 		repeatPassword := "password123"
 
 		// Создаем первого пользователя
-		t.Log("Creating first user...")
 		user1, err := usersService.CreateUser(ctx, login, password, repeatPassword)
-		require.NoError(t, err, "First user creation should succeed")
+		require.NoError(t, err)
 		assert.NotZero(t, user1.ID)
-		t.Logf("First user created successfully with ID: %d", user1.ID)
-
-		// Проверяем, что пользователь действительно в БД
-		retrievedBefore, _, err := usersRepository.GetUser(ctx, login)
-		require.NoError(t, err, "Should be able to retrieve first user")
-		t.Logf("User verified in DB with ID: %d", retrievedBefore.ID)
 
 		// Пытаемся создать второго пользователя с тем же логином
-		t.Log("Attempting to create duplicate user...")
 		user2, err := usersService.CreateUser(ctx, login, password, repeatPassword)
 
 		// Проверка
-		t.Logf("Second user creation error: %v", err)
-		t.Logf("Second user ID: %d", user2.ID)
-		if err != nil {
-			t.Logf("Error type: %T", err)
-			t.Logf("Error string: %q", err.Error())
-		} else {
-			// Если ошибки нет, проверим, что в БД
-			t.Log("ERROR: Second user was created without error! Checking database...")
-			// Попробуем получить пользователя напрямую
-			var count int
-			row := pool.QueryRow(ctx, "SELECT COUNT(*) FROM weather.users WHERE login = $1", login)
-			err := row.Scan(&count)
-			if err == nil {
-				t.Logf("Number of users with login '%s': %d", login, count)
-			}
-		}
-		require.Error(t, err, "Second user creation must fail")
-		if !assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине") {
-			t.Logf("FAILED: Expected ErrLoginAlreadyExists but got: %v", err)
-		}
+		require.Error(t, err)
+		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
 		assert.Zero(t, user2.ID, "Второй пользователь не должен быть создан")
 
 		// Проверяем, что в БД только один пользователь

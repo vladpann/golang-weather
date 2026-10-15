@@ -68,8 +68,6 @@ func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
 		_, err := pool.Exec(ctx, query)
 		require.NoError(t, err, fmt.Sprintf("failed to clear table: %s", query))
 	}
-	
-	t.Log("Tables cleared successfully")
 }
 
 // GetTestDBName возвращает имя тестовой базы данных

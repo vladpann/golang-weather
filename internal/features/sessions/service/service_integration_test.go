@@ -69,28 +69,16 @@ func TestSessionsService_CreateSession_Integration(t *testing.T) {
 		password := "password123"
 		repeatPassword := "password123"
 
-		t.Log("Creating user for multiple sessions test...")
 		user, err := usersService.CreateUser(ctx, login, password, repeatPassword)
-		require.NoError(t, err, "User creation should succeed")
-		t.Logf("User created with ID: %d", user.ID)
+		require.NoError(t, err)
 
 		// Создаем первую сессию
-		t.Log("Creating first session...")
 		session1, err := sessionsService.CreateSession(ctx, user.ID)
-		if err != nil {
-			t.Logf("First session creation error: %v (type: %T)", err, err)
-		}
-		require.NoError(t, err, "First session creation should succeed")
-		t.Logf("First session created with ID: %s", session1.ID)
+		require.NoError(t, err)
 
 		// Создаем вторую сессию для того же пользователя
-		t.Log("Creating second session...")
 		session2, err := sessionsService.CreateSession(ctx, user.ID)
-		if err != nil {
-			t.Logf("Second session creation error: %v (type: %T)", err, err)
-		}
-		require.NoError(t, err, "Second session creation should succeed")
-		t.Logf("Second session created with ID: %s", session2.ID)
+		require.NoError(t, err)
 
 		// Проверка
 		assert.NotEqual(t, session1.ID, session2.ID, "Сессии должны иметь разные ID")
