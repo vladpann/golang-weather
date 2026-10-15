@@ -1,17 +1,14 @@
 -- Создание тестовой базы данных
 -- Запустите этот скрипт для подготовки окружения для интеграционных тестов
 
--- ВАЖНО: Этот скрипт должен быть запущен от имени суперпользователя (postgres)
--- или владельца базы данных
+-- ВАЖНО: Этот скрипт должен быть запущен от имени пользователя, который является
+-- владельцем базы данных (в CI/CD это POSTGRES_USER из секретов)
 
--- Подключитесь к тестовой базе данных:
--- \c weather_db_test
+-- Удаляем схему если она существует (для чистого тестирования)
+DROP SCHEMA IF EXISTS weather CASCADE;
 
--- Выдаем права на создание схем (если запущено от суперпользователя)
--- GRANT CREATE ON DATABASE weather_db_test TO weather_user;
-
--- Создаем схему weather
-CREATE SCHEMA IF NOT EXISTS weather AUTHORIZATION weather_user;
+-- Создаем схему weather (владелец - текущий пользователь)
+CREATE SCHEMA weather;
 
 -- Создаем таблицу пользователей
 CREATE TABLE IF NOT EXISTS weather.users (
@@ -42,14 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON weather.sessions(expires_a
 COMMENT ON TABLE weather.users IS 'Таблица пользователей приложения';
 COMMENT ON TABLE weather.sessions IS 'Таблица активных сессий пользователей';
 
--- Выдаем права пользователю (замените weather_user на вашего пользователя)
-GRANT USAGE ON SCHEMA weather TO weather_user;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA weather TO weather_user;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA weather TO weather_user;
-
--- Устанавливаем права по умолчанию для новых объектов
-ALTER DEFAULT PRIVILEGES IN SCHEMA weather GRANT ALL PRIVILEGES ON TABLES TO weather_user;
-ALTER DEFAULT PRIVILEGES IN SCHEMA weather GRANT ALL PRIVILEGES ON SEQUENCES TO weather_user;
+-- Права уже установлены, так как текущий пользователь является владельцем схемы
 
 -- Вывод информации о созданных таблицах
 \dt weather.*
