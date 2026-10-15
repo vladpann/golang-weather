@@ -82,7 +82,7 @@ jobs:
           OPENWEATHER_API_KEY: ''
           SKIP_TESTS_IF_NO_API_KEY: 'true'
         run: |
-          go test ./internal/features/openweather/integration_test -v -short -count=1
+          go test ./internal/features/openweather/service -v -short -count=1
 
       - name: Run all tests with coverage
         run: |
