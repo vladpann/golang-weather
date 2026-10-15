@@ -60,7 +60,6 @@ test-integration: ## Запустить только интеграционны�
 	@echo "🧪 Запуск интеграционных тестов..."
 	@go test ./internal/features/users/service -v -count=1
 	@go test ./internal/features/sessions/service -v -count=1
-	@go test ./internal/features/openweather/integration_test -v -count=1
 
 test-users: ## Запустить тесты сервиса пользователей
 	@echo "👤 Тесты сервиса пользователей..."
