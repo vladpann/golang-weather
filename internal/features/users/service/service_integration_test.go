@@ -60,20 +60,26 @@ func TestUsersService_CreateUser_Integration(t *testing.T) {
 		repeatPassword := "password123"
 
 		// Создаем первого пользователя
+		t.Log("Creating first user...")
 		user1, err := usersService.CreateUser(ctx, login, password, repeatPassword)
-		require.NoError(t, err)
+		require.NoError(t, err, "First user creation should succeed")
 		assert.NotZero(t, user1.ID)
+		t.Logf("First user created successfully with ID: %d", user1.ID)
 
 		// Пытаемся создать второго пользователя с тем же логином
+		t.Log("Attempting to create duplicate user...")
 		user2, err := usersService.CreateUser(ctx, login, password, repeatPassword)
 
 		// Проверка
-		require.Error(t, err)
+		t.Logf("Second user creation error: %v", err)
 		if err != nil {
-			t.Logf("Received error: %v", err)
 			t.Logf("Error type: %T", err)
+			t.Logf("Error string: %q", err.Error())
 		}
-		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
+		require.Error(t, err, "Second user creation must fail")
+		if !assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине") {
+			t.Logf("FAILED: Expected ErrLoginAlreadyExists but got: %v", err)
+		}
 		assert.Zero(t, user2.ID, "Второй пользователь не должен быть создан")
 
 		// Проверяем, что в БД только один пользователь

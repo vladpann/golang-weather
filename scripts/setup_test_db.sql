@@ -10,8 +10,8 @@ DROP SCHEMA IF EXISTS weather CASCADE;
 -- Создаем схему weather (владелец - текущий пользователь)
 CREATE SCHEMA weather;
 
--- Создаем таблицу пользователей
-CREATE TABLE IF NOT EXISTS weather.users (
+-- Создаем таблицу пользователей (без IF NOT EXISTS для гарантии)
+CREATE TABLE weather.users (
     id BIGSERIAL PRIMARY KEY,
     login VARCHAR(255) NOT NULL UNIQUE,
     password BYTEA NOT NULL,
@@ -19,10 +19,10 @@ CREATE TABLE IF NOT EXISTS weather.users (
 );
 
 -- Создаем индекс для быстрого поиска по логину
-CREATE INDEX IF NOT EXISTS idx_users_login ON weather.users(login);
+CREATE INDEX idx_users_login ON weather.users(login);
 
--- Создаем таблицу сессий
-CREATE TABLE IF NOT EXISTS weather.sessions (
+-- Создаем таблицу сессий (без IF NOT EXISTS для гарантии)
+CREATE TABLE weather.sessions (
     id UUID PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES weather.users(id) ON DELETE CASCADE,
     expires_at TIMESTAMP NOT NULL,
@@ -30,10 +30,10 @@ CREATE TABLE IF NOT EXISTS weather.sessions (
 );
 
 -- Создаем индекс для быстрого поиска сессий по user_id
-CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON weather.sessions(user_id);
+CREATE INDEX idx_sessions_user_id ON weather.sessions(user_id);
 
 -- Создаем индекс для очистки истекших сессий
-CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON weather.sessions(expires_at);
+CREATE INDEX idx_sessions_expires_at ON weather.sessions(expires_at);
 
 -- Комментарии к таблицам
 COMMENT ON TABLE weather.users IS 'Таблица пользователей приложения';
