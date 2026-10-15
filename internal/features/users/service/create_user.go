@@ -38,7 +38,7 @@ func (s *UsersService) CreateUser(
 			return domain.User{}, core_errors.ErrLoginAlreadyExists
 		}
 
-		return domain.User{}, fmt.Errorf("%s %w:", op, err)
+		return domain.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return user, nil
