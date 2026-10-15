@@ -69,6 +69,10 @@ func TestUsersService_CreateUser_Integration(t *testing.T) {
 
 		// Проверка
 		require.Error(t, err)
+		if err != nil {
+			t.Logf("Received error: %v", err)
+			t.Logf("Error type: %T", err)
+		}
 		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
 		assert.Zero(t, user2.ID, "Второй пользователь не должен быть создан")
 
