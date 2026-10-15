@@ -17,6 +17,11 @@ type OpenWeatherDTOResponse struct {
 	Cod        int       `json:"cod"`
 }
 
+type OpenWeatherLocationDTOResponse struct {
+	Name  string `json:"name"`
+	Coord Coord  `json:"coord"`
+}
+
 type Coord struct {
 	Lon float64 `json:"lon"`
 	Lat float64 `json:"lat"`
