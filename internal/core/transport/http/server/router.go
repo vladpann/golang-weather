@@ -1,6 +1,8 @@
 package core_http_server
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 )
 
@@ -28,6 +30,13 @@ func NewAPIVersionRouter(
 
 func (r *APIVersionRouter) RegisterRoutes(routes ...Route) {
 	for _, route := range routes {
-		r.Method(route.Method, route.Path, route.Handler)
+		handler := http.Handler(route.Handler)
+		
+		// Применяем middleware в обратном порядке
+		for i := len(route.Middlewares) - 1; i >= 0; i-- {
+			handler = route.Middlewares[i](handler)
+		}
+		
+		r.Method(route.Method, route.Path, handler)
 	}
 }
