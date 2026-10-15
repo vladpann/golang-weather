@@ -60,14 +60,16 @@ func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
 	ctx := context.Background()
 
 	queries := []string{
-		"TRUNCATE TABLE weather.sessions CASCADE",
-		"TRUNCATE TABLE weather.users CASCADE",
+		"TRUNCATE TABLE weather.sessions RESTART IDENTITY CASCADE",
+		"TRUNCATE TABLE weather.users RESTART IDENTITY CASCADE",
 	}
 
 	for _, query := range queries {
 		_, err := pool.Exec(ctx, query)
 		require.NoError(t, err, fmt.Sprintf("failed to clear table: %s", query))
 	}
+	
+	t.Log("Tables cleared successfully")
 }
 
 // GetTestDBName возвращает имя тестовой базы данных

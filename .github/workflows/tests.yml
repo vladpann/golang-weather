@@ -69,6 +69,11 @@ jobs:
         run: |
           PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -f scripts/setup_test_db.sql
 
+      - name: Verify database schema
+        run: |
+          echo "Checking constraints on users table..."
+          PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c "\d weather.users"
+
       - name: Download dependencies
         run: go mod download
 
