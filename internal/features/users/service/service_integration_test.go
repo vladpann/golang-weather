@@ -64,11 +64,25 @@ func TestUsersService_CreateUser_Integration(t *testing.T) {
 		require.NoError(t, err)
 		assert.NotZero(t, user1.ID)
 
+		// ВАЖНО: Убедимся, что первый пользователь действительно сохранен
+		// Это гарантирует, что INSERT завершился и constraint активен
+		_, _, err = usersRepository.GetUser(ctx, login)
+		require.NoError(t, err, "First user must be retrievable from database")
+
 		// Пытаемся создать второго пользователя с тем же логином
 		user2, err := usersService.CreateUser(ctx, login, password, repeatPassword)
 
+		// DEBUG: Если ошибки нет, это баг - добавим детальную информацию
+		if err == nil {
+			var count int
+			row := pool.QueryRow(ctx, "SELECT COUNT(*) FROM weather.users WHERE login = $1", login)
+			_ = row.Scan(&count)
+			t.Fatalf("BUG: Second user with duplicate login was created without error! Users with login '%s' in DB: %d, user1.ID=%d, user2.ID=%d", 
+				login, count, user1.ID, user2.ID)
+		}
+
 		// Проверка
-		require.Error(t, err)
+		require.Error(t, err, "Second user creation must fail with unique constraint violation")
 		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
 		assert.Zero(t, user2.ID, "Второй пользователь не должен быть создан")
 
