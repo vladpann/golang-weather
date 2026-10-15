@@ -12,6 +12,12 @@ import (
 	core_pgx_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/vladpann/golang-weather/internal/core/transport/http/middleware"
 	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
+	locations_repository_postgres "github.com/vladpann/golang-weather/internal/features/locations/repository/postgres"
+	locations_service "github.com/vladpann/golang-weather/internal/features/locations/service"
+	locations_transport_http "github.com/vladpann/golang-weather/internal/features/locations/transport/http"
+	"github.com/vladpann/golang-weather/internal/features/openweather/ratelimiter"
+	openweather_service "github.com/vladpann/golang-weather/internal/features/openweather/service"
+	openweather_transport_http "github.com/vladpann/golang-weather/internal/features/openweather/transport/http"
 	sessions_repository_postgres "github.com/vladpann/golang-weather/internal/features/sessions/repository/postgres"
 	sessions_service "github.com/vladpann/golang-weather/internal/features/sessions/service"
 	users_repository_postgres "github.com/vladpann/golang-weather/internal/features/users/repository/postgres"
@@ -60,6 +66,33 @@ func main() {
 
 	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService)
 
+	logger.Debug("initializing feature", zap.String("feature", "locations"))
+	locationsRepository := locations_repository_postgres.NewLocationsRepository(pool)
+	locationsService := locations_service.NewLocationsService(locationsRepository)
+	authMiddleware := core_http_middleware.Auth(sessionsService)
+	locationsTransportHTTP := locations_transport_http.NewLocationsHTTPHandler(locationsService, authMiddleware)
+
+	logger.Debug("initializing feature", zap.String("feature", "openweather"))
+	openWeatherConfig := openweather_service.NewConfigMust()
+
+	// Initialize rate limiter
+	rateLimiterConfig := ratelimiter.Config{
+		RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
+		QueueSize:         openWeatherConfig.QueueSize,
+	}
+	rateLimiter, err := ratelimiter.NewRateLimiter(rateLimiterConfig, logger.Logger)
+	if err != nil {
+		logger.Fatal("failed to init rate limiter", zap.Error(err))
+	}
+	defer rateLimiter.Close()
+
+	openWeatherTransportHTTP := openweather_transport_http.NewOpenWeatherHTTPHandler(
+		locationsService,
+		openWeatherConfig,
+		authMiddleware,
+		rateLimiter,
+	)
+
 	logger.Debug("initializing HTTP server")
 	httpConfig := core_http_server.NewConfigMust()
 	httpServer := core_http_server.NewHTTPServer(
@@ -71,6 +104,8 @@ func main() {
 
 	apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
+	apiVersionRouter.RegisterRoutes(locationsTransportHTTP.Routes()...)
+	apiVersionRouter.RegisterRoutes(openWeatherTransportHTTP.Routes()...)
 
 	httpServer.RegisterAPIRouters(
 		apiVersionRouter,
