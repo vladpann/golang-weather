@@ -1,19 +1,44 @@
 package locations_transport_http
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/vladpann/golang-weather/internal/core/domain"
 	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
-	locations_service "github.com/vladpann/golang-weather/internal/features/locations/service"
 )
 
 type LocationsHTTPHandler struct {
-	locationsService *locations_service.LocationsService
+	locationsService LocationsService
 	authMiddleware   func(http.Handler) http.Handler
 }
 
+type LocationsService interface {
+	CreateLocation(
+		ctx context.Context,
+		location domain.Location,
+	) (domain.Location, error)
+
+	GetLocation(
+		ctx context.Context,
+		id int64,
+		userID int64,
+	) (domain.Location, error)
+
+	GetLocations(
+		ctx context.Context,
+		limit *int,
+		offset *int,
+	) ([]domain.Location, error)
+
+	DeleteLocation(
+		ctx context.Context,
+		id int64,
+	) error
+}
+
 func NewLocationsHTTPHandler(
-	locationsService *locations_service.LocationsService,
+	locationsService LocationsService,
 	authMiddleware func(http.Handler) http.Handler,
 ) *LocationsHTTPHandler {
 	return &LocationsHTTPHandler{

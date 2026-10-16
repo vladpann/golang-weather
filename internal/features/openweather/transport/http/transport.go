@@ -26,7 +26,8 @@ type LocationsService interface {
 
 	GetLocation(
 		ctx context.Context,
-		location domain.Location,
+		id int64,
+		userID int64,
 	) (domain.Location, error)
 }
 

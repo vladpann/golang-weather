@@ -19,3 +19,13 @@ func locationDomainFromModel(location LocationModel) domain.Location {
 		location.Longitude,
 	)
 }
+
+func locationDomainsFromModels(locationModels []LocationModel) []domain.Location {
+	userDomains := make([]domain.Location, len(locationModels))
+
+	for i, model := range locationModels {
+		userDomains[i] = locationDomainFromModel(model)
+	}
+
+	return userDomains
+}

@@ -2,19 +2,27 @@ package core_http_response
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+
+	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
+	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
+	"go.uber.org/zap"
 )
 
 type HTTPResponseHandler struct {
-	rw http.ResponseWriter
+	log *core_logger.Logger
+	rw  http.ResponseWriter
 }
 
 func NewHTTPResponseHandler(
+	log *core_logger.Logger,
 	rw http.ResponseWriter,
 ) *HTTPResponseHandler {
 	return &HTTPResponseHandler{
-		rw: rw,
+		log: log,
+		rw:  rw,
 	}
 }
 
@@ -26,7 +34,7 @@ func (h *HTTPResponseHandler) JSONResponse(
 	h.rw.WriteHeader(statusCode)
 
 	if err := json.NewEncoder(h.rw).Encode(responseBody); err != nil {
-		fmt.Println("", err.Error())
+		h.log.Error("write HTTP response", zap.Error(err))
 	}
 }
 
@@ -39,13 +47,35 @@ func (h *HTTPResponseHandler) HTMLResponse(html []byte) {
 
 	h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if _, err := h.rw.Write(html); err != nil {
-		fmt.Println("", err.Error())
+		h.log.Error("write HTML HTTP response", zap.Error(err))
 	}
 }
 
 func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
-	// var statusCode int
-	statusCode := http.StatusInternalServerError
+	var (
+		statusCode int
+		logFunc    func(string, ...zap.Field)
+	)
+
+	switch {
+	case errors.Is(err, core_errors.ErrInvalidArgument):
+		statusCode = http.StatusBadRequest
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrNotFound):
+		statusCode = http.StatusNotFound
+		logFunc = h.log.Debug
+
+	case errors.Is(err, core_errors.ErrConflict):
+		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	default:
+		statusCode = http.StatusInternalServerError
+		logFunc = h.log.Error
+	}
+
+	logFunc(msg, zap.Error(err))
 
 	h.errorResponse(
 		statusCode,
@@ -72,13 +102,13 @@ func (h *HTTPResponseHandler) errorResponse(
 	err error,
 	msg string,
 ) {
-	errorMsg := ""
+	var errStr string
 	if err != nil {
-		errorMsg = err.Error()
+		errStr = err.Error()
 	}
 
 	response := ErrorResponse{
-		Error:   errorMsg,
+		Error:   errStr,
 		Message: msg,
 	}
 

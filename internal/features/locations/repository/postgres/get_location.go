@@ -2,14 +2,18 @@ package locations_repository_postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/vladpann/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
 )
 
 func (r *LocationsRepository) GetLocation(
 	ctx context.Context,
-	location domain.Location,
+	id int64,
+	userID int64,
 ) (domain.Location, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
@@ -23,18 +27,22 @@ func (r *LocationsRepository) GetLocation(
 	row := r.pool.QueryRow(
 		ctx,
 		query,
-		location.ID,
-		location.UserID,
+		id,
+		userID,
 	)
 
 	var locationModel LocationModel
-	if err := row.Scan(
+	err := row.Scan(
 		&locationModel.ID,
 		&locationModel.UserID,
 		&locationModel.Name,
 		&locationModel.Latitude,
 		&locationModel.Longitude,
-	); err != nil {
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Location{}, fmt.Errorf("location id=%d: %w", id, core_errors.ErrNotFound)
+		}
 		return domain.Location{}, fmt.Errorf("scan location: %w", err)
 	}
 

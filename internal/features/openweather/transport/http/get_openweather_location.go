@@ -22,7 +22,7 @@ type GetOpenWeatherLocationResponse OpenWeatherLocationDTOResponse
 func (h *OpenWeatherHTTPHandler) GetOpenWeatherLocation(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
-	responseHandler := core_http_response.NewHTTPResponseHandler(rw)
+	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
 	log.Debug("invoke GetOpenWeatherLocation handler")
 

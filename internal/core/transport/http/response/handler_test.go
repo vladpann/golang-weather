@@ -9,16 +9,27 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
+	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
 	core_http_response "github.com/vladpann/golang-weather/internal/core/transport/http/response"
 )
+
+// newTestLogger создает логгер для тестов
+func newTestLogger() *core_logger.Logger {
+	zapLogger := zap.NewNop()
+	return &core_logger.Logger{
+		Logger: zapLogger,
+	}
+}
 
 // TestErrorResponse_WithError тестирует ErrorResponse с реальной ошибкой
 func TestErrorResponse_WithError(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
-	
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 	testErr := errors.New("test error")
 	testMsg := "Something went wrong"
 
@@ -41,8 +52,9 @@ func TestErrorResponse_WithError(t *testing.T) {
 func TestErrorResponse_WithNilError(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
-	
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 	testMsg := "User not authenticated"
 
 	// Act - не должно вызвать панику
@@ -65,13 +77,14 @@ func TestErrorResponse_WithNilError(t *testing.T) {
 func TestJSONResponse_Success(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
-	
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 	type TestResponse struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	}
-	
+
 	testData := TestResponse{
 		ID:   123,
 		Name: "Test",
@@ -111,8 +124,9 @@ func TestJSONResponse_WithDifferentStatusCodes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Arrange
 			rr := httptest.NewRecorder()
-			handler := core_http_response.NewHTTPResponseHandler(rr)
-			
+			log := newTestLogger()
+			handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 			data := map[string]string{"status": tc.name}
 
 			// Act
@@ -129,7 +143,8 @@ func TestJSONResponse_WithDifferentStatusCodes(t *testing.T) {
 func TestNoContentResponse(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
 
 	// Act
 	handler.NoContentResponse()
@@ -143,8 +158,9 @@ func TestNoContentResponse(t *testing.T) {
 func TestHTMLResponse(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
-	
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 	htmlContent := []byte("<html><body>Test</body></html>")
 
 	// Act
@@ -160,8 +176,9 @@ func TestHTMLResponse(t *testing.T) {
 func TestPanicResponse(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	handler := core_http_response.NewHTTPResponseHandler(rr)
-	
+	log := newTestLogger()
+	handler := core_http_response.NewHTTPResponseHandler(log, rr)
+
 	panicValue := "something went terribly wrong"
 	testMsg := "Unexpected panic occurred"
 

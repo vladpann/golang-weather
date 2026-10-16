@@ -21,7 +21,7 @@ type GetOpenWeatherResponse OpenWeatherDTOResponse
 func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := core_logger.FromContext(ctx)
-	responseHandler := core_http_response.NewHTTPResponseHandler(rw)
+	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
 	log.Debug("invoke GetOpenWeatherLocation handler")
 
@@ -80,31 +80,5 @@ func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	// userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
-	// if !ok {
-	// 	responseHandler.ErrorResponse(nil, "user not authenticated")
-	// 	return
-	// }
-
-	// location := domainFromDTO(GetOpenWeatherRequest(request), userID)
-
-	// domainLocation, err := h.locationsService.GetLocation(ctx, location)
-	// if err != nil {
-	// 	log.Debug("failed to get weather location")
-	// 	responseHandler.ErrorResponse(err, "failed to get weather location")
-
-	// 	return
-	// }
-
 	responseHandler.JSONResponse(weatherData, http.StatusOK)
 }
-
-// func domainFromDTO(location GetOpenWeatherRequest, userID int64) domain.Location {
-// 	return domain.Location{
-// 		ID:        location.ID,
-// 		UserID:    userID,
-// 		Name:      location.Name,
-// 		Latitude:  location.Latitude,
-// 		Longitude: location.Longitude,
-// 	}
-// }
