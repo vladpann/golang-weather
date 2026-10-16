@@ -2,7 +2,6 @@ package users_repository_postgres
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/vladpann/golang-weather/internal/core/domain"
 )
@@ -30,7 +29,7 @@ func (r *UsersRepository) CreateUser(
 	)
 
 	if err != nil {
-		return domain.User{}, fmt.Errorf("scan error: %w", err)
+		return domain.User{}, err
 	}
 
 	userDomain := userDomainFromModel(userModel)
