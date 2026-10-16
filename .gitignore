@@ -1,5 +1,7 @@
 .env
-.env.test
+.env.*
+!.env.example
+!.env.test.example
 out
 .DS_STORE
 

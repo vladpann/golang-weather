@@ -83,7 +83,7 @@ func HTTPLogger(logger *core_logger.Logger) Middleware {
 			next.ServeHTTP(wrappedWriter, r.WithContext(ctx))
 
 			duration := time.Since(start)
-			durationMs := float64(duration.Microseconds()) / 1000.0
+			durationMs := float64(duration.Microseconds()) / 100.0
 
 			reqField := r.Method + " " + r.RequestURI
 			if requestBody != "" {

@@ -1,12 +1,12 @@
 package locations_transport_http
 
+import "net/http"
+
 type GetLocationsResponse struct {
 	Locations []LocationResponse `json:"locations"`
 }
 
-type LocationResponse struct {
-	ID        int64   `json:"id"`
-	Name      string  `json:"name"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Request) {
+	// TODO: implement
+	http.Error(rw, "Not implemented", http.StatusNotImplemented)
 }

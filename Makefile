@@ -7,10 +7,9 @@ endif
 .PHONY: run help test test-integration test-users test-sessions test-all setup-test-db
 
 help: ## Показать справку
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ": *## *"}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 run: ## Запустить проект
-	@echo "✅ Проект запущен"
 	@go run ./cmd/weather/main.go
 
 setup-db: ## Настроить production базу данных
@@ -74,6 +73,10 @@ test-all: ## Запустить все тесты с покрытием
 	@go test ./... -v -cover -coverprofile=coverage.out
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "📊 Отчет о покрытии сохранен в coverage.html"
+
+test-openweather: ## Запустить тесты OpenWeather HTTP транспорта
+	@echo "🌤️  Тесты OpenWeather HTTP транспорта..."
+	@go test ./internal/features/openweather/transport/http -v -count=1
 
 setup-test-db: ## Настроить тестовую базу данных
 	@echo "🗄️ Настройка тестовой базы данных..."
