@@ -2,9 +2,12 @@ package users_repository_postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/vladpann/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
 )
 
 func (r *UsersRepository) CreateUser(
@@ -30,6 +33,9 @@ func (r *UsersRepository) CreateUser(
 	)
 
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.User{}, fmt.Errorf("user=%s: %w", login, core_errors.ErrNotFound)
+		}
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 

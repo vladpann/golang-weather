@@ -32,8 +32,8 @@ func (m *MockLocationsService) CreateLocation(ctx context.Context, location doma
 	return args.Get(0).(domain.Location), args.Error(1)
 }
 
-func (m *MockLocationsService) GetLocation(ctx context.Context, location domain.Location) (domain.Location, error) {
-	args := m.Called(ctx, location)
+func (m *MockLocationsService) GetLocation(ctx context.Context, id int64, userID int64) (domain.Location, error) {
+	args := m.Called(ctx, id, userID)
 	return args.Get(0).(domain.Location), args.Error(1)
 }
 

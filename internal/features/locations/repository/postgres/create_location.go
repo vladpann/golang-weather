@@ -30,13 +30,15 @@ func (r *LocationsRepository) CreateLocation(
 	)
 
 	var locationModel LocationModel
-	if err := row.Scan(
+	err := row.Scan(
 		&locationModel.ID,
 		&locationModel.UserID,
 		&locationModel.Name,
 		&locationModel.Latitude,
 		&locationModel.Longitude,
-	); err != nil {
+	)
+
+	if err != nil {
 		return domain.Location{}, fmt.Errorf("scan location: %w", err)
 	}
 

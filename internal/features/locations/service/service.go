@@ -18,8 +18,20 @@ type LocationsRepository interface {
 
 	GetLocation(
 		ctx context.Context,
-		location domain.Location,
+		id int64,
+		userID int64,
 	) (domain.Location, error)
+
+	GetLocations(
+		ctx context.Context,
+		limit *int,
+		offset *int,
+	) ([]domain.Location, error)
+
+	DeleteLocation(
+		ctx context.Context,
+		id int64,
+	) error
 }
 
 func NewLocationsService(
