@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
 func (s *LocationsService) GetLocations(
 	ctx context.Context,
+	userID int64,
 	limit *int,
 	offset *int,
 ) ([]domain.Location, error) {
@@ -27,7 +28,9 @@ func (s *LocationsService) GetLocations(
 		)
 	}
 
-	users, err := s.locationsRepository.GetLocations(ctx,
+	users, err := s.locationsRepository.GetLocations(
+		ctx,
+		userID,
 		limit,
 		offset,
 	)

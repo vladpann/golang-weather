@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
 func (r *LocationsRepository) GetLocation(

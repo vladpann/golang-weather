@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rate Limit Test</title>
+    <style>
+      body {
+        font-family: system-ui;
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .card {
+        background: white;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #667eea;
+      }
+      .warning {
+        background: #fff5f5;
+        border-left: 4px solid #f56565;
+        padding: 15px;
+        margin: 15px 0;
+      }
+      button {
+        padding: 12px 24px;
+        margin: 5px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+      }
+      .btn-primary {
+        background: #667eea;
+      }
+      .btn-danger {
+        background: #f56565;
+      }
+      .btn-success {
+        background: #48bb78;
+      }
+      input {
+        padding: 10px;
+        border: 2px solid #e2e8f0;
+        border-radius: 4px;
+        width: 100%;
+        margin: 10px 0;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+      }
+      .stat {
+        background: #f7fafc;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+      }
+      .stat-label {
+        color: #718096;
+        font-size: 14px;
+      }
+      .result {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+      .success {
+        background: #c6f6d5;
+      }
+      .error {
+        background: #fed7d7;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🚦 Rate Limit Тестер</h1>
+
+    <div class="card">
+      <div class="warning">
+        <strong>⚠️ ВАЖНО:</strong> Сначала залогиньтесь в приложении!
+        <ol style="margin: 10px 0 0 20px">
+          <li>
+            Откройте:
+            <a href="http://localhost:8080" target="_blank"
+              >http://localhost:8080</a
+            >
+          </li>
+          <li>Войдите в систему (sign-in)</li>
+          <li>Вернитесь сюда и запустите тест</li>
+        </ol>
+      </div>
+
+      <label>API URL:</label>
+      <input type="text" id="apiUrl" value="http://localhost:8080" />
+
+      <label>Количество запросов:</label>
+      <input type="number" id="count" value="65" min="1" max="200" />
+
+      <button class="btn-primary" onclick="runBurst()">
+        💥 Burst Test (все сразу)
+      </button>
+      <button class="btn-success" onclick="runOne()">🎯 Один запрос</button>
+      <button class="btn-danger" onclick="clearResults()">🗑️ Очистить</button>
+    </div>
+
+    <div class="card">
+      <h3>📊 Статистика</h3>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="ok">0</div>
+          <div class="stat-label">✅ Успешных</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="limited">0</div>
+          <div class="stat-label">⚠️ Rate Limited</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="errors">0</div>
+          <div class="stat-label">❌ Ошибок</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📝 Результаты</h3>
+      <div id="results"></div>
+    </div>
+
+    <script>
+      let stats = { ok: 0, limited: 0, errors: 0 };
+
+      function update() {
+        document.getElementById('ok').textContent = stats.ok;
+        document.getElementById('limited').textContent = stats.limited;
+        document.getElementById('errors').textContent = stats.errors;
+      }
+
+      function addLog(msg, isOk) {
+        const div = document.createElement('div');
+        div.className = `result ${isOk ? 'success' : 'error'}`;
+        div.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+        document
+          .getElementById('results')
+          .insertBefore(div, document.getElementById('results').firstChild);
+      }
+
+      async function request(n) {
+        const url = document.getElementById('apiUrl').value;
+        try {
+          const res = await fetch(`${url}/api/v1/open-weather/get-weather`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ latitude: 55.7522, longitude: 37.6156 }),
+          });
+
+          if (res.ok) {
+            stats.ok++;
+            const data = await res.json();
+            addLog(`#${n} ✅ HTTP 200 - ${data.name}`, true);
+          } else if (res.status === 429) {
+            stats.limited++;
+            addLog(`#${n} ⚠️ HTTP 429 - Rate Limit`, false);
+          } else if (res.status === 503) {
+            stats.limited++;
+            addLog(`#${n} 🔴 HTTP 503 - Queue Full`, false);
+          } else if (res.status === 401) {
+            stats.errors++;
+            addLog(
+              `#${n} 🔐 HTTP 401 - НЕ ЗАЛОГИНЕНЫ! Откройте приложение и войдите`,
+              false,
+            );
+          } else {
+            stats.errors++;
+            addLog(`#${n} ❌ HTTP ${res.status}`, false);
+          }
+          update();
+        } catch (e) {
+          stats.errors++;
+          addLog(`#${n} 💀 ${e.message}`, false);
+          update();
+        }
+      }
+
+      async function runBurst() {
+        stats = { ok: 0, limited: 0, errors: 0 };
+        update();
+        const count = parseInt(document.getElementById('count').value);
+        await Promise.allSettled(
+          Array.from({ length: count }, (_, i) => request(i + 1)),
+        );
+        addLog(`🏁 Тест завершен! Всего: ${count}`, true);
+      }
+
+      async function runOne() {
+        await request(1);
+      }
+
+      function clearResults() {
+        document.getElementById('results').innerHTML = '';
+        stats = { ok: 0, limited: 0, errors: 0 };
+        update();
+      }
+    </script>
+  </body>
+</html>

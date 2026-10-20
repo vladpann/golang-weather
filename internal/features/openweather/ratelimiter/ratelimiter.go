@@ -231,10 +231,3 @@ func (rl *RateLimiter) Close() {
 	rl.wg.Wait()
 	close(rl.queue)
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 )
 
@@ -48,7 +48,6 @@ func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
 				return
 			}
 
-			// Добавляем userID в context
 			ctx = context.WithValue(ctx, UserIDContextKey, session.UserID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -56,7 +55,6 @@ func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
 	}
 }
 
-// GetUserIDFromContext извлекает userID из context
 func GetUserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(UserIDContextKey).(int64)
 	return userID, ok

@@ -3,7 +3,7 @@ package locations_service
 import (
 	"context"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 type LocationsService struct {
@@ -24,6 +24,7 @@ type LocationsRepository interface {
 
 	GetLocations(
 		ctx context.Context,
+		userID int64,
 		limit *int,
 		offset *int,
 	) ([]domain.Location, error)

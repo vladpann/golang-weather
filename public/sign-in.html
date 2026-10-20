@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather Viewer – Sign In</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-6">
+          <div class="weather-logo"></div>
+        </div>
+      </div>
+
+      <h2 class="text-center mb-5">Sign In</h2>
+
+      <!-- Общая ошибка (скрыта, пока нет ошибки) -->
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-4 col-md-6 col-sm-12">
+          <div
+            id="form-error"
+            class="alert alert-danger d-none"
+            role="alert"
+          ></div>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-4 col-md-6 col-sm-12">
+          <form id="sign-in-form" class="mt-4" novalidate>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <div class="input-group has-validation">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  name="username"
+                  required
+                  value=""
+                />
+                <div id="username-error" class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <div class="input-group has-validation">
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  required
+                  value=""
+                />
+                <div id="password-error" class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              id="submit-btn"
+              class="btn btn-primary w-100 mt-3"
+            >
+              Sign In
+            </button>
+            <p class="mt-2 text-center">
+              Don't have an account? <a href="sign-up.html">Sign up here</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = 'http://localhost:5050/api/v1/auth/sign-in';
+      const REQUEST_TIMEOUT_MS = 10000;
+
+      const form = document.getElementById('sign-in-form');
+      const submitBtn = document.getElementById('submit-btn');
+      const formError = document.getElementById('form-error');
+
+      const fields = {
+        login: {
+          input: document.getElementById('username'),
+          error: document.getElementById('username-error'),
+        },
+        password: {
+          input: document.getElementById('password'),
+          error: document.getElementById('password-error'),
+        },
+      };
+
+      function showFormError(message) {
+        formError.textContent = message;
+        formError.classList.remove('d-none');
+      }
+
+      function showFieldError(name, message) {
+        const field = fields[name];
+        if (!field) return false;
+        field.input.classList.add('is-invalid');
+        field.error.textContent = message;
+        return true;
+      }
+
+      function clearErrors() {
+        formError.textContent = '';
+        formError.classList.add('d-none');
+        Object.values(fields).forEach(({ input, error }) => {
+          input.classList.remove('is-invalid');
+          error.textContent = '';
+        });
+      }
+
+      // Сброс ошибки поля при вводе
+      Object.entries(fields).forEach(([name, { input, error }]) => {
+        input.addEventListener('input', () => {
+          input.classList.remove('is-invalid');
+          error.textContent = '';
+          formError.classList.add('d-none');
+        });
+      });
+
+      // Клиентская валидация
+      function validate(body) {
+        let valid = true;
+        if (!body.login) {
+          showFieldError('login', 'Username is required.');
+          valid = false;
+        }
+        if (!body.password) {
+          showFieldError('password', 'Password is required.');
+          valid = false;
+        }
+        return valid;
+      }
+
+      // Безопасное чтение тела ответа с ошибкой
+      async function readErrorBody(response) {
+        const text = await response.text().catch(() => '');
+        try {
+          return { json: JSON.parse(text), text };
+        } catch {
+          return { json: null, text };
+        }
+      }
+
+      // Ошибки, пришедшие с сервера
+      async function handleErrorResponse(response) {
+        const { json, text } = await readErrorBody(response);
+        const serverMessage =
+          (json && (json.message || json.error)) ||
+          (text && text.length < 200 ? text : '');
+
+        if (response.status === 400 || response.status === 422) {
+          // Ожидаемый формат: { errors: { login: "...", password: "..." } }
+          const errors = json && json.errors;
+          let shown = false;
+          if (errors && typeof errors === 'object') {
+            for (const [name, msg] of Object.entries(errors)) {
+              const text = Array.isArray(msg) ? msg.join(' ') : String(msg);
+              shown = showFieldError(name, text) || shown;
+            }
+          }
+          if (!shown) showFormError(serverMessage || 'Invalid request data.');
+          return;
+        }
+
+        if (
+          response.status === 401 ||
+          response.status === 403 ||
+          response.status === 404
+        ) {
+          showFormError('Invalid username or password.');
+          return;
+        }
+
+        if (response.status === 429) {
+          showFormError('Too many attempts. Please try again later.');
+          return;
+        }
+
+        if (response.status >= 500) {
+          showFormError('Server error. Please try again later.');
+          return;
+        }
+
+        showFormError(
+          serverMessage || `Unexpected error (${response.status}).`,
+        );
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const body = {
+          login: fields.login.input.value.trim(),
+          password: fields.password.input.value,
+        };
+
+        if (!validate(body)) return;
+
+        submitBtn.disabled = true;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          REQUEST_TIMEOUT_MS,
+        );
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(body),
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            await handleErrorResponse(response);
+            return;
+          }
+
+          window.location.href = 'index.html';
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            showFormError('The server is not responding. Please try again.');
+          } else {
+            showFormError(
+              'Unable to connect to the server. Check your connection.',
+            );
+          }
+          console.error('Sign-in error:', err);
+        } finally {
+          clearTimeout(timeoutId);
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

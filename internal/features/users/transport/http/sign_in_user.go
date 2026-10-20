@@ -3,9 +3,9 @@ package users_transport_http
 import (
 	"net/http"
 
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
-	core_http_request "github.com/vladpann/golang-weather/internal/core/transport/http/request"
-	core_http_response "github.com/vladpann/golang-weather/internal/core/transport/http/response"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
 	"go.uber.org/zap"
 )
 
@@ -58,10 +58,11 @@ func (h *UsersHTTPHandler) SignInUser(rw http.ResponseWriter, r *http.Request) {
 		Value:    session.ID.String(),
 		Path:     "/",
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 		Expires:  session.ExpiresAt,
 	})
 
-	http.Redirect(rw, r, "/", http.StatusSeeOther)
+	responseHandler.NoContentResponse()
 }
 
 func domainFromSignInUserDTO(dto SignInUserRequest) (login string, password string) {

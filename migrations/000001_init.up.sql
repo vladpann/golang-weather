@@ -11,7 +11,9 @@ CREATE TABLE weather.locations (
     name          VARCHAR(255)    NOT NULL,
     user_id       BIGINT          NOT NULL REFERENCES weather.users(id) ON DELETE CASCADE,
     latitude      NUMERIC(9, 6)   NOT NULL,
-    longitude     NUMERIC(9, 6)   NOT NULL
+    longitude     NUMERIC(9, 6)   NOT NULL,
+
+    CONSTRAINT locations_user_id_coords_key UNIQUE (user_id, latitude, longitude)
 );
 
 CREATE TABLE weather.sessions (

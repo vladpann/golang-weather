@@ -3,7 +3,7 @@ package users_service
 import (
 	"context"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 type PasswordHasher interface {
@@ -27,6 +27,11 @@ type UsersRepository interface {
 		ctx context.Context,
 		login string,
 	) (user domain.User, passwordHash []byte, err error)
+
+	GetUserByID(
+		ctx context.Context,
+		userID int64,
+	) (domain.User, error)
 }
 
 func NewUsersService(

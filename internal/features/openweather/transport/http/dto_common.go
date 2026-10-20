@@ -18,8 +18,11 @@ type OpenWeatherDTOResponse struct {
 }
 
 type OpenWeatherLocationDTOResponse struct {
-	Name  string `json:"name"`
-	Coord Coord  `json:"coord"`
+	Name    string  `json:"name"`
+	Lat     float64 `json:"lat"`
+	Lon     float64 `json:"lon"`
+	Country string  `json:"country"`
+	State   string  `json:"state"`
 }
 
 type Coord struct {

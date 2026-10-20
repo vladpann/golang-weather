@@ -2,9 +2,12 @@ package users_repository_postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
 )
 
 func (r *UsersRepository) GetUser(
@@ -32,6 +35,13 @@ func (r *UsersRepository) GetUser(
 	)
 
 	if err != nil {
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
+			return domain.User{}, nil, fmt.Errorf("user with login='%s': %w",
+				login,
+				core_errors.ErrNotFound,
+			)
+		}
+
 		return domain.User{}, nil, fmt.Errorf("scan user: %w", err)
 	}
 

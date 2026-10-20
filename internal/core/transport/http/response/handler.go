@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 )
 
@@ -68,6 +68,22 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 
 	case errors.Is(err, core_errors.ErrConflict):
 		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrLoginAlreadyExists):
+		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrLocationAlreadyExists):
+		statusCode = http.StatusConflict
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrPasswordDoNotMatch):
+		statusCode = http.StatusBadRequest
+		logFunc = h.log.Warn
+
+	case errors.Is(err, core_errors.ErrInvalidCredentials):
+		statusCode = http.StatusUnauthorized
 		logFunc = h.log.Warn
 
 	default:

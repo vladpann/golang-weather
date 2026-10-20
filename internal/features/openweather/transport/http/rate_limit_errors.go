@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	core_http_response "github.com/vladpann/golang-weather/internal/core/transport/http/response"
-	"github.com/vladpann/golang-weather/internal/features/openweather/ratelimiter"
+	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+	"github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
 )
 
 // handleRateLimitError converts rate limiter errors to appropriate HTTP responses

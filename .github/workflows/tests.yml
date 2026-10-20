@@ -32,7 +32,7 @@ jobs:
       HTTP_SHUTDOWN_TIMEOUT: 30s
       ALLOWED_ORIGINS: 'http://localhost'
       LOGGER_LEVEL: DEBUG
-      LOGGER_FOLDER: out
+      LOGGER_FOLDER: out/logs
       SESSION_TTL: 24h
 
     services:
@@ -65,12 +65,18 @@ jobs:
         run: |
           PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -c "SELECT version();"
 
-      - name: Setup test database schema
-        run: |
-          PGPASSWORD=$POSTGRES_PASSWORD psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -f scripts/setup_test_db.sql
-
       - name: Download dependencies
         run: go mod download
+
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+          migrate -version
+
+      - name: Apply database migrations
+        run: |
+          migrate -path migrations -database "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?sslmode=disable" up
 
       - name: Run integration tests
         run: |

@@ -1,0 +1,74 @@
+services:
+  # Development PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: weather_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-weather_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-weather_password}
+      POSTGRES_DB: ${POSTGRES_DB:-weather_db}
+      POSTGRES_INITDB_ARGS: '-E UTF8'
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-weather_user} -d ${POSTGRES_DB:-weather_db}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weather_network
+
+  # Test PostgreSQL Database (separate instance)
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: weather_postgres_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_TEST:-weather_user_test}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_TEST:-weather_password_test}
+      POSTGRES_DB: ${POSTGRES_DB_TEST:-weather_db_test}
+      POSTGRES_INITDB_ARGS: '-E UTF8'
+    ports:
+      - '${POSTGRES_PORT_TEST:-5433}:5432'
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER_TEST:-weather_user_test} -d ${POSTGRES_DB_TEST:-weather_db_test}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - weather_network
+
+  frontend:
+    build: .
+    container_name: weather-frontend
+    ports:
+      - '8080:80'
+    volumes:
+      - ./public:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    networks:
+      - weather_network
+
+volumes:
+  postgres_data:
+    driver: local
+  postgres_test_data:
+    driver: local
+
+networks:
+  weather_network:
+    driver: bridge

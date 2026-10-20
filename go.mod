@@ -1,4 +1,4 @@
-module github.com/vladpann/golang-weather
+module github.com/vladpann/backend/golang-weather
 
 go 1.26.1
 

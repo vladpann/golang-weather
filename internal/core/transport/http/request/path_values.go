@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
 func GetInt64PathValue(r *http.Request, key string) (int64, error) {

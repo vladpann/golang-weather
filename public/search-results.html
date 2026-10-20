@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather Viewer – Search Results</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="auth-middleware.js"></script>
+    <script src="sign-out.js"></script>
+    <script>
+      const API_BASE_URL = 'http://localhost:5050/api/v1';
+
+      document.addEventListener('DOMContentLoaded', function () {
+        // Get query parameter from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('query');
+
+        if (query) {
+          document.getElementById('location-input').value = query;
+          searchLocations(query);
+        }
+
+        // Setup search form
+        const searchForm = document.getElementById('location-search-form');
+        searchForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          const searchQuery = document
+            .getElementById('location-input')
+            .value.trim();
+          if (searchQuery) {
+            // Update URL and search
+            window.history.pushState(
+              {},
+              '',
+              `?query=${encodeURIComponent(searchQuery)}`,
+            );
+            searchLocations(searchQuery);
+          }
+        });
+
+        // Load username
+        loadUsername();
+      });
+
+      async function loadUsername() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/check`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const usernameDisplay = document.getElementById('username-display');
+            if (data.login) {
+              usernameDisplay.textContent = data.login;
+            } else {
+              usernameDisplay.textContent = 'User';
+            }
+          }
+        } catch (error) {
+          console.error('Error loading username:', error);
+          document.getElementById('username-display').textContent = 'User';
+        }
+      }
+
+      async function searchLocations(cityName) {
+        const resultsContainer = document.getElementById('search-results');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+
+        // Show loading state
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        resultsContainer.innerHTML = '';
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/open-weather/search-location?city_name=${encodeURIComponent(cityName)}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+            },
+          );
+
+          loadingMessage.style.display = 'none';
+
+          if (response.status === 401) {
+            window.location.href = 'sign-in.html';
+            return;
+          }
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+              `Failed to search locations (${response.status}): ${errorText}`,
+            );
+          }
+
+          const locations = await response.json();
+
+          if (!locations || locations.length === 0) {
+            resultsContainer.innerHTML =
+              '<div class="col-12"><p class="text-muted">No locations found. Try a different search term.</p></div>';
+            return;
+          }
+
+          // Display results
+          locations.forEach((location) => {
+            const locationCard = createLocationCard(location);
+            resultsContainer.appendChild(locationCard);
+          });
+        } catch (error) {
+          console.error('Error searching locations:', error);
+          loadingMessage.style.display = 'none';
+          errorMessage.style.display = 'block';
+          errorMessage.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      function createLocationCard(location) {
+        const col = document.createElement('div');
+        col.className = 'col-12 col-lg-3 col-md-6 mb-4';
+
+        const state = location.state
+          ? `<p class="card-text mb-3">State: ${location.state}</p>`
+          : '';
+
+        col.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">${location.name}</h5>
+              <p class="card-text mb-1">Latitude: ${location.lat}</p>
+              <p class="card-text mb-1">Longitude: ${location.lon}</p>
+              <p class="card-text mb-1">Country: ${location.country}</p>
+              ${state}
+              <div class="mt-auto">
+                <button class="btn btn-primary w-100 add-location-btn" 
+                        data-name="${location.name}" 
+                        data-lat="${location.lat}" 
+                        data-lon="${location.lon}">
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Add event listener to prevent double-clicking
+        const addButton = col.querySelector('.add-location-btn');
+        addButton.addEventListener('click', function () {
+          const name = this.getAttribute('data-name');
+          const lat = parseFloat(this.getAttribute('data-lat'));
+          const lon = parseFloat(this.getAttribute('data-lon'));
+
+          // Disable button immediately to prevent double-submission
+          this.disabled = true;
+          this.textContent = 'Adding...';
+
+          addLocation(name, lat, lon, this);
+        });
+
+        return col;
+      }
+
+      async function addLocation(name, lat, lon, buttonElement) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/locations`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              name: name,
+              latitude: lat,
+              longitude: lon,
+            }),
+          });
+
+          if (response.status === 401) {
+            window.location.href = 'sign-in.html';
+            return;
+          }
+
+          if (!response.ok) {
+            let errorText = '';
+
+            try {
+              // Try to parse JSON error response
+              const errorData = await response.json();
+              errorText =
+                errorData.error || errorData.message || 'Unknown error';
+            } catch (e) {
+              // If not JSON, get as text
+              errorText = await response.text();
+            }
+
+            // Check if it's a duplicate location error
+            if (
+              errorText.includes('already exists') ||
+              errorText.includes('unique violation')
+            ) {
+              throw new Error('location already exists');
+            }
+
+            // Other errors - show more details
+            throw new Error(errorText || `Server error (${response.status})`);
+          }
+
+          // Redirect to homepage after successful addition
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error('Error adding location:', error);
+
+          // Re-enable button on error
+          if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.textContent = 'Add';
+          }
+
+          // Show user-friendly error message
+          const errorMessage = error.message || 'Unknown error occurred';
+          alert(`Failed to add location: ${errorMessage}`);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img
+            src="images/weather-app.png"
+            alt=""
+            width="30"
+            height="24"
+            class="d-inline-block align-text-top"
+          />
+          Weather Tracker
+        </a>
+        <div class="d-flex align-items-center">
+          <span id="username-display" class="navbar-text me-3">Loading...</span>
+          <button class="btn btn-outline-danger" id="sign-out-btn">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <section id="page-content">
+      <div class="container mt-4">
+        <form id="location-search-form" class="d-flex my-4">
+          <div class="input-group location-search-input-group me-3">
+            <input
+              id="location-input"
+              class="form-control"
+              type="text"
+              name="name"
+              placeholder="Enter location"
+              required
+            />
+            <button
+              class="btn btn-outline-secondary btn-sm clear-input-button"
+              type="button"
+              onclick="document.getElementById('location-input').value = ''"
+            >
+              &times;
+            </button>
+          </div>
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <div id="loading-message" style="display: none">
+          <p class="text-muted">Searching locations...</p>
+        </div>
+
+        <div
+          id="error-message"
+          class="alert alert-danger"
+          style="display: none"
+        ></div>
+
+        <div>
+          <h2>Locations:</h2>
+          <div id="search-results" class="row">
+            <!-- Results will be dynamically inserted here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer
+      class="d-flex flex-wrap justify-content-between align-items-center py-3 mt-4 border-top"
+    >
+      <div class="px-4">
+        <span
+          >© Weather Viewer, project from
+          <a href="https://zhukovsd.github.io/java-backend-learning-course/"
+            >zhukovsd/java-backend-learning-course</a
+          >
+          roadmap.</span
+        >
+      </div>
+    </footer>
+  </body>
+</html>

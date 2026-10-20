@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
 var requestValidator = validator.New()

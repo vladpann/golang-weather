@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
-	core_http_request "github.com/vladpann/golang-weather/internal/core/transport/http/request"
-	core_http_response "github.com/vladpann/golang-weather/internal/core/transport/http/response"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+	core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
 )
 
 type GetLocationsResponse []LocationDTOResponse
@@ -16,6 +17,14 @@ func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Requ
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
 
+	log.Debug("invoke GetLocations handler")
+
+	userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
+	if !ok {
+		responseHandler.ErrorResponse(nil, "user not authenticated")
+		return
+	}
+
 	limit, offset, err := getLimitOffsetQueryParams(r)
 	if err != nil {
 		responseHandler.ErrorResponse(
@@ -24,7 +33,7 @@ func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Requ
 		)
 	}
 
-	locationDomains, err := h.locationsService.GetLocations(ctx, limit, offset)
+	locationDomains, err := h.locationsService.GetLocations(ctx, userID, limit, offset)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,

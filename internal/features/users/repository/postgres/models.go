@@ -1,6 +1,6 @@
 package users_repository_postgres
 
-import "github.com/vladpann/golang-weather/internal/core/domain"
+import "github.com/vladpann/backend/golang-weather/internal/core/domain"
 
 type UserModel struct {
 	ID    int64
