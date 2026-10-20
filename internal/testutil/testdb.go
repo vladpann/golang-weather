@@ -37,10 +37,14 @@ func SetupTestDB(t *testing.T) *core_pgx_pool.Pool {
 	t.Helper()
 
 	path, err := findEnvTest()
-	require.NoError(t, err, "failed to locate .env.test")
-
-	require.NoError(t, godotenv.Overload(path), "failed to load .env.test")
-	t.Logf("Loaded config from: %s", path)
+	if err == nil {
+		require.NoError(t, godotenv.Overload(path), "failed to load .env.test")
+		t.Logf("Loaded config from: %s", path)
+	} else {
+		require.NotEmpty(t, os.Getenv("POSTGRES_DB"),
+			".env.test not found and POSTGRES_* env vars are not set")
+		t.Log("Using POSTGRES_* from environment (CI)")
+	}
 
 	ctx := context.Background()
 	config := core_pgx_pool.NewConfigMust()
