@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 )
 

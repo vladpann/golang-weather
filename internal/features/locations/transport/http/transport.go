@@ -4,13 +4,14 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+	core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
 )
 
 type LocationsHTTPHandler struct {
 	locationsService LocationsService
-	authMiddleware   func(http.Handler) http.Handler
+	authMiddleware   core_http_middleware.Middleware
 }
 
 type LocationsService interface {
@@ -27,6 +28,7 @@ type LocationsService interface {
 
 	GetLocations(
 		ctx context.Context,
+		userID int64,
 		limit *int,
 		offset *int,
 	) ([]domain.Location, error)
@@ -39,7 +41,7 @@ type LocationsService interface {
 
 func NewLocationsHTTPHandler(
 	locationsService LocationsService,
-	authMiddleware func(http.Handler) http.Handler,
+	authMiddleware core_http_middleware.Middleware,
 ) *LocationsHTTPHandler {
 	return &LocationsHTTPHandler{
 		locationsService: locationsService,
@@ -50,16 +52,22 @@ func NewLocationsHTTPHandler(
 func (h *LocationsHTTPHandler) Routes() []core_http_server.Route {
 	return []core_http_server.Route{
 		{
+			Method:      http.MethodPost,
+			Path:        "/locations",
+			Handler:     h.CreateLocation,
+			Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+		},
+		{
 			Method:      http.MethodGet,
 			Path:        "/locations",
 			Handler:     h.GetLocations,
-			Middlewares: []func(http.Handler) http.Handler{h.authMiddleware},
+			Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
 		},
 		{
 			Method:      http.MethodDelete,
 			Path:        "/locations/{id}",
 			Handler:     h.DeleteLocation,
-			Middlewares: []func(http.Handler) http.Handler{h.authMiddleware},
+			Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
 		},
 	}
 }

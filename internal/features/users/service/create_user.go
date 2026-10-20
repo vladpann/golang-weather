@@ -2,12 +2,9 @@ package users_service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
-	core_postgres_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 func (s *UsersService) CreateUser(
@@ -34,10 +31,6 @@ func (s *UsersService) CreateUser(
 
 	user, err := s.usersRepository.CreateUser(ctx, login, passwordHash)
 	if err != nil {
-		if errors.Is(err, core_postgres_pool.ErrUniqueViolation) {
-			return domain.User{}, core_errors.ErrLoginAlreadyExists
-		}
-
 		return domain.User{}, fmt.Errorf("%s: %w", op, err)
 	}
 

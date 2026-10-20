@@ -1,7 +1,7 @@
 package locations_repository_postgres
 
 import (
-	core_repository_postgres_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool"
+	core_repository_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
 )
 
 type LocationsRepository struct {

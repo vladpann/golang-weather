@@ -7,11 +7,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	sessions_repository_postgres "github.com/vladpann/golang-weather/internal/features/sessions/repository/postgres"
-	sessions_service "github.com/vladpann/golang-weather/internal/features/sessions/service"
-	users_repository_postgres "github.com/vladpann/golang-weather/internal/features/users/repository/postgres"
-	users_service "github.com/vladpann/golang-weather/internal/features/users/service"
-	"github.com/vladpann/golang-weather/internal/testutil"
+	sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
+	sessions_service "github.com/vladpann/backend/golang-weather/internal/features/sessions/service"
+	users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
+	users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
+	"github.com/vladpann/backend/golang-weather/internal/testutil"
 )
 
 func TestSessionsService_CreateSession_Integration(t *testing.T) {
@@ -158,10 +158,8 @@ func TestSessionExpiration_Integration(t *testing.T) {
 		// Проверяем, что сессия не истекла
 		assert.False(t, time.Now().After(session.ExpiresAt), "Сессия должна быть активна")
 
-		// Проверяем, что TTL установлен правильно (от 30 минут до 48 часов)
-		actualTTL := session.ExpiresAt.Sub(beforeCreate)
-		assert.Greater(t, actualTTL, 30*time.Minute, "TTL должен быть больше 30 минут")
-		assert.Less(t, actualTTL, 48*time.Hour, "TTL должен быть меньше 48 часов")
+		// ExpiresAt должен быть примерно через час после создания, с точностью до 5 секунд
+		assert.WithinDuration(t, beforeCreate.Add(time.Hour), session.ExpiresAt, 5*time.Second)
 	})
 }
 

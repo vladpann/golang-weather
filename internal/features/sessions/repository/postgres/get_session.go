@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 func (r *SessionsRepository) GetSession(

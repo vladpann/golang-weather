@@ -1,6 +1,12 @@
 package users_service
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+	"fmt"
+
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type Hasher struct{}
 
@@ -20,7 +26,10 @@ func (p *Hasher) Hash(password string) ([]byte, error) {
 func (p *Hasher) Compare(hash []byte, password string) error {
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	if err != nil {
-		return err
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return core_errors.ErrInvalidCredentials
+		}
+		return fmt.Errorf("compare password: %w", err)
 	}
 
 	return nil

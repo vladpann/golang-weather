@@ -4,39 +4,43 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
-	core_pgx_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool/pgx"
+	core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
 )
 
-// SetupTestDB создает подключение к тестовой базе данных
+func findEnvTest() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		candidate := filepath.Join(dir, ".env.test")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf(".env.test not found")
+		}
+		dir = parent
+	}
+}
+
+// SetupTestDB connection to test DB
 func SetupTestDB(t *testing.T) *core_pgx_pool.Pool {
 	t.Helper()
 
-	// Загружаем тестовую конфигурацию из нескольких возможных мест
-	// Пробуем загрузить .env.test, если не получается - используем .env
-	loaded := false
-	paths := []string{
-		".env.test",
-		"../.env.test",
-		"../../.env.test",
-		"../../../.env.test",
-		"../../../../.env.test",
-	}
-	
-	for _, path := range paths {
-		if err := godotenv.Load(path); err == nil {
-			loaded = true
-			t.Logf("Loaded config from: %s", path)
-			break
-		}
-	}
-	
-	if !loaded {
-		t.Log("Warning: could not load .env.test, using default environment")
-	}
+	path, err := findEnvTest()
+	require.NoError(t, err, "failed to locate .env.test")
+
+	require.NoError(t, godotenv.Overload(path), "failed to load .env.test")
+	t.Logf("Loaded config from: %s", path)
 
 	ctx := context.Background()
 	config := core_pgx_pool.NewConfigMust()

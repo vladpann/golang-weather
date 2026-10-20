@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 func (s *LocationsService) CreateLocation(

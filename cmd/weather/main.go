@@ -8,21 +8,21 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
-	core_pgx_pool "github.com/vladpann/golang-weather/internal/core/repository/postgres/pool/pgx"
-	core_http_middleware "github.com/vladpann/golang-weather/internal/core/transport/http/middleware"
-	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
-	locations_repository_postgres "github.com/vladpann/golang-weather/internal/features/locations/repository/postgres"
-	locations_service "github.com/vladpann/golang-weather/internal/features/locations/service"
-	locations_transport_http "github.com/vladpann/golang-weather/internal/features/locations/transport/http"
-	"github.com/vladpann/golang-weather/internal/features/openweather/ratelimiter"
-	openweather_service "github.com/vladpann/golang-weather/internal/features/openweather/service"
-	openweather_transport_http "github.com/vladpann/golang-weather/internal/features/openweather/transport/http"
-	sessions_repository_postgres "github.com/vladpann/golang-weather/internal/features/sessions/repository/postgres"
-	sessions_service "github.com/vladpann/golang-weather/internal/features/sessions/service"
-	users_repository_postgres "github.com/vladpann/golang-weather/internal/features/users/repository/postgres"
-	users_service "github.com/vladpann/golang-weather/internal/features/users/service"
-	users_transport_http "github.com/vladpann/golang-weather/internal/features/users/transport/http"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+	core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
+	locations_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres"
+	locations_service "github.com/vladpann/backend/golang-weather/internal/features/locations/service"
+	locations_transport_http "github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http"
+	"github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
+	openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
+	openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
+	sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
+	sessions_service "github.com/vladpann/backend/golang-weather/internal/features/sessions/service"
+	users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
+	users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
+	users_transport_http "github.com/vladpann/backend/golang-weather/internal/features/users/transport/http"
 	"go.uber.org/zap"
 )
 
@@ -64,12 +64,12 @@ func main() {
 	sessionsConfig := sessions_service.NewConfigMust()
 	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
 
-	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService)
+	authMiddleware := core_http_middleware.Auth(sessionsService)
+	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService, authMiddleware)
 
 	logger.Debug("initializing feature", zap.String("feature", "locations"))
 	locationsRepository := locations_repository_postgres.NewLocationsRepository(pool)
 	locationsService := locations_service.NewLocationsService(locationsRepository)
-	authMiddleware := core_http_middleware.Auth(sessionsService)
 	locationsTransportHTTP := locations_transport_http.NewLocationsHTTPHandler(locationsService, authMiddleware)
 
 	logger.Debug("initializing feature", zap.String("feature", "openweather"))
@@ -98,6 +98,7 @@ func main() {
 	httpServer := core_http_server.NewHTTPServer(
 		httpConfig,
 		logger,
+		core_http_middleware.CORS(httpConfig.AllowedOrigins),
 		core_http_middleware.RequestID(),
 		core_http_middleware.HTTPLogger(logger),
 	)

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weather Viewer – Homepage</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="auth-middleware.js"></script>
+    <script>
+      const API_BASE_URL = 'http://localhost:5050/api/v1';
+      const SIGN_IN_PAGE = 'sign-in.html';
+
+      // Sign-out functionality
+      async function signOut() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/sign-out`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+
+          if (!response.ok && response.status !== 204) {
+            console.error('Sign-out failed:', response.status);
+          }
+        } catch (error) {
+          console.error('Sign-out error:', error);
+        } finally {
+          window.location.href = SIGN_IN_PAGE;
+        }
+      }
+
+      function attachSignOutHandler() {
+        const signOutBtn = document.getElementById('sign-out-btn');
+        if (signOutBtn) {
+          signOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            signOut();
+          });
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const searchForm = document.getElementById('location-search-form');
+
+        searchForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const locationInput = document.getElementById('location-input');
+          const searchQuery = locationInput.value.trim();
+
+          if (searchQuery) {
+            // Redirect to search-results.html with the search query as a URL parameter
+            window.location.href = `search-results.html?query=${encodeURIComponent(searchQuery)}`;
+          }
+        });
+
+        // Sign-out button
+        attachSignOutHandler();
+
+        // Load user's locations and weather data
+        loadLocations();
+
+        // Load username
+        loadUsername();
+      });
+
+      async function loadUsername() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/auth/check`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const usernameDisplay = document.getElementById('username-display');
+            if (data.login) {
+              usernameDisplay.textContent = data.login;
+            } else {
+              usernameDisplay.textContent = 'User';
+            }
+          }
+        } catch (error) {
+          console.error('Error loading username:', error);
+          document.getElementById('username-display').textContent = 'User';
+        }
+      }
+
+      async function loadLocations() {
+        const locationsContainer = document.getElementById(
+          'locations-container',
+        );
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+
+        try {
+          loadingMessage.style.display = 'block';
+          errorMessage.style.display = 'none';
+          locationsContainer.innerHTML = '';
+
+          // Fetch user's saved locations
+          const response = await fetch(`${API_BASE_URL}/locations`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+
+          if (response.status === 401) {
+            window.location.href = 'sign-in.html';
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch locations: ${response.status}`);
+          }
+
+          const locations = await response.json();
+          loadingMessage.style.display = 'none';
+
+          if (!locations || locations.length === 0) {
+            locationsContainer.innerHTML =
+              '<div class="col-12"><p class="text-muted">No locations saved yet. Search and add locations to see weather data.</p></div>';
+            return;
+          }
+
+          // Fetch weather data for each location
+          for (const location of locations) {
+            await loadWeatherForLocation(location);
+          }
+        } catch (error) {
+          console.error('Error loading locations:', error);
+          loadingMessage.style.display = 'none';
+          errorMessage.style.display = 'block';
+          errorMessage.textContent = `Error: ${error.message}`;
+        }
+      }
+
+      async function loadWeatherForLocation(location) {
+        const locationsContainer = document.getElementById(
+          'locations-container',
+        );
+
+        try {
+          // Fetch weather data for this location
+          const response = await fetch(
+            `${API_BASE_URL}/open-weather/get-weather`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }),
+            },
+          );
+
+          if (!response.ok) {
+            console.error(`Failed to fetch weather for ${location.name}`);
+            return;
+          }
+
+          const weatherData = await response.json();
+
+          // Create and append weather card
+          const weatherCard = createWeatherCard(location, weatherData);
+          locationsContainer.appendChild(weatherCard);
+        } catch (error) {
+          console.error(`Error loading weather for ${location.name}:`, error);
+        }
+      }
+
+      function createWeatherCard(location, weatherData) {
+        const col = document.createElement('div');
+        col.className = 'col-12 col-lg-3 col-md-6 mb-4';
+
+        const tempCelsius = Math.round(weatherData.main.temp - 273.15);
+        const feelsLikeCelsius = Math.round(
+          weatherData.main.feels_like - 273.15,
+        );
+        const weatherIcon = weatherData.weather[0]?.icon || '01d';
+        const weatherDescription =
+          weatherData.weather[0]?.description || 'Unknown';
+        // Capitalize first letter
+        const capitalizedDescription =
+          weatherDescription.charAt(0).toUpperCase() +
+          weatherDescription.slice(1);
+        const country = weatherData.sys?.country || '';
+        const cityDisplay = country
+          ? `${location.name}, ${country}`
+          : location.name;
+
+        col.innerHTML = `
+          <div class="card h-100 position-relative weather-card">
+            <div class="position-absolute weather-card-delete-form">
+              <button class="btn-close" aria-label="Delete" onclick="deleteLocation(${location.id})"></button>
+            </div>
+            <img
+              class="card-img-top img-fluid"
+              src="https://openweathermap.org/img/wn/${weatherIcon}@4x.png"
+              alt="Weather icon"
+            />
+            <div class="card-body d-flex flex-column">
+              <h1 class="card-text">${tempCelsius}°C</h1>
+              <h3 class="card-title">${cityDisplay}</h3>
+              <p class="card-text mb-1">
+                Feels like <span>${feelsLikeCelsius}</span>°C.
+                <span>${capitalizedDescription}</span>
+              </p>
+              <p class="card-text mb-1">Humidity: ${weatherData.main.humidity}%</p>
+            </div>
+          </div>
+        `;
+
+        return col;
+      }
+
+      async function deleteLocation(locationId) {
+        if (!confirm('Are you sure you want to delete this location?')) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_BASE_URL}/locations/${locationId}`,
+            {
+              method: 'DELETE',
+              credentials: 'include',
+            },
+          );
+
+          if (response.status === 401) {
+            window.location.href = 'sign-in.html';
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(`Failed to delete location: ${response.status}`);
+          }
+
+          // Reload locations after successful deletion
+          loadLocations();
+        } catch (error) {
+          console.error('Error deleting location:', error);
+          alert(`Failed to delete location: ${error.message}`);
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img
+            src="images/weather-app.png"
+            alt=""
+            width="30"
+            height="24"
+            class="d-inline-block align-text-top"
+          />
+          Weather Tracker
+        </a>
+        <div class="d-flex align-items-center">
+          <span id="username-display" class="navbar-text me-3">Loading...</span>
+          <button class="btn btn-outline-danger" id="sign-out-btn">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <section id="page-content">
+      <div class="container mt-4">
+        <form id="location-search-form" class="d-flex my-4">
+          <div class="input-group location-search-input-group me-3">
+            <input
+              id="location-input"
+              class="form-control"
+              type="text"
+              name="name"
+              placeholder="Enter location"
+              required
+            />
+            <button
+              class="btn btn-outline-secondary btn-sm clear-input-button"
+              type="button"
+              onclick="document.getElementById('location-input').value = ''"
+            >
+              &times;
+            </button>
+          </div>
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+
+        <div id="loading-message" style="display: none">
+          <p class="text-muted">Loading your locations...</p>
+        </div>
+
+        <div
+          id="error-message"
+          class="alert alert-danger"
+          style="display: none"
+        ></div>
+
+        <div>
+          <div id="locations-container" class="row">
+            <!-- Weather cards will be dynamically inserted here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer
+      class="d-flex flex-wrap justify-content-between align-items-center py-3 mt-4 border-top"
+    >
+      <div class="px-4">
+        <span
+          >© Weather Viewer, project from
+          <a href="https://zhukovsd.github.io/java-backend-learning-course/"
+            >zhukovsd/java-backend-learning-course</a
+          >
+          roadmap.</span
+        >
+      </div>
+    </footer>
+  </body>
+</html>

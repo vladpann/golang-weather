@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
-	core_http_response "github.com/vladpann/golang-weather/internal/core/transport/http/response"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
 )
 
 // newTestLogger создает логгер для тестов

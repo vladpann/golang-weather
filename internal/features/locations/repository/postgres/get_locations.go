@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 )
 
 func (r *LocationsRepository) GetLocations(
 	ctx context.Context,
+	userID int64,
 	limit *int,
 	offset *int,
 ) ([]domain.Location, error) {
@@ -18,14 +19,16 @@ func (r *LocationsRepository) GetLocations(
 	query := `
 	SELECT id, user_id, name, latitude, longitude
 	FROM weather.locations
+	WHERE user_id = $1
 	ORDER BY id ASC
-	LIMIT $1
-	OFFSET $2;
+	LIMIT $2
+	OFFSET $3;
 	`
 
 	rows, err := r.pool.Query(
 		ctx,
 		query,
+		userID,
 		limit,
 		offset,
 	)

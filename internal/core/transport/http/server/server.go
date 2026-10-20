@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	core_logger "github.com/vladpann/golang-weather/internal/core/logger"
-	core_http_middleware "github.com/vladpann/golang-weather/internal/core/transport/http/middleware"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
 )
 
 type HTTPServer struct {

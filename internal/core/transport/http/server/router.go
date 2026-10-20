@@ -1,9 +1,8 @@
 package core_http_server
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi/v5"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
 )
 
 type ApiVersion string
@@ -30,13 +29,7 @@ func NewAPIVersionRouter(
 
 func (r *APIVersionRouter) RegisterRoutes(routes ...Route) {
 	for _, route := range routes {
-		handler := http.Handler(route.Handler)
-		
-		// Применяем middleware в обратном порядке
-		for i := len(route.Middlewares) - 1; i >= 0; i-- {
-			handler = route.Middlewares[i](handler)
-		}
-		
+		handler := core_http_middleware.ChainMiddleware(route.Handler, route.Middlewares...)
 		r.Method(route.Method, route.Path, handler)
 	}
 }

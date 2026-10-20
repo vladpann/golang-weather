@@ -2,9 +2,12 @@ package locations_repository_postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
 )
 
 func (r *LocationsRepository) CreateLocation(
@@ -39,6 +42,16 @@ func (r *LocationsRepository) CreateLocation(
 	)
 
 	if err != nil {
+		if errors.Is(err, core_postgres_pool.ErrUniqueViolation) {
+			return domain.Location{}, fmt.Errorf(
+				"location with coordinates (%v, %v) for user %d: %w",
+				location.Latitude,
+				location.Longitude,
+				location.UserID,
+				core_errors.ErrLocationAlreadyExists,
+			)
+		}
+
 		return domain.Location{}, fmt.Errorf("scan location: %w", err)
 	}
 

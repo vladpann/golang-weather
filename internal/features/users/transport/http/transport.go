@@ -4,13 +4,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/vladpann/golang-weather/internal/core/domain"
-	core_http_server "github.com/vladpann/golang-weather/internal/core/transport/http/server"
+	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+	core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
 )
 
 type UsersHTTPHandler struct {
 	usersService    UsersService
 	sessionsService SessionsService
+	authMiddleware  core_http_middleware.Middleware
 }
 
 type UsersService interface {
@@ -26,6 +28,11 @@ type UsersService interface {
 		login string,
 		password string,
 	) (domain.User, error)
+
+	GetUserByID(
+		ctx context.Context,
+		userID int64,
+	) (domain.User, error)
 }
 
 type SessionsService interface {
@@ -38,10 +45,12 @@ type SessionsService interface {
 func NewUsersHTTPHandler(
 	usersService UsersService,
 	sessionsService SessionsService,
+	authMiddleware core_http_middleware.Middleware,
 ) *UsersHTTPHandler {
 	return &UsersHTTPHandler{
 		usersService:    usersService,
 		sessionsService: sessionsService,
+		authMiddleware:  authMiddleware,
 	}
 }
 
@@ -56,6 +65,17 @@ func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
 			Method:  http.MethodPost,
 			Path:    "/auth/sign-in",
 			Handler: h.SignInUser,
+		},
+		{
+			Method:  http.MethodPost,
+			Path:    "/auth/sign-out",
+			Handler: h.SignOutUser,
+		},
+		{
+			Method:      http.MethodGet,
+			Path:        "/auth/check",
+			Handler:     h.CheckAuth,
+			Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
 		},
 	}
 }

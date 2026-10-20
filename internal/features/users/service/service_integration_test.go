@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	core_errors "github.com/vladpann/golang-weather/internal/core/errors"
-	users_repository_postgres "github.com/vladpann/golang-weather/internal/features/users/repository/postgres"
-	users_service "github.com/vladpann/golang-weather/internal/features/users/service"
-	"github.com/vladpann/golang-weather/internal/testutil"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
+	users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
+	"github.com/vladpann/backend/golang-weather/internal/testutil"
 )
 
 func TestUsersService_CreateUser_Integration(t *testing.T) {
