@@ -59,6 +59,9 @@ docker-restart: ## Перезапустить Docker контейнеры
 docker-ps: ## Показать статус Docker контейнеров
 	@docker compose ps
 
+docker-build: ## Сборка
+	docker build -f Dockerfile.backend -t golang-weather:latest .
+
 # ============================================
 # Миграции (Docker)
 # ============================================
