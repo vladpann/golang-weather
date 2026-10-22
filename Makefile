@@ -1,105 +1,117 @@
-# Загрузка переменных из .env файла
-ifneq (,$(wildcard ./.env))
-    include .env
-    export
-endif
+include .env
+export
 
-.PHONY: run help test test-integration test-users test-sessions test-all setup-test-db docker-up docker-down docker-logs docker-clean docker-migrate dev migrate-up migrate-up-test migrate-down migrate-force setup-db drop-db clean-test-db drop-test-db
+export PROJECT_ROOT=$(shell pwd)
+
+.PHONY: help env-up env-down env-cleanup env-port-forward env-port-close \
+	migrate-create migrate-up migrate-down migrate-action \
+	migrate-up-test migrate-down-test migrate-action-test \
+	logs-cleanup weather-run weather-deploy weather-undeploy ps \
+	test test-all test-integration test-users test-sessions test-openweather
 
 help: ## Показать справку
-	@grep -hE '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ": *## *"}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ": *## *"}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 # ============================================
 # Приложение
 # ============================================
-dev: ## Запустить полное окружение (Docker + миграции + приложение)
-	@docker-up docker-migrate run 
 
-run: ## Запустить приложение
-	@go run ./cmd/weather/main.go
+weather-run: ## Запустить приложение локально
+	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
+	export POSTGRES_HOST=localhost && \
+	go mod tidy && \
+	go run ${PROJECT_ROOT}/cmd/weather/main.go
 
-# ============================================
-# Docker команды
-# ============================================
+weather-deploy: ## Собрать и запустить приложение + nginx в Docker
+	@docker compose up -d --build weather nginx
 
-docker-up: ## Запустить Docker контейнеры (PostgreSQL dev + test)
-	@./scripts/docker-setup.sh
+weather-undeploy: ## Остановить приложение + nginx
+	@docker compose down weather nginx
 
-docker-down: ## Остановить Docker контейнеры
-	@echo "🛑 Остановка Docker контейнеров..."
-	@docker compose down
-	@echo "✅ Docker контейнеры остановлены"
-
-docker-logs: ## Показать логи Docker контейнеров
-	@docker compose logs -f
-
-docker-logs-dev: ## Показать логи dev базы данных
-	@docker compose logs -f postgres
-
-docker-logs-test: ## Показать логи test базы данных
-	@docker compose logs -f postgres_test
-
-docker-clean: ## Удалить Docker контейнеры и volumes (ОСТОРОЖНО!)
-	@echo "⚠️  ВНИМАНИЕ: Удаление всех Docker контейнеров и данных!"
-	@read -p "Вы уверены? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker compose down -v; \
-		echo "✅ Docker контейнеры и volumes удалены"; \
+logs-cleanup: ## Удалить файлы логов (ОСТОРОЖНО!)
+	@read -p "Delete all log volume files? Risk of data loss. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		rm -rf ${PROJECT_ROOT}/out/logs && \
+		echo "Log files have been cleared"; \
 	else \
-		echo "❌ Отменено"; \
-	fi
+		echo "Log clean-up cancelled"; \
+	fi;
 
-docker-restart: ## Перезапустить Docker контейнеры
-	@echo "🔄 Перезапуск Docker контейнеров..."
-	@docker compose down
-	@docker compose up -d --build
-	@echo "✅ Docker контейнеры перезапущены"
-
-docker-ps: ## Показать статус Docker контейнеров
+ps: ## Показать статус контейнеров
 	@docker compose ps
 
-docker-build: ## Сборка
-	docker build -f Dockerfile.backend -t golang-weather:latest .
-
 # ============================================
-# Миграции (Docker)
+# Окружение (PostgreSQL dev + test)
 # ============================================
 
-docker-migrate: ## Применить миграции к обеим базам данных в Docker
-	@echo "⬆️  Применение миграций к dev базе..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" up
-	@echo "✅ Миграции применены к dev базе"
-	@echo "⬆️  Применение миграций к test базе..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER_TEST):$(POSTGRES_PASSWORD_TEST)@localhost:$(POSTGRES_PORT_TEST)/$(POSTGRES_DB_TEST)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" up
-	@echo "✅ Миграции применены к test базе"
+env-up: ## Запустить PostgreSQL (dev + test)
+	@docker compose up -d weather-postgres weather-postgres-test
+
+env-down: ## Остановить PostgreSQL (dev + test)
+	@docker compose down weather-postgres weather-postgres-test
+
+env-cleanup: ## Удалить данные PostgreSQL (ОСТОРОЖНО!)
+	@read -p "Delete all environment volume files? Risk of data loss. [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+		docker compose down weather-postgres weather-postgres-test port-forwarder port-forwarder-test && \
+		rm -rf ${PROJECT_ROOT}/out/pgdata ${PROJECT_ROOT}/out/pgdata-test && \
+		echo "Environment files have been cleared"; \
+	else \
+		echo "Environment clean-up cancelled"; \
+	fi;
+
+env-port-forward: ## Пробросить порты БД на localhost (dev 5432, test 5433)
+	@docker compose up -d port-forwarder port-forwarder-test
+
+env-port-close: ## Закрыть проброшенные порты БД
+	@docker compose down port-forwarder port-forwarder-test
+
+# ============================================
+# Миграции
+# ============================================
+
+migrate-create: ## Создать миграцию (make migrate-create seq=init)
+	@if [ -z "$(seq)" ]; then \
+		echo "The required \"seq\" parameter is missing. Example: make migrate-create seq=init"; \
+		exit 1; \
+	fi; \
+	docker compose run --rm weather-postgres-migrate \
+		create \
+		-ext sql \
+		-dir /migrations \
+		-seq "$(seq)"
 
 migrate-up: ## Применить миграции к dev базе
-	@echo "⬆️  Применение миграций..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" up
-	@echo "✅ Миграции применены"
-
-migrate-up-test: ## Применить миграции к test базе
-	@echo "⬆️  Применение миграций к test базе..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER_TEST):$(POSTGRES_PASSWORD_TEST)@$(POSTGRES_HOST_TEST):$(POSTGRES_PORT_TEST)/$(POSTGRES_DB_TEST)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" up
-	@echo "✅ Миграции применены к test базе"
+	@make migrate-action action=up
 
 migrate-down: ## Откатить миграции dev базы
-	@echo "⬇️  Откат миграций..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" down
-	@echo "✅ Миграции откачены"
+	@make migrate-action action=down
 
-migrate-force: ## Принудительно установить версию миграции (использовать: make migrate-force VERSION=1)
-	@echo "🔧 Установка версии миграции: $(VERSION)..."
-	@export DATABASE_URL='postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable' && \
-		migrate -path migrations -database "$$DATABASE_URL" force $(VERSION)
-	@echo "✅ Версия миграции установлена"
+migrate-action: ## Выполнить действие миграции на dev базе (make migrate-action action=up)
+	@if [ -z "$(action)" ]; then \
+		echo "The required \"action\" parameter is missing. Example: make migrate-action action=up"; \
+		exit 1; \
+	fi; \
+	docker compose run --rm weather-postgres-migrate \
+		-path /migrations \
+		-database "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@weather-postgres:5432/${POSTGRES_DB}?sslmode=disable" \
+		"$(action)"
 
+migrate-up-test: ## Применить миграции к test базе
+	@make migrate-action-test action=up
+
+migrate-down-test: ## Откатить миграции test базы
+	@make migrate-action-test action=down
+
+migrate-action-test: ## Выполнить действие миграции на test базе
+	@if [ -z "$(action)" ]; then \
+		echo "The required \"action\" parameter is missing. Example: make migrate-action-test action=up"; \
+		exit 1; \
+	fi; \
+	docker compose run --rm weather-postgres-migrate \
+		-path /migrations \
+		-database "postgres://${POSTGRES_USER_TEST}:${POSTGRES_PASSWORD_TEST}@weather-postgres-test:5432/${POSTGRES_DB_TEST}?sslmode=disable" \
+		"$(action)"
 
 # ============================================
 # Тесты
@@ -114,18 +126,14 @@ test-all: ## Запустить все тесты с покрытием
 	@echo "📊 Отчет о покрытии сохранен в coverage.html"
 
 test-integration: ## Запустить только интеграционные тесты
-	@echo "🧪 Запуск интеграционных тестов..."
 	@go test ./internal/features/users/service -v -count=1
 	@go test ./internal/features/sessions/service -v -count=1
 
 test-users: ## Запустить тесты сервиса пользователей
-	@echo "👤 Тесты сервиса пользователей..."
 	@go test ./internal/features/users/service -v -count=1
 
 test-sessions: ## Запустить тесты сервиса сессий
-	@echo "🔑 Тесты сервиса сессий..."
 	@go test ./internal/features/sessions/service -v -count=1
 
 test-openweather: ## Запустить тесты OpenWeather HTTP транспорта
-	@echo "🌤️  Тесты OpenWeather HTTP транспорта..."
 	@go test ./internal/features/openweather/transport/http -v -count=1
