@@ -16,6 +16,14 @@ help: ## Показать справку
 # Приложение
 # ============================================
 
+build-local: ## Собрать бинарник локально для Linux
+	@echo "Building binary for Linux..."
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+		-ldflags="-w -s" \
+		-o ${PROJECT_ROOT}/exe \
+		${PROJECT_ROOT}/cmd/weather/main.go
+	@echo "Binary built: ${PROJECT_ROOT}/exe"
+
 weather-run: ## Запустить приложение локально
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
 	export POSTGRES_HOST=localhost && \
@@ -24,6 +32,13 @@ weather-run: ## Запустить приложение локально
 
 weather-deploy: ## Собрать и запустить приложение + nginx в Docker
 	@docker compose up -d --build weather nginx
+
+weather-deploy-fast: ## Деплой с локально собранным бинарником (быстрее)
+	@echo "🔨 Building binary locally..."
+	@$(MAKE) build-local
+	@echo "🐳 Deploying to Docker..."
+	@docker compose -f docker-compose.fast.yml up -d --build weather nginx
+	@echo "✅ Deployment complete!"
 
 weather-undeploy: ## Остановить приложение + nginx
 	@docker compose down weather nginx
