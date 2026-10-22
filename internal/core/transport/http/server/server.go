@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
@@ -56,6 +57,8 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 	go func() {
 		defer close(ch)
 
+		s.log.Warn("start HTTP server", zap.String("addr", s.config.Addr))
+
 		err := server.ListenAndServe()
 
 		if !errors.Is(err, http.ErrServerClosed) {
@@ -69,6 +72,8 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 			return fmt.Errorf("listen and serve HTTP: %w", err)
 		}
 	case <-ctx.Done():
+		s.log.Warn("shutdown HTTP server...")
+
 		shutdownCtx, cancel := context.WithTimeout(
 			context.Background(),
 			s.config.ShutdownTimeout,
@@ -80,6 +85,8 @@ func (s *HTTPServer) Run(ctx context.Context) error {
 
 			return fmt.Errorf("shutdown HTTP server: %w", err)
 		}
+
+		s.log.Warn("HTTP server stopped")
 	}
 
 	return nil

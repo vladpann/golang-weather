@@ -1,92 +1,81 @@
 services:
-  # Development PostgreSQL Database
-  postgres:
-    image: postgres:16-alpine
-    container_name: weather_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-weather_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-weather_password}
-      POSTGRES_DB: ${POSTGRES_DB:-weather_db}
-      POSTGRES_INITDB_ARGS: '-E UTF8'
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U ${POSTGRES_USER:-weather_user} -d ${POSTGRES_DB:-weather_db}',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - weather_network
-
-  # Test PostgreSQL Database (separate instance)
-  postgres_test:
-    image: postgres:16-alpine
-    container_name: weather_postgres_test
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER_TEST:-weather_user_test}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_TEST:-weather_password_test}
-      POSTGRES_DB: ${POSTGRES_DB_TEST:-weather_db_test}
-      POSTGRES_INITDB_ARGS: '-E UTF8'
-    ports:
-      - '${POSTGRES_PORT_TEST:-5433}:5432'
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U ${POSTGRES_USER_TEST:-weather_user_test} -d ${POSTGRES_DB_TEST:-weather_db_test}',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - weather_network
-
-  backend:
+  weather:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: weather-backend
-    env_file: .env
+      context: ${PROJECT_ROOT}
+      dockerfile: ${PROJECT_ROOT}/cmd/weather/Dockerfile
+    container_name: weather
     environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-    ports:
-      - '5050:5050'
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - weather_network
-
-  frontend:
-    build: .
-    container_name: weather-frontend
-    ports:
-      - '8080:80'
+      - HTTP_ADDR=:5050
+      - HTTP_SHUTDOWN_TIMEOUT=${HTTP_SHUTDOWN_TIMEOUT}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - POSTGRES_HOST=weather-postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_TIMEOUT=${POSTGRES_TIMEOUT}
+      - SESSION_TTL=${SESSION_TTL}
+      - OPENWEATHER_API_BASE_URL=${OPENWEATHER_API_BASE_URL}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - OPENWEATHER_REQUESTS_PER_MINUTE=${OPENWEATHER_REQUESTS_PER_MINUTE}
+      - OPENWEATHER_QUEUE_SIZE=${OPENWEATHER_QUEUE_SIZE}
+      - LOGGER_LEVEL=${LOGGER_LEVEL}
+      - LOGGER_FOLDER=/app/out/logs
+      - TIME_ZONE=${TIME_ZONE}
     volumes:
-      - ./public:/usr/share/nginx/html:ro
-    restart: unless-stopped
-    networks:
-      - weather_network
+      - ${PROJECT_ROOT}/out/logs:/app/out/logs
+    expose:
+      - '5050'
+    restart: always
 
-volumes:
-  postgres_data:
-    driver: local
-  postgres_test_data:
-    driver: local
+  weather-postgres:
+    image: postgres:18.1-bookworm
+    container_name: weather-env-postgres
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
+    restart: always
 
-networks:
-  weather_network:
-    driver: bridge
+  weather-postgres-test:
+    image: postgres:18.1-bookworm
+    container_name: weather-env-postgres-test
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER_TEST}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD_TEST}
+      - POSTGRES_DB=${POSTGRES_DB_TEST}
+    volumes:
+      - ${PROJECT_ROOT}/out/pgdata-test:/var/lib/postgresql
+    restart: always
+
+  weather-postgres-migrate:
+    image: migrate/migrate:v4.19.1
+    volumes:
+      - ${PROJECT_ROOT}/migrations:/migrations
+
+  port-forwarder:
+    image: alpine/socat:1.8.0.3
+    container_name: weather-postgres-port-forwarder
+    command: tcp-listen:5432,fork,reuseaddr tcp-connect:weather-postgres:5432
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+
+  port-forwarder-test:
+    image: alpine/socat:1.8.0.3
+    container_name: weather-postgres-test-port-forwarder
+    command: tcp-listen:5432,fork,reuseaddr tcp-connect:weather-postgres-test:5432
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT_TEST:-5432}:5432'
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: weather-nginx
+    ports:
+      - '80:80'
+    volumes:
+      - ${PROJECT_ROOT}/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${PROJECT_ROOT}/public:/usr/share/nginx/html:ro
+    restart: always
+    depends_on:
+      - weather
