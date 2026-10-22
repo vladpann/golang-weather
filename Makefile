@@ -34,12 +34,11 @@ weather-deploy: ## Собрать и запустить приложение + n
 	@docker compose up -d --build weather nginx
 
 weather-deploy-fast: ## Деплой с локально собранным бинарником (быстрее)
-	@echo "Building locally..."
+	@echo "🔨 Building binary locally..."
 	@$(MAKE) build-local
-	@echo "Deploying to Docker..."
-	@docker compose -f docker-compose.yml build --build-arg USE_LOCAL_BINARY=1 weather
-	@docker compose up -d weather nginx
-	@echo "Deployment complete!"
+	@echo "🐳 Deploying to Docker..."
+	@docker compose -f docker-compose.fast.yml up -d --build weather nginx
+	@echo "✅ Deployment complete!"
 
 weather-undeploy: ## Остановить приложение + nginx
 	@docker compose down weather nginx
