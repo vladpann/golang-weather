@@ -7,4 +7,4 @@ out
 
 # Test coverage files
 coverage.out
-coverage.html
+coverage.html*.exe
