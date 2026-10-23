@@ -11,8 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Middleware func(http.Handler) http.Handler
-
 const requestIDHeader = "X-Request-ID"
 
 func RequestID() Middleware {
@@ -55,7 +53,7 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return rw.ResponseWriter.Write(b)
 }
 
-func HTTPLogger(logger *core_logger.Logger) Middleware {
+func Logger(logger *core_logger.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()

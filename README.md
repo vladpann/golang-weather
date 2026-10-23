@@ -33,19 +33,16 @@ Demo123
 
 ### Users
 
-- `POST /api/v1/users` - создать пользователя
-- `POST /api/v1/users/login` - авторизация пользователя
-
-### Sessions
-
-- `GET /api/v1/sessions` - получить текущую сессию
-- `DELETE /api/v1/sessions` - удалить сессию (logout)
+- `POST /api/v1/auth/sign-up` - регистрация пользователя
+- `POST /api/v1/auth/sign-in` - авторизация пользователя
+- `POST /api/v1/auth/sign-out` - logout пользователя
+- `GET /api/v1/auth/check` - проверка авторизации пользователя
 
 ### Locations
 
-- `GET /api/v1/locations` - получить сохраненные локации пользователя
-- `POST /api/v1/locations` - добавить локацию
-- `DELETE /api/v1/locations/{id}` - удалить локацию
+- `GET /api/v1/locations` - получить список добавленных локации 
+- `POST /api/v1/locations` - добавить локацию в список
+- `DELETE /api/v1/locations/{id}` - удалить локацию из списка
 
 ### OpenWeather
 
