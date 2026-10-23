@@ -101,6 +101,7 @@ func TestSessionExpiration_Integration(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("сессия с коротким TTL истекает", func(t *testing.T) {
+		// Очистка таблиц перенесена в начало подтеста для избежания deadlock
 		testutil.ClearTables(t, pool)
 
 		// Создаем конфигурацию с очень коротким TTL (1 секунда)

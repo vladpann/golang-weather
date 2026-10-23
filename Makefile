@@ -133,10 +133,10 @@ migrate-action-test: ## Выполнить действие миграции н�
 # ============================================
 
 test: ## Запустить все тесты
-	@go test ./... -v
+	@go test ./... -v -p=1
 
 test-all: ## Запустить все тесты с покрытием
-	@go test ./... -v -cover -coverprofile=coverage.out
+	@go test ./... -v -cover -coverprofile=coverage.out -p=1 -count=1
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "📊 Отчет о покрытии сохранен в coverage.html"
 

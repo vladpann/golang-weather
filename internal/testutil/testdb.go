@@ -67,7 +67,10 @@ func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
 
 	ctx := context.Background()
 
+	// Очищаем в обратном порядке зависимостей:
+	// сначала зависимые таблицы, потом главные
 	queries := []string{
+		"TRUNCATE TABLE weather.locations RESTART IDENTITY CASCADE",
 		"TRUNCATE TABLE weather.sessions RESTART IDENTITY CASCADE",
 		"TRUNCATE TABLE weather.users RESTART IDENTITY CASCADE",
 	}

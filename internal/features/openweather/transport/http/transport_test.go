@@ -365,3 +365,254 @@ func TestOpenWeatherHTTPHandler_Routes(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 }
+
+// TestSearchLocation_Success проверяет успешный поиск локации
+func TestSearchLocation_Success(t *testing.T) {
+	upstreamResponse := []openweather_transport_http.GeocodingResponse{
+		{
+			Name:    "Moscow",
+			Lat:     55.7522,
+			Lon:     37.6156,
+			Country: "RU",
+			State:   "Moscow",
+		},
+		{
+			Name:    "Moscow",
+			Lat:     55.8333,
+			Lon:     37.6156,
+			Country: "RU",
+			State:   "Moscow Oblast",
+		},
+	}
+
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Проверяем правильность URL
+		assert.Equal(t, "/geo/1.0/direct", r.URL.Path)
+
+		// Проверяем query параметры
+		query := r.URL.Query()
+		assert.Equal(t, "Moscow", query.Get("q"))
+		assert.Equal(t, "5", query.Get("limit"))
+		assert.Equal(t, "test-api-key", query.Get("appid"))
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(upstreamResponse)
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+	ctx := context.Background()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=Moscow", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var result []openweather_transport_http.GeocodingResponse
+	err := json.NewDecoder(rr.Body).Decode(&result)
+	require.NoError(t, err)
+
+	assert.Len(t, result, 2)
+	assert.Equal(t, "Moscow", result[0].Name)
+	assert.Equal(t, 55.7522, result[0].Lat)
+	assert.Equal(t, 37.6156, result[0].Lon)
+	assert.Equal(t, "RU", result[0].Country)
+}
+
+// TestSearchLocation_MissingCityName проверяет обработку отсутствующего параметра city_name
+func TestSearchLocation_MissingCityName(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Fatal("upstream не должен вызываться при отсутствии city_name")
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+	ctx := context.Background()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	// ErrorResponse возвращает StatusInternalServerError
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+// TestSearchLocation_UpstreamErrors проверяет обработку различных ошибок от upstream
+func TestSearchLocation_UpstreamErrors(t *testing.T) {
+	testCases := []struct {
+		name           string
+		upstreamStatus int
+		expectedStatus int
+	}{
+		{
+			name:           "bad_request",
+			upstreamStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name:           "unauthorized",
+			upstreamStatus: http.StatusUnauthorized,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name:           "not_found",
+			upstreamStatus: http.StatusNotFound,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name:           "too_many_requests",
+			upstreamStatus: http.StatusTooManyRequests,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name:           "internal_error",
+			upstreamStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusInternalServerError,
+		},
+		{
+			name:           "service_unavailable",
+			upstreamStatus: http.StatusServiceUnavailable,
+			expectedStatus: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tc.upstreamStatus)
+			}))
+			defer upstreamServer.Close()
+
+			env := newTestEnv(t, upstreamServer.URL)
+			ctx := context.Background()
+
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=Test", nil)
+			req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+			rr := httptest.NewRecorder()
+
+			env.handler.SearchLocation(rr, req)
+
+			assert.Equal(t, tc.expectedStatus, rr.Code)
+		})
+	}
+}
+
+// TestSearchLocation_UpstreamInvalidJSON проверяет обработку невалидного JSON от upstream
+func TestSearchLocation_UpstreamInvalidJSON(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{invalid json`))
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+	ctx := context.Background()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=Test", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+// TestSearchLocation_UpstreamUnreachable проверяет обработку недоступного upstream
+func TestSearchLocation_UpstreamUnreachable(t *testing.T) {
+	env := newTestEnv(t, "http://127.0.0.1:64212") // несуществующий адрес
+	ctx := context.Background()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=Test", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+}
+
+// TestSearchLocation_RateLimitRejected проверяет обработку превышения rate limit
+func TestSearchLocation_RateLimitRejected(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Fatal("upstream не должен вызываться при превышении rate limit")
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+
+	// Отменяем контекст, чтобы симулировать ошибку rate limiter (context.Canceled)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=Test", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	// context.Canceled возвращает StatusRequestTimeout (408)
+	assert.Equal(t, http.StatusRequestTimeout, rr.Code)
+}
+
+// TestSearchLocation_SpecialCharacters проверяет обработку спецсимволов в названии города
+func TestSearchLocation_SpecialCharacters(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
+		cityName := query.Get("q")
+
+		// Проверяем, что спецсимволы правильно escaped
+		assert.Equal(t, "San Francisco", cityName)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode([]openweather_transport_http.GeocodingResponse{
+			{Name: "San Francisco", Lat: 37.7749, Lon: -122.4194, Country: "US"},
+		})
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+	ctx := context.Background()
+
+	// URL encoding будет выполнен браузером/клиентом
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=San+Francisco", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+}
+
+// TestSearchLocation_EmptyResults проверяет обработку пустого результата от API
+func TestSearchLocation_EmptyResults(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode([]openweather_transport_http.GeocodingResponse{})
+	}))
+	defer upstreamServer.Close()
+
+	env := newTestEnv(t, upstreamServer.URL)
+	ctx := context.Background()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/open-weather/search-location?city_name=NonExistentCity12345", nil)
+	req = req.WithContext(core_logger.ToContext(ctx, env.logger))
+	rr := httptest.NewRecorder()
+
+	env.handler.SearchLocation(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var result []openweather_transport_http.GeocodingResponse
+	err := json.NewDecoder(rr.Body).Decode(&result)
+	require.NoError(t, err)
+	assert.Len(t, result, 0)
+}

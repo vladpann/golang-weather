@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
 )
 
 func (r *LocationsRepository) GetLocation(
@@ -40,8 +40,8 @@ func (r *LocationsRepository) GetLocation(
 		&locationModel.Longitude,
 	)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Location{}, fmt.Errorf("location id=%d: %w", id, core_errors.ErrNotFound)
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
+			return domain.Location{}, fmt.Errorf("location id=%d for user_id=%d: %w", id, userID, core_errors.ErrNotFound)
 		}
 		return domain.Location{}, fmt.Errorf("scan location: %w", err)
 	}
