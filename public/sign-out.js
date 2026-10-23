@@ -1,5 +1,5 @@
 // Sign-out functionality
-const SIGN_OUT_URL = 'http://77.223.99.64/api/v1/auth/sign-out';
+const SIGN_OUT_URL = 'http://localhost/api/v1/auth/sign-out';
 const SIGN_IN_PAGE = 'sign-in.html';
 
 async function signOut() {

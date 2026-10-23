@@ -1,7 +1,6 @@
 package openweather_transport_http_test
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -109,30 +108,20 @@ func newTestEnvWithAuth(
 	return &testEnv{handler: handler, logger: &core_logger.Logger{Logger: zapLogger}}
 }
 
-// do отправляет сырое тело в GetOpenWeather и возвращает recorder.
-func (e *testEnv) do(t *testing.T, ctx context.Context, body []byte) *httptest.ResponseRecorder {
+// doCoords отправляет GET запрос с координатами в query параметрах
+func (e *testEnv) doCoords(t *testing.T, ctx context.Context, lat, lon float64) *httptest.ResponseRecorder {
 	t.Helper()
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/open-weather/get-weather", bytes.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
+	url := "/api/v1/open-weather/get-weather?latitude=" + strconv.FormatFloat(lat, 'f', -1, 64) +
+		"&longitude=" + strconv.FormatFloat(lon, 'f', -1, 64)
+
+	req := httptest.NewRequest(http.MethodGet, url, nil)
 	req = req.WithContext(core_logger.ToContext(ctx, e.logger))
 
 	rr := httptest.NewRecorder()
 	e.handler.GetOpenWeather(rr, req)
 
 	return rr
-}
-
-func (e *testEnv) doCoords(t *testing.T, ctx context.Context, lat, lon float64) *httptest.ResponseRecorder {
-	t.Helper()
-
-	body, err := json.Marshal(openweather_transport_http.GetOpenWeatherRequest{
-		Latitude:  lat,
-		Longitude: lon,
-	})
-	require.NoError(t, err)
-
-	return e.do(t, ctx, body)
 }
 
 func TestGetOpenWeather_Success(t *testing.T) {
@@ -259,13 +248,12 @@ func TestGetOpenWeather_UpstreamUnreachable(t *testing.T) {
 func TestGetOpenWeather_InvalidRequest(t *testing.T) {
 	tests := []struct {
 		name string
-		body string
+		url  string
 	}{
-		{"empty body", ``},
-		{"malformed json", `{"latitude": `},
-		{"missing fields", `{}`},
-		{"missing longitude", `{"latitude": 55.7522}`},
-		{"wrong types", `{"latitude": "abc", "longitude": "def"}`},
+		{"missing latitude", "/api/v1/open-weather/get-weather?longitude=37.6156"},
+		{"missing longitude", "/api/v1/open-weather/get-weather?latitude=55.7522"},
+		{"missing both", "/api/v1/open-weather/get-weather"},
+		{"wrong types", "/api/v1/open-weather/get-weather?latitude=abc&longitude=def"},
 	}
 
 	for _, tt := range tests {
@@ -278,10 +266,12 @@ func TestGetOpenWeather_InvalidRequest(t *testing.T) {
 
 			env := newTestEnv(t, server.URL)
 
-			rr := env.do(t, context.Background(), []byte(tt.body))
+			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			req = req.WithContext(core_logger.ToContext(context.Background(), env.logger))
+			rr := httptest.NewRecorder()
+			env.handler.GetOpenWeather(rr, req)
 
-			// Ожидаем 400 от DecodeAndValidateRequest (ErrInvalidArgument).
-			// Если ваш ErrorResponse маппит иначе - поправьте ожидаемый код.
+			// Ожидаем 400 от ParseQueryParams (ErrInvalidArgument).
 			assert.Equal(t, http.StatusBadRequest, rr.Code)
 			assert.EqualValues(t, 0, atomic.LoadInt32(&calls), "upstream must not be called")
 		})
@@ -332,7 +322,7 @@ func TestOpenWeatherHTTPHandler_Routes(t *testing.T) {
 
 	t.Run("get-weather", func(t *testing.T) {
 		route := routes[1]
-		assert.Equal(t, http.MethodPost, route.Method)
+		assert.Equal(t, http.MethodGet, route.Method)
 		assert.Equal(t, "/open-weather/get-weather", route.Path)
 		assert.NotNil(t, route.Handler)
 		require.Len(t, route.Middlewares, 1)
@@ -355,8 +345,8 @@ func TestOpenWeatherHTTPHandler_Routes(t *testing.T) {
 	})
 
 	t.Run("get-weather привязан к GetOpenWeather", func(t *testing.T) {
-		// Пустое тело даёт 400 от DecodeAndValidateRequest, как в TestGetOpenWeather_InvalidRequest
-		req := httptest.NewRequest(http.MethodPost, "/open-weather/get-weather", bytes.NewReader(nil))
+		// Без query параметров даёт 400 от ParseQueryParams, как в TestGetOpenWeather_InvalidRequest
+		req := httptest.NewRequest(http.MethodGet, "/open-weather/get-weather", nil)
 		req = req.WithContext(core_logger.ToContext(req.Context(), env.logger))
 		rr := httptest.NewRecorder()
 

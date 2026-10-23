@@ -96,9 +96,7 @@
         <ol style="margin: 10px 0 0 20px">
           <li>
             Откройте:
-            <a href="http://77.223.99.64" target="_blank"
-              >http://77.223.99.64</a
-            >
+            <a href="http://localhost" target="_blank">http://localhost</a>
           </li>
           <li>Войдите в систему (sign-in)</li>
           <li>Вернитесь сюда и запустите тест</li>
@@ -106,7 +104,7 @@
       </div>
 
       <label>API URL:</label>
-      <input type="text" id="apiUrl" value="http://77.223.99.64" />
+      <input type="text" id="apiUrl" value="http://localhost" />
 
       <label>Количество запросов:</label>
       <input type="number" id="count" value="65" min="1" max="200" />
@@ -162,11 +160,10 @@
       async function request(n) {
         const url = document.getElementById('apiUrl').value;
         try {
-          const res = await fetch(`${url}/api/v1/open-weather/get-weather`, {
-            method: 'POST',
+          const res = await fetch(`${url}/api/v1/open-weather/get-weather?latitude=55.7522&longitude=37.6156`, {
+            method: 'GET',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ latitude: 55.7522, longitude: 37.6156 }),
           });
 
           if (res.ok) {

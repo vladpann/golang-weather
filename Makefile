@@ -30,14 +30,11 @@ weather-run: ## Запустить приложение локально
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/weather/main.go
 
-weather-deploy: ## Собрать и запустить приложение + nginx в Docker
-	@docker compose up -d --build weather nginx
-
-weather-deploy-fast: ## Деплой с локально собранным бинарником (быстрее)
+weather-deploy: ## Деплой с локально собранным бинарником 
 	@echo "🔨 Building binary locally..."
 	@$(MAKE) build-local
 	@echo "🐳 Deploying to Docker..."
-	@docker compose -f docker-compose.fast.yml up -d --build weather nginx
+	@docker compose -f docker-compose.yml up -d --build weather nginx
 	@echo "✅ Deployment complete!"
 
 weather-undeploy: ## Остановить приложение + nginx

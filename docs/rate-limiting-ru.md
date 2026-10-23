@@ -311,7 +311,7 @@ func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.
 | Эндпоинт                               | Метод | Описание                                 | Файл                    |
 | -------------------------------------- | ----- | ---------------------------------------- | ----------------------- |
 | `/api/v1/open-weather/search-location` | GET   | Поиск локаций по названию города         | `search_location.go:38` |
-| `/api/v1/open-weather/get-weather`     | POST  | Получение данных о погоде по координатам | `get_openweather.go:36` |
+| `/api/v1/open-weather/get-weather`     | GET   | Получение данных о погоде по координатам | `get_openweather.go:36` |
 
 ---
 
@@ -655,13 +655,8 @@ func (rl *RateLimiter) processQueue() {
 
 ```bash
 # Успешный запрос
-curl -X POST http://localhost:8080/api/v1/open-weather/get-weather \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "latitude": 55.7522,
-    "longitude": 37.6156
-  }'
+curl -X GET "http://localhost:8080/api/v1/open-weather/get-weather?latitude=55.7522&longitude=37.6156" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 
 # Ответ при превышении лимита (429)
 {
@@ -680,7 +675,6 @@ curl -X POST http://localhost:8080/api/v1/open-weather/get-weather \
 package main
 
 import (
-    "bytes"
     "encoding/json"
     "fmt"
     "net/http"
@@ -688,16 +682,13 @@ import (
 )
 
 func getWeatherWithRetry(lat, lon float64, maxRetries int) error {
-    request := map[string]float64{
-        "latitude":  lat,
-        "longitude": lon,
-    }
-
-    body, _ := json.Marshal(request)
+    url := fmt.Sprintf(
+        "http://localhost:8080/api/v1/open-weather/get-weather?latitude=%f&longitude=%f",
+        lat, lon,
+    )
 
     for attempt := 0; attempt < maxRetries; attempt++ {
-        resp, err := http.Post(
-            "http://localhost:8080/api/v1/open-weather/get-weather",
+        resp, err := http.Get(url)
             "application/json",
             bytes.NewReader(body),
         )
@@ -739,14 +730,16 @@ async function getWeather(
   const retryDelay = 5000; // 5 секунд
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const response = await fetch('/api/v1/open-weather/get-weather', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `/api/v1/open-weather/get-weather?latitude=${latitude}&longitude=${longitude}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       },
-      body: JSON.stringify({ latitude, longitude }),
-    });
+    );
 
     if (response.ok) {
       return await response.json();

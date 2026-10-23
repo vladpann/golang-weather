@@ -1,7 +1,7 @@
 // Frontend authentication middleware
 // This script checks if user is authenticated and redirects to sign-in if not
 
-const AUTH_CHECK_URL = 'http://77.223.99.64/api/v1/auth/check';
+const AUTH_CHECK_URL = 'http://localhost/api/v1/auth/check';
 const SIGN_IN_URL = 'sign-in.html';
 
 // Pages that require authentication

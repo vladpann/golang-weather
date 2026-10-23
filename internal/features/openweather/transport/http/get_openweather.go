@@ -12,8 +12,8 @@ import (
 )
 
 type GetOpenWeatherRequest struct {
-	Latitude  float64 `json:"latitude" validate:"required"`
-	Longitude float64 `json:"longitude" validate:"required"`
+	Latitude  float64 `query:"latitude" validate:"required"`
+	Longitude float64 `query:"longitude" validate:"required"`
 }
 
 type GetOpenWeatherResponse OpenWeatherDTOResponse
@@ -25,10 +25,16 @@ func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.
 
 	log.Debug("invoke GetOpenWeatherLocation handler")
 
-	var request GetOpenWeatherRequest
-	if err := core_http_request.DecodeAndValidateRequest(r, &request); err != nil {
-		responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+	// Parse latitude and longitude from query parameters
+	latitude, err := core_http_request.GetFloat64QueryParam(r, "latitude")
+	if err != nil {
+		responseHandler.ErrorResponse(err, "invalid or missing latitude parameter")
+		return
+	}
 
+	longitude, err := core_http_request.GetFloat64QueryParam(r, "longitude")
+	if err != nil {
+		responseHandler.ErrorResponse(err, "invalid or missing longitude parameter")
 		return
 	}
 
@@ -42,8 +48,8 @@ func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.
 	url := fmt.Sprintf(
 		"%s/data/2.5/weather?lat=%f&lon=%f&appid=%s",
 		h.config.APIBaseUrl,
-		request.Latitude,
-		request.Longitude,
+		latitude,
+		longitude,
 		h.config.APIKey,
 	)
 	req, err := http.NewRequestWithContext(

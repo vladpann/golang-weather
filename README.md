@@ -1,4 +1,4 @@
-# Weather
+# Погода
 
 Реализация проекта "Погода" из [Golang Роадмап Сергея Жукова](https://zhukovsd.github.io/golang-backend-learning-course/projects/weather-viewer/)
 
@@ -29,6 +29,54 @@ Demo123
 - **Migrations**: golang-migrate
 - **Weather Provider**: OpenWeather API
 
+## API Endpoints
+
+### Users
+
+- `POST /api/v1/users` - создать пользователя
+- `POST /api/v1/users/login` - авторизация пользователя
+
+### Sessions
+
+- `GET /api/v1/sessions` - получить текущую сессию
+- `DELETE /api/v1/sessions` - удалить сессию (logout)
+
+### Locations
+
+- `GET /api/v1/locations` - получить сохраненные локации пользователя
+- `POST /api/v1/locations` - добавить локацию
+- `DELETE /api/v1/locations/{id}` - удалить локацию
+
+### OpenWeather
+
+- `GET /api/v1/open-weather/search-location?city_name={city}` - поиск локаций
+- `GET /api/v1/open-weather/get-weather?latitude={lat}&longitude={lon}` - получить погоду по координатам
+
+## Структура проекта
+
+```
+.
+├── cmd/weather/          # Точка входа приложения
+├── internal/
+│   ├── core/             # Общие компоненты (config, logger, transport, repository, etc.)
+│   │   ├── config/       # Конфигурация приложения
+│   │   ├── domain/       # Доменные модели
+│   │   ├── errors/       # Общие ошибки
+│   │   ├── logger/       # Логирование (zap)
+│   │   ├── repository/   # Работа с БД (pgx pool)
+│   │   └── transport/    # HTTP транспорт (middleware, request, response, server)
+│   └── features/         # Бизнес-логика
+│       ├── users/        # Управление пользователями
+│       ├── sessions/     # Управление сессиями
+│       ├── locations/    # Управление локациями
+│       └── openweather/  # Интеграция с OpenWeather API
+├── migrations/           # SQL миграции
+├── public/               # Статические файлы (frontend)
+├── docs/                 # Документация
+├── nginx.conf            # Конфигурация Nginx
+└── docker-compose.yml    # Docker Compose конфигурация
+```
+
 ## Быстрый старт
 
 1. Скопируйте `.env.example` в `.env`:
@@ -49,13 +97,19 @@ OPENWEATHER_API_KEY=your_openweather_api_key_here
 make env-up
 ```
 
-4. Примените миграции:
+4. Пробросить порты для локального подключения
+
+```bash
+make env-port-forward
+```
+
+5. Примените миграции:
 
 ```bash
 make migrate-up
 ```
 
-5. Запустите приложение с Nginx:
+6. Запустите приложение с Nginx:
 
 ```bash
 make weather-deploy
@@ -83,8 +137,7 @@ make weather-deploy
 
 ### Приложение
 
-- `make weather-deploy` - запустить приложение (backend + nginx) в Docker
-- `make weather-deploy-fast` - быстрый деплой с локально собранным бинарником
+- `make weather-deploy` - деплой с локально собранным бинарником
 - `make weather-undeploy` - остановить приложение
 - `make weather-run` - запустить backend локально (для разработки)
 - `make build-local` - собрать бинарник локально для Linux
@@ -103,73 +156,7 @@ make weather-deploy
 - `make ps` - показать статус контейнеров
 - `make logs-cleanup` - очистить логи
 
-## API Endpoints
-
-### Users
-
-- `POST /api/v1/users` - создать пользователя
-- `POST /api/v1/users/login` - авторизация пользователя
-
-### Sessions
-
-- `GET /api/v1/sessions` - получить текущую сессию
-- `DELETE /api/v1/sessions` - удалить сессию (logout)
-
-### Locations
-
-- `GET /api/v1/locations` - получить сохраненные локации пользователя
-- `GET /api/v1/locations/search?name={city}` - поиск локаций
-- `POST /api/v1/locations` - добавить локацию
-- `DELETE /api/v1/locations/{id}` - удалить локацию
-
-### Weather
-
-- `GET /api/v1/weather/{locationId}` - получить погоду для локации
-
-## Структура проекта
-
-```
-.
-├── cmd/weather/          # Точка входа приложения
-├── internal/
-│   ├── core/             # Общие компоненты (config, logger, transport, repository, etc.)
-│   │   ├── config/       # Конфигурация приложения
-│   │   ├── domain/       # Доменные модели
-│   │   ├── errors/       # Общие ошибки
-│   │   ├── logger/       # Логирование (zap)
-│   │   ├── repository/   # Работа с БД (pgx pool)
-│   │   └── transport/    # HTTP транспорт (middleware, request, response, server)
-│   └── features/         # Бизнес-логика
-│       ├── users/        # Управление пользователями
-│       ├── sessions/     # Управление сессиями
-│       ├── locations/    # Управление локациями
-│       └── openweather/  # Интеграция с OpenWeather API
-├── migrations/           # SQL миграции
-├── public/               # Статические файлы (frontend)
-├── docs/                 # Документация
-├── nginx.conf            # Конфигурация Nginx
-└── docker-compose.yml    # Docker Compose конфигурация
-```
-
 ## Разработка
-
-### Локальный запуск backend
-
-```bash
-# Запустить PostgreSQL
-make env-up
-
-# Пробросить порты для локального подключения
-make env-port-forward
-
-# Применить миграции
-make migrate-up
-
-# Запустить backend
-make weather-run
-```
-
-Backend будет доступен на http://localhost:5050
 
 ### Работа с миграциями
 
