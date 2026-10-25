@@ -11,11 +11,13 @@
 http://77.223.99.64
 
 Username
+
 ```
 Demo
 ```
 
 Password
+
 ```
 Demo123
 ```
@@ -29,6 +31,17 @@ Demo123
 - **Migrations**: golang-migrate
 - **Weather Provider**: OpenWeather API
 
+## Технологии
+
+- **Go 1.26.1**
+- **Chi Router** - HTTP роутер
+- **pgx/v5** - PostgreSQL драйвер 
+- **Zap** - логирование
+- **golang-migrate** - управление миграциями БД
+- **bcrypt** - хеширование паролей
+- **UUID** - генерация уникальных идентификаторов
+- **validator** - валидация структур
+
 ## API Endpoints
 
 ### Users
@@ -40,7 +53,7 @@ Demo123
 
 ### Locations
 
-- `GET /api/v1/locations` - получить список добавленных локации 
+- `GET /api/v1/locations` - получить список добавленных локации
 - `POST /api/v1/locations` - добавить локацию в список
 - `DELETE /api/v1/locations/{id}` - удалить локацию из списка
 
@@ -73,6 +86,37 @@ Demo123
 ├── nginx.conf            # Конфигурация Nginx
 └── docker-compose.yml    # Docker Compose конфигурация
 ```
+
+## Особенности
+
+- **Аутентификация**: Сессии на основе cookies с bcrypt хешированием паролей
+- **Rate Limiting**: Ограничение запросов к OpenWeather API (60 req/min по умолчанию)
+- **ON DELETE CASCADE**: При удалении пользователя автоматически удаляются все его сессии и локации
+- **CORS**: Настроен для работы с frontend
+- **Логирование**: Структурированные логи с помощью zap
+- **Graceful Shutdown**: Корректное завершение работы сервера
+- **Middleware**: Request ID, Logger, Trace, Panic Recovery, CORS, Auth
+- **Валидация**: Валидация входных данных с помощью go-playground/validator
+- **Connection Pooling**: Эффективное управление подключениями к БД с помощью pgx/v5
+
+## Получение API ключа OpenWeather
+
+1. Зарегистрируйтесь на [OpenWeather](https://openweathermap.org/)
+2. Перейдите в раздел [API keys](https://home.openweathermap.org/api_keys)
+3. Создайте новый API ключ
+4. Добавьте его в `.env` файл
+
+## Конфигурация
+
+Основные параметры конфигурации (см. `.env.example`):
+
+- `HTTP_ADDR` - адрес HTTP сервера (по умолчанию :5050)
+- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - настройки подключения к PostgreSQL
+- `SESSION_TTL` - время жизни сессии (по умолчанию 24h)
+- `OPENWEATHER_API_KEY` - API ключ OpenWeather
+- `OPENWEATHER_REQUESTS_PER_MINUTE` - лимит запросов к OpenWeather API (по умолчанию 60)
+- `LOGGER_LEVEL` - уровень логирования (DEBUG, INFO, WARN, ERROR)
+- `ALLOWED_ORIGINS` - разрешенные origins для CORS
 
 ## Быстрый старт
 
@@ -113,125 +157,6 @@ make weather-deploy
 ```
 
 6. Откройте в браузере: http://localhost
-
-## Доступные команды
-
-### Окружение
-
-- `make env-up` - запустить PostgreSQL (dev + test)
-- `make env-down` - остановить PostgreSQL (dev + test)
-- `make env-cleanup` - удалить данные PostgreSQL
-- `make env-port-forward` - пробросить порты БД на localhost (dev 5432, test 5433)
-- `make env-port-close` - закрыть проброс портов
-
-### Миграции
-
-- `make migrate-up` - применить все миграции к dev базе
-- `make migrate-down` - откатить последнюю миграцию dev базы
-- `make migrate-create seq=<name>` - создать новую миграцию
-- `make migrate-up-test` - применить миграции к test базе
-- `make migrate-down-test` - откатить миграции test базы
-
-### Приложение
-
-- `make weather-deploy` - деплой с локально собранным бинарником
-- `make weather-undeploy` - остановить приложение
-- `make weather-run` - запустить backend локально (для разработки)
-- `make build-local` - собрать бинарник локально для Linux
-
-### Тесты
-
-- `make test` - запустить все тесты
-- `make test-all` - запустить все тесты с покрытием
-- `make test-integration` - запустить только интеграционные тесты
-- `make test-users` - запустить тесты сервиса пользователей
-- `make test-sessions` - запустить тесты сервиса сессий
-- `make test-openweather` - запустить тесты OpenWeather HTTP транспорта
-
-### Утилиты
-
-- `make ps` - показать статус контейнеров
-- `make logs-cleanup` - очистить логи
-
-## Разработка
-
-### Работа с миграциями
-
-Создать новую миграцию:
-
-```bash
-make migrate-create seq=add_new_table
-```
-
-Применить миграции:
-
-```bash
-make migrate-up
-```
-
-Откатить последнюю миграцию:
-
-```bash
-make migrate-down
-```
-
-### Запуск тестов
-
-Запустить все тесты:
-
-```bash
-make test
-```
-
-Запустить тесты с отчетом о покрытии:
-
-```bash
-make test-all
-```
-
-Отчет будет сохранен в `coverage.html`.
-
-## Особенности
-
-- **Аутентификация**: Сессии на основе cookies с bcrypt хешированием паролей
-- **Rate Limiting**: Ограничение запросов к OpenWeather API (60 req/min по умолчанию)
-- **ON DELETE CASCADE**: При удалении пользователя автоматически удаляются все его сессии и локации
-- **CORS**: Настроен для работы с frontend
-- **Логирование**: Структурированные логи с помощью zap
-- **Graceful Shutdown**: Корректное завершение работы сервера
-- **Middleware**: Request ID, Logger, Trace, Panic Recovery, CORS, Auth
-- **Валидация**: Валидация входных данных с помощью go-playground/validator
-- **Connection Pooling**: Эффективное управление подключениями к БД с помощью pgx/v5
-
-## Конфигурация
-
-Основные параметры конфигурации (см. `.env.example`):
-
-- `HTTP_ADDR` - адрес HTTP сервера (по умолчанию :5050)
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - настройки подключения к PostgreSQL
-- `SESSION_TTL` - время жизни сессии (по умолчанию 24h)
-- `OPENWEATHER_API_KEY` - API ключ OpenWeather
-- `OPENWEATHER_REQUESTS_PER_MINUTE` - лимит запросов к OpenWeather API (по умолчанию 60)
-- `LOGGER_LEVEL` - уровень логирования (DEBUG, INFO, WARN, ERROR)
-- `ALLOWED_ORIGINS` - разрешенные origins для CORS
-
-## Технологии
-
-- **Go 1.26.1**
-- **Chi Router** - легкий и быстрый HTTP роутер
-- **pgx/v5** - PostgreSQL драйвер и connection pool
-- **Zap** - быстрое структурированное логирование
-- **golang-migrate** - управление миграциями БД
-- **bcrypt** - хеширование паролей
-- **UUID** - генерация уникальных идентификаторов
-- **validator** - валидация структур
-
-## Получение API ключа OpenWeather
-
-1. Зарегистрируйтесь на [OpenWeather](https://openweathermap.org/)
-2. Перейдите в раздел [API keys](https://home.openweathermap.org/api_keys)
-3. Создайте новый API ключ
-4. Добавьте его в `.env` файл
 
 ## Лицензия
 
