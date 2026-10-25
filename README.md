@@ -35,7 +35,7 @@ Demo123
 
 - **Go 1.26.1**
 - **Chi Router** - HTTP роутер
-- **pgx/v5** - PostgreSQL драйвер 
+- **pgx/v5** - PostgreSQL драйвер
 - **Zap** - логирование
 - **golang-migrate** - управление миграциями БД
 - **bcrypt** - хеширование паролей
@@ -54,7 +54,8 @@ Demo123
 
 ### Locations
 
-- `GET /api/v1/locations` - получить список добавленных локации
+- `GET /api/v1/locations` - получить список добавленных локаций
+- `GET /api/v1/locations?limit={limit}&offset{offset}` - получить список добавленных локаций с пагинацией
 - `POST /api/v1/locations` - добавить локацию в список
 - `DELETE /api/v1/locations/{id}` - удалить локацию из списка
 
