@@ -51,7 +51,7 @@ func (h *UsersHTTPHandler) SignInUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debug("session created successfully", zap.String("session_id", session.ID.String()))
+	log.Debug("session created successfully")
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:     "session_id",

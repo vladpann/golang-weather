@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -53,6 +54,19 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	return rw.ResponseWriter.Write(b)
 }
 
+var sensitivePathPrefixes = []string{
+	"/api/v1/auth",
+}
+
+func isSensitivePath(path string) bool {
+	for _, p := range sensitivePathPrefixes {
+		if path == p || strings.HasPrefix(path, p+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 func Logger(logger *core_logger.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -67,8 +81,10 @@ func Logger(logger *core_logger.Logger) Middleware {
 
 			ctx := core_logger.ToContext(r.Context(), l)
 
+			sensitive := isSensitivePath(r.URL.Path)
+
 			var requestBody string
-			if r.Body != nil {
+			if !sensitive && r.Body != nil {
 				bodyBytes, err := io.ReadAll(r.Body)
 				if err == nil {
 					requestBody = string(bodyBytes)
@@ -84,6 +100,13 @@ func Logger(logger *core_logger.Logger) Middleware {
 			durationMs := float64(duration.Microseconds()) / 100.0
 
 			reqField := r.Method + " " + r.RequestURI
+			respField := wrappedWriter.body.String()
+
+			if sensitive {
+				reqField += " Body: [REDACTED]"
+				respField = "[REDACTED]"
+			}
+
 			if requestBody != "" {
 				reqField += " Body: " + requestBody
 			}
@@ -91,7 +114,7 @@ func Logger(logger *core_logger.Logger) Middleware {
 			l.Info("HTTP Request",
 				zap.String("time", start.Format(time.RFC3339)),
 				zap.String("req", reqField),
-				zap.String("resp", wrappedWriter.body.String()),
+				zap.String("resp", respField),
 				zap.Int("code", wrappedWriter.statusCode),
 				zap.Float64("duration_ms", durationMs),
 			)
