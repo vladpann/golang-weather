@@ -27,44 +27,36 @@ func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.
 
 	log.Debug("invoke SearchLocation handler")
 
-	// Get city_name from query parameters
 	cityName := r.URL.Query().Get("city_name")
 	if cityName == "" {
 		responseHandler.ErrorResponse(fmt.Errorf("city_name is required"), "city_name parameter is required")
 		return
 	}
 
-	// Check rate limit before making API request
 	if err := h.rateLimiter.Allow(ctx); err != nil {
 		log.Warn("rate limit check failed", zap.Error(err))
 		h.handleRateLimitError(responseHandler, err)
 		return
 	}
 
-	// Use OpenWeather Geocoding API
-	apiUrl := fmt.Sprintf(
-		"%s/geo/1.0/direct?q=%s&limit=5&appid=%s",
-		h.config.APIBaseUrl,
-		url.QueryEscape(cityName),
-		h.config.APIKey,
-	)
+	query := url.Values{}
+	query.Set("q", cityName)
+	query.Set("limit", "5")
+	query.Set("appid", h.config.APIKey)
 
-	log.Debug("calling OpenWeather Geocoding API", zap.String("url", apiUrl), zap.String("city", cityName))
+	apiURL := fmt.Sprintf("%s/geo/1.0/direct?%s", h.config.APIBaseUrl, query.Encode())
 
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodGet,
-		apiUrl,
-		nil,
-	)
+	log.Debug("calling OpenWeather Geocoding API", zap.String("city", cityName))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
-		responseHandler.ErrorResponse(err, "failed to create HTTP request")
+		responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to create HTTP request")
 		return
 	}
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		responseHandler.ErrorResponse(err, "failed to search locations")
+		responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to search locations")
 		return
 	}
 	defer resp.Body.Close()
@@ -73,7 +65,10 @@ func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.
 		log.Debug("OpenWeather API error",
 			zap.Int("status", resp.StatusCode),
 			zap.String("city", cityName))
-		responseHandler.ErrorResponse(fmt.Errorf("OpenWeather API returned status %d", resp.StatusCode), "failed to search locations")
+		responseHandler.ErrorResponse(
+			fmt.Errorf("OpenWeather API returned status %d", resp.StatusCode),
+			"failed to search locations",
+		)
 		return
 	}
 

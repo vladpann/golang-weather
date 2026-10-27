@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 
 	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
@@ -20,16 +21,10 @@ func NewHTTPResponseHandler(
 	log *core_logger.Logger,
 	rw http.ResponseWriter,
 ) *HTTPResponseHandler {
-	return &HTTPResponseHandler{
-		log: log,
-		rw:  rw,
-	}
+	return &HTTPResponseHandler{log: log, rw: rw}
 }
 
-func (h *HTTPResponseHandler) JSONResponse(
-	responseBody any,
-	statusCode int,
-) {
+func (h *HTTPResponseHandler) JSONResponse(responseBody any, statusCode int) {
 	h.rw.Header().Set("Content-Type", "application/json")
 	h.rw.WriteHeader(statusCode)
 
@@ -43,9 +38,9 @@ func (h *HTTPResponseHandler) NoContentResponse() {
 }
 
 func (h *HTTPResponseHandler) HTMLResponse(html []byte) {
+	h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	h.rw.WriteHeader(http.StatusOK)
 
-	h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if _, err := h.rw.Write(html); err != nil {
 		h.log.Error("write HTML HTTP response", zap.Error(err))
 	}
@@ -55,81 +50,60 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 	var (
 		statusCode int
 		logFunc    func(string, ...zap.Field)
+		publicErr  string
 	)
 
 	switch {
 	case errors.Is(err, core_errors.ErrInvalidArgument):
-		statusCode = http.StatusBadRequest
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrInvalidArgument.Error()
 
 	case errors.Is(err, core_errors.ErrNotFound):
-		statusCode = http.StatusNotFound
-		logFunc = h.log.Debug
+		statusCode, logFunc, publicErr = http.StatusNotFound, h.log.Debug, core_errors.ErrNotFound.Error()
 
 	case errors.Is(err, core_errors.ErrConflict):
-		statusCode = http.StatusConflict
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrConflict.Error()
 
 	case errors.Is(err, core_errors.ErrLoginAlreadyExists):
-		statusCode = http.StatusConflict
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLoginAlreadyExists.Error()
 
 	case errors.Is(err, core_errors.ErrLocationAlreadyExists):
-		statusCode = http.StatusConflict
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLocationAlreadyExists.Error()
 
 	case errors.Is(err, core_errors.ErrPasswordDoNotMatch):
-		statusCode = http.StatusBadRequest
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrPasswordDoNotMatch.Error()
 
 	case errors.Is(err, core_errors.ErrInvalidCredentials):
-		statusCode = http.StatusUnauthorized
-		logFunc = h.log.Warn
+		statusCode, logFunc, publicErr = http.StatusUnauthorized, h.log.Warn, core_errors.ErrInvalidCredentials.Error()
 
 	default:
-		statusCode = http.StatusInternalServerError
-		logFunc = h.log.Error
+		statusCode, logFunc, publicErr = http.StatusInternalServerError, h.log.Error, ""
 	}
 
 	logFunc(msg, zap.Error(err))
 
-	h.errorResponse(
-		statusCode,
-		err,
-		msg,
-	)
+	h.errorResponse(statusCode, publicErr, msg)
 }
 
 func (h *HTTPResponseHandler) PanicResponse(p any, msg string) {
-	statusCode := http.StatusInternalServerError
-	err := fmt.Errorf("unexpected panic: %v", p)
-
-	h.rw.WriteHeader(statusCode)
-
-	h.errorResponse(
-		statusCode,
-		err,
+	h.log.Error(
 		msg,
+		zap.String("panic", fmt.Sprint(p)),
+		zap.ByteString("stack", debug.Stack()),
 	)
+
+	h.errorResponse(http.StatusInternalServerError, "", msg)
 }
 
 func (h *HTTPResponseHandler) errorResponse(
 	statusCode int,
-	err error,
+	publicErr string,
 	msg string,
 ) {
-	var errStr string
-	if err != nil {
-		errStr = err.Error()
-	}
-
-	response := ErrorResponse{
-		Error:   errStr,
-		Message: msg,
-	}
-
 	h.JSONResponse(
-		response,
+		ErrorResponse{
+			Error:   publicErr,
+			Message: msg,
+		},
 		statusCode,
 	)
 }
