@@ -10,16 +10,17 @@ import (
 func (r *LocationsRepository) DeleteLocation(
 	ctx context.Context,
 	id int64,
+	userID int64,
 ) error {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
 	query := `
 	DELETE FROM weather.locations
-	WHERE id=$1;
+	WHERE id=$1 AND user_id=$2;
 	`
 
-	cmdTag, err := r.pool.Exec(ctx, query, id)
+	cmdTag, err := r.pool.Exec(ctx, query, id, userID)
 	if err != nil {
 		return fmt.Errorf("exec query: %w", err)
 	}

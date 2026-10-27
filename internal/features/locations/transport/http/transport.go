@@ -36,6 +36,7 @@ type LocationsService interface {
 	DeleteLocation(
 		ctx context.Context,
 		id int64,
+		userID int64,
 	) error
 }
 

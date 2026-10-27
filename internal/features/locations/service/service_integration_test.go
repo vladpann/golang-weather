@@ -446,7 +446,7 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Удаляем локацию
-		err = locationsService.DeleteLocation(ctx, createdLocation.ID)
+		err = locationsService.DeleteLocation(ctx, createdLocation.ID, user.ID)
 
 		// Проверка
 		require.NoError(t, err)
@@ -465,9 +465,12 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 	t.Run("попытка удалить несуществующую локацию возвращает ошибку", func(t *testing.T) {
 		testutil.ClearTables(t, pool)
 
+		user, err := usersService.CreateUser(ctx, "deleteuser", "password123", "password123")
+		require.NoError(t, err)
+
 		// Пытаемся удалить несуществующую локацию
 		nonExistentID := int64(99999)
-		err := locationsService.DeleteLocation(ctx, nonExistentID)
+		err = locationsService.DeleteLocation(ctx, nonExistentID, user.ID)
 
 		// Проверка
 		require.Error(t, err)
@@ -493,7 +496,7 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// user1 удаляет свою локацию
-		err = locationsService.DeleteLocation(ctx, created1.ID)
+		err = locationsService.DeleteLocation(ctx, created1.ID, user1.ID)
 		require.NoError(t, err)
 
 		// Проверяем, что локация user2 осталась
@@ -511,6 +514,16 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		user2Locations, err := locationsRepository.GetLocations(ctx, user2.ID, nil, nil)
 		require.NoError(t, err)
 		assert.Len(t, user2Locations, 1)
+
+		// user1 удаляет локацию user2
+		err = locationsService.DeleteLocation(ctx, created2.ID, user1.ID)
+		require.Error(t, err)
+
+		// Проверяем, что локация user2 осталась
+		retrievedLocation, err = locationsRepository.GetLocation(ctx, created2.ID, user2.ID)
+		require.NoError(t, err)
+		assert.Equal(t, created2.ID, retrievedLocation.ID)
+		assert.Equal(t, user2.ID, retrievedLocation.UserID)
 	})
 
 	t.Run("удаление одной локации из нескольких", func(t *testing.T) {
@@ -533,7 +546,7 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Удаляем средню локацию
-		err = locationsService.DeleteLocation(ctx, created2.ID)
+		err = locationsService.DeleteLocation(ctx, created2.ID, user.ID)
 		require.NoError(t, err)
 
 		// Проверяем, что осталось 2 локации
@@ -601,7 +614,7 @@ func TestLocationsService_CompleteScenario_Integration(t *testing.T) {
 		assert.Equal(t, "Saint Petersburg", retrievedLocation.Name)
 
 		// 7. Удаляем первую локацию
-		err = locationsService.DeleteLocation(ctx, created1.ID)
+		err = locationsService.DeleteLocation(ctx, created1.ID, user.ID)
 		require.NoError(t, err)
 		t.Logf("Локация 1 удалена")
 
