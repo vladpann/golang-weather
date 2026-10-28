@@ -74,7 +74,7 @@ func main() {
 	sessionsConfig := sessions_service.NewConfigMust()
 	sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
 	sessionsWorkerConfig := sessions_worker.NewConfigMust()
-	sessionsWorkerCleaner := sessions_worker.NewSessionCleaner(sessionsWorkerConfig, sessionsService, logger)
+	sessionsWorkerCleaner := sessions_worker.NewSessionsCleaner(sessionsWorkerConfig, sessionsService, logger)
 
 	authMiddleware := core_http_middleware.Auth(sessionsService)
 	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(
@@ -92,7 +92,6 @@ func main() {
 	logger.Debug("initializing feature", zap.String("feature", "openweather"))
 	openWeatherConfig := openweather_service.NewConfigMust()
 
-	// Initialize rate limiter
 	rateLimiterConfig := ratelimiter.Config{
 		RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
 		QueueSize:         openWeatherConfig.QueueSize,

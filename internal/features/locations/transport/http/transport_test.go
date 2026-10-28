@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	sessions_worker "github.com/vladpann/backend/golang-weather/internal/features/sessions/worker"
 	"go.uber.org/zap"
 
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
@@ -46,16 +47,18 @@ func setupLocationsTestEnv(t *testing.T) *locationsTestEnv {
 	usersRepository := users_repository_postgres.NewUsersRepository(pool)
 	passwordHasher := users_service.NewPasswordHasher()
 	usersService := users_service.NewUsersService(usersRepository, passwordHasher)
+	usersTransportHTTPConfig := users_transport_http.NewConfigMust()
 
 	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
 	sessionsService := sessions_service.NewSessionsService(
-		sessionsRepository,
 		sessions_service.Config{TTL: 24 * time.Hour},
+		sessionsRepository,
 	)
+	sessions_worker.NewConfigMust()
 
 	authMiddleware := core_http_middleware.Auth(sessionsService)
-
 	usersHandler := users_transport_http.NewUsersHTTPHandler(
+		usersTransportHTTPConfig,
 		usersService,
 		sessionsService,
 		func(next http.Handler) http.Handler { return next },

@@ -42,6 +42,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	usersRepository := users_repository_postgres.NewUsersRepository(pool)
 	passwordHasher := users_service.NewPasswordHasher()
 	usersService := users_service.NewUsersService(usersRepository, passwordHasher)
+	usersTransportHTTPConfig := users_transport_http.NewConfigMust()
 
 	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
 	sessionsConfig := sessions_service.Config{TTL: 24 * time.Hour}
@@ -51,6 +52,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	noopAuth := func(next http.Handler) http.Handler { return next }
 
 	handler := users_transport_http.NewUsersHTTPHandler(
+		usersTransportHTTPConfig,
 		usersService,
 		sessionsService,
 		noopAuth,

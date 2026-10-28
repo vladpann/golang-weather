@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Cleanup_Inverval time.Duration `envconfig:"CLEANUP_INTERVAL" default:"10h"`
+	CleanupInterval time.Duration `envconfig:"CLEANUP_INTERVAL" default:"10h"`
 }
 
 func NewConfig() (Config, error) {

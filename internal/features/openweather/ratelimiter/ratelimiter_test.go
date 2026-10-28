@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 
 	"github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
@@ -25,7 +26,7 @@ func newTestRateLimiter(t *testing.T, requestsPerMin, queueSize int) *ratelimite
 		QueueSize:         queueSize,
 	}
 
-	rl, err := ratelimiter.NewRateLimiter(config, logger)
+	rl, err := ratelimiter.NewRateLimiter(config, &core_logger.Logger{Logger: logger})
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
@@ -235,7 +236,7 @@ func TestRateLimiter_Close(t *testing.T) {
 		QueueSize:         10,
 	}
 
-	rl, err := ratelimiter.NewRateLimiter(config, logger)
+	rl, err := ratelimiter.NewRateLimiter(config, &core_logger.Logger{Logger: logger})
 	require.NoError(t, err)
 
 	// Make a request to ensure it's working
@@ -306,7 +307,7 @@ func TestRateLimiter_ConfigValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rl, err := ratelimiter.NewRateLimiter(tt.config, logger)
+			rl, err := ratelimiter.NewRateLimiter(tt.config, &core_logger.Logger{Logger: logger})
 			if tt.wantError {
 				assert.Error(t, err)
 				assert.Nil(t, rl)

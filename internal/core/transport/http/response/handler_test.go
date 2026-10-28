@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
@@ -23,11 +25,19 @@ func newTestLogger() *core_logger.Logger {
 	}
 }
 
-// TestErrorResponse_WithError тестирует ErrorResponse с реальной ошибкой
+// newObservedLogger возвращает логгер и доступ к записанным логам
+func newObservedLogger() (*core_logger.Logger, *observer.ObservedLogs) {
+	core, logs := observer.New(zapcore.DebugLevel)
+	return &core_logger.Logger{
+		Logger: zap.New(core),
+	}, logs
+}
+
+// TestErrorResponse_WithError: внутренняя ошибка логируется, но не уходит клиенту
 func TestErrorResponse_WithError(t *testing.T) {
 	// Arrange
 	rr := httptest.NewRecorder()
-	log := newTestLogger()
+	log, logs := newObservedLogger()
 	handler := core_http_response.NewHTTPResponseHandler(log, rr)
 
 	testErr := errors.New("test error")
@@ -41,11 +51,16 @@ func TestErrorResponse_WithError(t *testing.T) {
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
 	var response core_http_response.ErrorResponse
-	err := json.NewDecoder(rr.Body).Decode(&response)
-	require.NoError(t, err)
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&response))
 
-	assert.Equal(t, "test error", response.Error)
+	// Клиент не должен видеть текст внутренней ошибки
+	assert.Empty(t, response.Error)
+	assert.NotContains(t, rr.Body.String(), "test error")
 	assert.Equal(t, testMsg, response.Message)
+
+	// Но в лог ошибка должна попасть
+	require.GreaterOrEqual(t, logs.Len(), 1)
+	assert.Contains(t, logs.All()[0].ContextMap()["error"], "test error")
 }
 
 // TestErrorResponse_WithNilError тестирует ErrorResponse с nil ошибкой (регрессионный тест для бага)
@@ -172,28 +187,29 @@ func TestHTMLResponse(t *testing.T) {
 	assert.Equal(t, string(htmlContent), rr.Body.String())
 }
 
-// TestPanicResponse тестирует PanicResponse
 func TestPanicResponse(t *testing.T) {
-	// Arrange
 	rr := httptest.NewRecorder()
-	log := newTestLogger()
+	log, logs := newObservedLogger()
 	handler := core_http_response.NewHTTPResponseHandler(log, rr)
 
 	panicValue := "something went terribly wrong"
 	testMsg := "Unexpected panic occurred"
 
-	// Act
 	handler.PanicResponse(panicValue, testMsg)
 
-	// Assert
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	assert.Equal(t, "application/json", rr.Header().Get("Content-Type"))
 
 	var response core_http_response.ErrorResponse
-	err := json.NewDecoder(rr.Body).Decode(&response)
-	require.NoError(t, err)
+	require.NoError(t, json.NewDecoder(rr.Body).Decode(&response))
 
-	assert.Contains(t, response.Error, "unexpected panic")
-	assert.Contains(t, response.Error, panicValue)
+	assert.Empty(t, response.Error)
+	assert.NotContains(t, rr.Body.String(), panicValue)
 	assert.Equal(t, testMsg, response.Message)
+
+	require.Equal(t, 1, logs.Len())
+	entry := logs.All()[0]
+	assert.Equal(t, testMsg, entry.Message)
+	assert.Equal(t, panicValue, entry.ContextMap()["panic"])
+	assert.NotEmpty(t, entry.ContextMap()["stack"])
 }

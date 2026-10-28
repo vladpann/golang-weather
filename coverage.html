@@ -1,0 +1,4288 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>weather: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/vladpann/backend/golang-weather/cmd/weather/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/vladpann/backend/golang-weather/internal/core/config/config.go (0.0%)</option>
+				
+				<option value="file2">github.com/vladpann/backend/golang-weather/internal/core/domain/location.go (0.0%)</option>
+				
+				<option value="file3">github.com/vladpann/backend/golang-weather/internal/core/domain/session.go (0.0%)</option>
+				
+				<option value="file4">github.com/vladpann/backend/golang-weather/internal/core/domain/user.go (0.0%)</option>
+				
+				<option value="file5">github.com/vladpann/backend/golang-weather/internal/core/logger/config.go (0.0%)</option>
+				
+				<option value="file6">github.com/vladpann/backend/golang-weather/internal/core/logger/logger.go (0.0%)</option>
+				
+				<option value="file7">github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx/adapters.go (0.0%)</option>
+				
+				<option value="file8">github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx/config.go (0.0%)</option>
+				
+				<option value="file9">github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx/pool.go (0.0%)</option>
+				
+				<option value="file10">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/auth.go (0.0%)</option>
+				
+				<option value="file11">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/cors.go (0.0%)</option>
+				
+				<option value="file12">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/logger.go (0.0%)</option>
+				
+				<option value="file13">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/middleware.go (0.0%)</option>
+				
+				<option value="file14">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/panic.go (0.0%)</option>
+				
+				<option value="file15">github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware/trace.go (0.0%)</option>
+				
+				<option value="file16">github.com/vladpann/backend/golang-weather/internal/core/transport/http/request/decode.go (0.0%)</option>
+				
+				<option value="file17">github.com/vladpann/backend/golang-weather/internal/core/transport/http/request/path_values.go (0.0%)</option>
+				
+				<option value="file18">github.com/vladpann/backend/golang-weather/internal/core/transport/http/request/query_params.go (0.0%)</option>
+				
+				<option value="file19">github.com/vladpann/backend/golang-weather/internal/core/transport/http/response/handler.go (64.0%)</option>
+				
+				<option value="file20">github.com/vladpann/backend/golang-weather/internal/core/transport/http/response/writer.go (0.0%)</option>
+				
+				<option value="file21">github.com/vladpann/backend/golang-weather/internal/core/transport/http/server/config.go (0.0%)</option>
+				
+				<option value="file22">github.com/vladpann/backend/golang-weather/internal/core/transport/http/server/router.go (0.0%)</option>
+				
+				<option value="file23">github.com/vladpann/backend/golang-weather/internal/core/transport/http/server/server.go (0.0%)</option>
+				
+				<option value="file24">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/create_location.go (0.0%)</option>
+				
+				<option value="file25">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/delete_location.go (0.0%)</option>
+				
+				<option value="file26">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/get_location.go (0.0%)</option>
+				
+				<option value="file27">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/get_locations.go (0.0%)</option>
+				
+				<option value="file28">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/models.go (0.0%)</option>
+				
+				<option value="file29">github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres/repository.go (0.0%)</option>
+				
+				<option value="file30">github.com/vladpann/backend/golang-weather/internal/features/locations/service/create_location.go (100.0%)</option>
+				
+				<option value="file31">github.com/vladpann/backend/golang-weather/internal/features/locations/service/delete_location.go (100.0%)</option>
+				
+				<option value="file32">github.com/vladpann/backend/golang-weather/internal/features/locations/service/get_location.go (100.0%)</option>
+				
+				<option value="file33">github.com/vladpann/backend/golang-weather/internal/features/locations/service/get_locations.go (87.5%)</option>
+				
+				<option value="file34">github.com/vladpann/backend/golang-weather/internal/features/locations/service/service.go (100.0%)</option>
+				
+				<option value="file35">github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http/create_location.go (0.0%)</option>
+				
+				<option value="file36">github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http/delete_location.go (76.5%)</option>
+				
+				<option value="file37">github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http/dto_common.go (0.0%)</option>
+				
+				<option value="file38">github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http/get_locations.go (0.0%)</option>
+				
+				<option value="file39">github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http/transport.go (100.0%)</option>
+				
+				<option value="file40">github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter/config.go (83.3%)</option>
+				
+				<option value="file41">github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter/ratelimiter.go (89.2%)</option>
+				
+				<option value="file42">github.com/vladpann/backend/golang-weather/internal/features/openweather/service/config.go (0.0%)</option>
+				
+				<option value="file43">github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http/errors.go (75.0%)</option>
+				
+				<option value="file44">github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http/get_openweather.go (94.9%)</option>
+				
+				<option value="file45">github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http/rate_limit_errors.go (40.0%)</option>
+				
+				<option value="file46">github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http/search_location.go (94.4%)</option>
+				
+				<option value="file47">github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http/transport.go (100.0%)</option>
+				
+				<option value="file48">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/create_session.go (0.0%)</option>
+				
+				<option value="file49">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/delete_expired_session.go (0.0%)</option>
+				
+				<option value="file50">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/delete_session.go (0.0%)</option>
+				
+				<option value="file51">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/get_session.go (0.0%)</option>
+				
+				<option value="file52">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/models.go (0.0%)</option>
+				
+				<option value="file53">github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres/repository.go (0.0%)</option>
+				
+				<option value="file54">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/config.go (100.0%)</option>
+				
+				<option value="file55">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/create_session.go (100.0%)</option>
+				
+				<option value="file56">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/delete_session.go (0.0%)</option>
+				
+				<option value="file57">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/detete_expired_session.go (0.0%)</option>
+				
+				<option value="file58">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/get_session.go (100.0%)</option>
+				
+				<option value="file59">github.com/vladpann/backend/golang-weather/internal/features/sessions/service/service.go (100.0%)</option>
+				
+				<option value="file60">github.com/vladpann/backend/golang-weather/internal/features/sessions/worker/cleaner.go (100.0%)</option>
+				
+				<option value="file61">github.com/vladpann/backend/golang-weather/internal/features/sessions/worker/config.go (0.0%)</option>
+				
+				<option value="file62">github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres/create_user.go (0.0%)</option>
+				
+				<option value="file63">github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres/get_user.go (0.0%)</option>
+				
+				<option value="file64">github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres/get_user_by_id.go (0.0%)</option>
+				
+				<option value="file65">github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres/models.go (0.0%)</option>
+				
+				<option value="file66">github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres/repository.go (0.0%)</option>
+				
+				<option value="file67">github.com/vladpann/backend/golang-weather/internal/features/users/service/create_user.go (90.9%)</option>
+				
+				<option value="file68">github.com/vladpann/backend/golang-weather/internal/features/users/service/get_user.go (100.0%)</option>
+				
+				<option value="file69">github.com/vladpann/backend/golang-weather/internal/features/users/service/get_user_by_id.go (0.0%)</option>
+				
+				<option value="file70">github.com/vladpann/backend/golang-weather/internal/features/users/service/password_hasher.go (81.8%)</option>
+				
+				<option value="file71">github.com/vladpann/backend/golang-weather/internal/features/users/service/service.go (100.0%)</option>
+				
+				<option value="file72">github.com/vladpann/backend/golang-weather/internal/features/users/service/validators.go (88.9%)</option>
+				
+				<option value="file73">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/check_auth.go (0.0%)</option>
+				
+				<option value="file74">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/config.go (66.7%)</option>
+				
+				<option value="file75">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/create_user.go (100.0%)</option>
+				
+				<option value="file76">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/dto_common.go (100.0%)</option>
+				
+				<option value="file77">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/sign_in_user.go (88.5%)</option>
+				
+				<option value="file78">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/sign_out_user.go (0.0%)</option>
+				
+				<option value="file79">github.com/vladpann/backend/golang-weather/internal/features/users/transport/http/transport.go (100.0%)</option>
+				
+				<option value="file80">github.com/vladpann/backend/golang-weather/internal/testutil/testdb.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/joho/godotenv"
+        core_config "github.com/vladpann/backend/golang-weather/internal/core/config"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
+        locations_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres"
+        locations_service "github.com/vladpann/backend/golang-weather/internal/features/locations/service"
+        locations_transport_http "github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http"
+        "github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
+        openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
+        openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
+        sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
+        sessions_service "github.com/vladpann/backend/golang-weather/internal/features/sessions/service"
+        sessions_worker "github.com/vladpann/backend/golang-weather/internal/features/sessions/worker"
+        users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
+        users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
+        users_transport_http "github.com/vladpann/backend/golang-weather/internal/features/users/transport/http"
+        "go.uber.org/zap"
+        "golang.org/x/sync/errgroup"
+)
+
+func main() {
+        <span class="cov0" title="0">cfg := core_config.NewConfigMust()
+        time.Local = cfg.TimeZone
+</span>
+        <span class="cov0" title="0">ctx, cancel := signal.NotifyContext(
+                context.Background(),
+                syscall.SIGINT, syscall.SIGTERM,
+        )
+        defer cancel()
+</span>
+        <span class="cov0" title="0">if err := godotenv.Load(); err != nil </span>{
+                <span class="cov0" title="0">fmt.Println("failed to init env variables:", err)
+</span>        }
+
+        <span class="cov0" title="0">logger, err := core_logger.NewLogger(core_logger.NewConfigMust())
+        if err != nil </span>{
+                <span class="cov0" title="0">fmt.Println("failed to init application logger:", err)
+                os.Exit(1)
+</span>        }
+        <span class="cov0" title="0">defer logger.Close()
+</span>
+        <span class="cov0" title="0">logger.Debug("application time zone", zap.Any("zone", time.Local))
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing postgres connection pool")
+        pool, err := core_pgx_pool.NewPool(
+                ctx,
+                core_pgx_pool.NewConfigMust(),
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">logger.Fatal("failed to init postgres connection pool", zap.Error(err))
+</span>        }
+        <span class="cov0" title="0">defer pool.Close()
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing feature", zap.String("feature", "users"))
+        usersRepository := users_repository_postgres.NewUsersRepository(pool)
+        passwordHasher := users_service.NewPasswordHasher()
+        usersService := users_service.NewUsersService(usersRepository, passwordHasher)
+        usersTransportHTTPConfig := users_transport_http.NewConfigMust()
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing feature", zap.String("feature", "sessions"))
+        sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
+        sessionsConfig := sessions_service.NewConfigMust()
+        sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
+        sessionsWorkerConfig := sessions_worker.NewConfigMust()
+        sessionsWorkerCleaner := sessions_worker.NewSessionsCleaner(sessionsWorkerConfig, sessionsService, logger)
+</span>
+        <span class="cov0" title="0">authMiddleware := core_http_middleware.Auth(sessionsService)
+        usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(
+                usersTransportHTTPConfig,
+                usersService,
+                sessionsService,
+                authMiddleware,
+        )
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing feature", zap.String("feature", "locations"))
+        locationsRepository := locations_repository_postgres.NewLocationsRepository(pool)
+        locationsService := locations_service.NewLocationsService(locationsRepository)
+        locationsTransportHTTP := locations_transport_http.NewLocationsHTTPHandler(locationsService, authMiddleware)
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing feature", zap.String("feature", "openweather"))
+        openWeatherConfig := openweather_service.NewConfigMust()
+</span>
+        <span class="cov0" title="0">rateLimiterConfig := ratelimiter.Config{
+                RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
+                QueueSize:         openWeatherConfig.QueueSize,
+</span>        }
+        <span class="cov0" title="0">rateLimiter, err := ratelimiter.NewRateLimiter(rateLimiterConfig, logger)
+        if err != nil </span>{
+                <span class="cov0" title="0">logger.Fatal("failed to init rate limiter", zap.Error(err))
+</span>        }
+        <span class="cov0" title="0">defer rateLimiter.Close()
+</span>
+        <span class="cov0" title="0">openWeatherTransportHTTP := openweather_transport_http.NewOpenWeatherHTTPHandler(
+                locationsService,
+                openWeatherConfig,
+                authMiddleware,
+                rateLimiter,
+        )
+</span>
+        <span class="cov0" title="0">logger.Debug("initializing HTTP server")
+        httpConfig := core_http_server.NewConfigMust()
+        httpServer := core_http_server.NewHTTPServer(
+                httpConfig,
+                logger,
+                core_http_middleware.CORS(httpConfig.AllowedOrigins),
+                core_http_middleware.RequestID(),
+                core_http_middleware.Logger(logger),
+                core_http_middleware.Trace(),
+                core_http_middleware.Panic(),
+        )
+</span>
+        <span class="cov0" title="0">apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
+        apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
+        apiVersionRouter.RegisterRoutes(locationsTransportHTTP.Routes()...)
+        apiVersionRouter.RegisterRoutes(openWeatherTransportHTTP.Routes()...)
+</span>
+        <span class="cov0" title="0">httpServer.RegisterAPIRouters(
+                apiVersionRouter,
+        )
+</span>
+        <span class="cov0" title="0">egroup, ectx := errgroup.WithContext(ctx)
+</span>
+        <span class="cov0" title="0">egroup.Go(func() error </span>{ <span class="cov0" title="0">return httpServer.Run(ectx) }</span>)
+        <span class="cov0" title="0">egroup.Go(func() error </span>{ <span class="cov0" title="0">return sessionsWorkerCleaner.Run(ectx) }</span>)
+
+        <span class="cov0" title="0">if err := egroup.Wait(); err != nil </span>{
+                <span class="cov0" title="0">logger.Error("app stopped with error", zap.Error(err))
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package core_config
+
+import (
+        "fmt"
+        "os"
+        "time"
+)
+
+type Config struct {
+        TimeZone *time.Location
+}
+
+func NewConfig() (*Config, error) {
+        /*
+                Default: UTC
+                - Europe/Moscow
+                - Europe/Berlin
+                - Other...
+        */
+
+        <span class="cov0" title="0">tz := os.Getenv("TIME_ZONE")
+        if tz == "" </span>{
+                <span class="cov0" title="0">tz = "UTC"
+</span>        }
+
+        <span class="cov0" title="0">zone, err := time.LoadLocation(tz)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("load time zone: %s: %w", tz, err)
+</span>        }
+
+        <span class="cov0" title="0">return &amp;Config{
+                TimeZone: zone,
+        }, nil</span>
+}
+
+func NewConfigMust() *Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get core config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package domain
+
+type Location struct {
+        ID        int64
+        UserID    int64
+        Name      string
+        Latitude  float64
+        Longitude float64
+}
+
+func NewLocation(
+        id int64,
+        userID int64,
+        name string,
+        latitude float64,
+        longitude float64,
+) Location {
+        <span class="cov0" title="0">return Location{
+                ID:        id,
+                UserID:    userID,
+                Name:      name,
+                Latitude:  latitude,
+                Longitude: longitude,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package domain
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+)
+
+type Session struct {
+        ID        uuid.UUID
+        UserID    int64
+        ExpiresAt time.Time
+}
+
+func NewSession(
+        id uuid.UUID,
+        userID int64,
+        expiresAt time.Time,
+) Session {
+        <span class="cov0" title="0">return Session{
+                ID:        id,
+                UserID:    userID,
+                ExpiresAt: expiresAt,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package domain
+
+type User struct {
+        ID    int64
+        Login string
+}
+
+func NewUser(
+        id int64,
+        login string,
+) User {
+        <span class="cov0" title="0">return User{
+                ID:    id,
+                Login: login,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package core_logger
+
+import (
+        "fmt"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        Level  string `envconfig:"LEVEL" default:"DEBUG"`
+        Folder string `envconfig:"FOLDER" required:"true"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov0" title="0">var config Config
+</span>
+        <span class="cov0" title="0">if err := envconfig.Process("LOGGER", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get Logger config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package core_logger
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "path/filepath"
+        "time"
+
+        "go.uber.org/zap"
+        "go.uber.org/zap/zapcore"
+)
+
+type loggerContextKey struct{}
+
+var (
+        key = loggerContextKey{}
+)
+
+type Logger struct {
+        *zap.Logger
+
+        file *os.File
+}
+
+func ToContext(ctx context.Context, log *Logger) context.Context {
+        <span class="cov0" title="0">return context.WithValue(
+                ctx,
+                key,
+                log,
+        )
+</span>}
+
+func FromContext(ctx context.Context) *Logger {
+        <span class="cov0" title="0">log, ok := ctx.Value(key).(*Logger)
+        if !ok </span>{
+                <span class="cov0" title="0">panic("no logger in context")</span>
+        }
+
+        <span class="cov0" title="0">return log</span>
+}
+
+func NewLogger(config Config) (*Logger, error) {
+        <span class="cov0" title="0">zapLvl := zap.NewAtomicLevel()
+        if err := zapLvl.UnmarshalText([]byte(config.Level)); err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("unmarshal log level: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">if err := os.MkdirAll(config.Folder, 0755); err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("mkfir log folder: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">timestamp := time.Now().UTC().Format("2006-01-02T15-04-05.000000")
+        logFilePath := filepath.Join(
+                config.Folder,
+                fmt.Sprintf("%s.log", timestamp),
+        )
+</span>
+        <span class="cov0" title="0">logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY, 0644)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("open log file: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">zapConfig := zap.NewDevelopmentEncoderConfig()
+        zapConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02T15:04:05.000000")
+</span>
+        <span class="cov0" title="0">zapEncoder := zapcore.NewConsoleEncoder(zapConfig)
+</span>
+        <span class="cov0" title="0">core := zapcore.NewTee(
+                zapcore.NewCore(zapEncoder, zapcore.AddSync(os.Stdout), zapLvl),
+                zapcore.NewCore(zapEncoder, zapcore.AddSync(logFile), zapLvl),
+        )
+</span>
+        <span class="cov0" title="0">zapLogger := zap.New(core, zap.AddCaller())
+</span>
+        <span class="cov0" title="0">return &amp;Logger{
+                Logger: zapLogger,
+                file:   logFile,
+        }, nil</span>
+}
+
+func (l *Logger) With(field ...zap.Field) *Logger {
+        <span class="cov0" title="0">return &amp;Logger{
+                Logger: l.Logger.With(field...),
+                file:   l.file,
+</span>        }
+}
+
+func (l *Logger) Close() {
+        <span class="cov0" title="0">if err := l.file.Close(); err != nil </span>{
+                <span class="cov0" title="0">fmt.Println("failed to close application logger: ", err)
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package core_pgx_pool
+
+import (
+        "errors"
+        "fmt"
+
+        "github.com/jackc/pgx/v5"
+        "github.com/jackc/pgx/v5/pgconn"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+type pgxRows struct {
+        pgx.Rows
+}
+
+type pgxRow struct {
+        pgx.Row
+}
+
+func (r pgxRow) Scan(dest ...any) error {
+        <span class="cov0" title="0">err := r.Row.Scan(dest...)
+        if err != nil </span>{
+                <span class="cov0" title="0">return mapErrors(err)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+type pgxCommandTag struct {
+        pgconn.CommandTag
+}
+
+func mapErrors(err error) error {
+        <span class="cov0" title="0">const (
+                pgxViolatesForeignKeyErrorCode = "23503"
+                pgxUniqueViolationErrorCode    = "23505"
+        )
+</span>
+        <span class="cov0" title="0">if errors.Is(err, pgx.ErrNoRows) </span>{
+                <span class="cov0" title="0">return core_postgres_pool.ErrNoRows
+</span>
+        }
+
+        <span class="cov0" title="0">var pgErr *pgconn.PgError
+        if errors.As(err, &amp;pgErr) </span>{
+                <span class="cov0" title="0">switch pgErr.Code </span>{
+                case pgxViolatesForeignKeyErrorCode:
+                        <span class="cov0" title="0">return fmt.Errorf(
+                                "%v: %w",
+                                err,
+                                core_postgres_pool.ErrViolatesForeignKey,
+                        )</span>
+
+                case pgxUniqueViolationErrorCode:
+                        <span class="cov0" title="0">return fmt.Errorf(
+                                "%v: %w",
+                                err,
+                                core_postgres_pool.ErrUniqueViolation,
+                        )</span>
+                }
+        }
+
+        <span class="cov0" title="0">return fmt.Errorf(
+                "%v: %w",
+                err,
+                core_postgres_pool.ErrUnknown,
+        )</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package core_pgx_pool
+
+import (
+        "fmt"
+        "time"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        Host     string        `envconfig:"HOST" required:"true"`
+        Port     string        `envconfig:"PORT" default:"5432"`
+        User     string        `envconfig:"USER" required:"true"`
+        Password string        `envconfig:"PASSWORD" required:"true"`
+        Database string        `envconfig:"DB" required:"true"`
+        Timeout  time.Duration `envconfig:"TIMEOUT" required:"true"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov0" title="0">var config Config
+</span>
+        <span class="cov0" title="0">if err := envconfig.Process("POSTGRES", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get Postgres connection pool config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package core_pgx_pool
+
+import (
+        "context"
+        "fmt"
+        "time"
+
+        "github.com/jackc/pgx/v5/pgxpool"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+type Pool struct {
+        *pgxpool.Pool
+        opTimeout time.Duration
+}
+
+func NewPool(
+        ctx context.Context,
+        config Config,
+) (*Pool, error) {
+        <span class="cov0" title="0">connectionString := fmt.Sprintf(
+                "postgres://%s:%s@%s:%s/%s?sslmode=disable",
+                config.User,
+                config.Password,
+                config.Host,
+                config.Port,
+                config.Database,
+        )
+</span>
+        <span class="cov0" title="0">pgxconfig, err := pgxpool.ParseConfig(connectionString)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("parse pgxconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">pool, err := pgxpool.NewWithConfig(ctx, pgxconfig)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("create pgxpool: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">if err := pool.Ping(ctx); err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("pgxpool ping: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return &amp;Pool{
+                Pool:      pool,
+                opTimeout: config.Timeout,
+        }, nil</span>
+}
+
+func (p *Pool) Query(
+        ctx context.Context,
+        sql string,
+        args ...any,
+) (core_postgres_pool.Rows, error) {
+        <span class="cov0" title="0">rows, err := p.Pool.Query(ctx, sql, args...)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, err
+</span>        }
+
+        <span class="cov0" title="0">return pgxRows{rows}, nil</span>
+}
+
+func (p *Pool) QueryRow(
+        ctx context.Context,
+        sql string,
+        args ...any,
+) core_postgres_pool.Row {
+        <span class="cov0" title="0">row := p.Pool.QueryRow(ctx, sql, args...)
+</span>
+        <span class="cov0" title="0">return pgxRow{row}
+</span>}
+
+func (p *Pool) Exec(
+        ctx context.Context,
+        sql string,
+        arguments ...any,
+) (core_postgres_pool.CommandTag, error) {
+        <span class="cov0" title="0">tag, err := p.Pool.Exec(ctx, sql, arguments...)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, err
+</span>        }
+
+        <span class="cov0" title="0">return pgxCommandTag{tag}, nil</span>
+}
+
+func (p *Pool) OpTimeout() time.Duration {
+        <span class="cov0" title="0">return p.opTimeout
+</span>}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package core_http_middleware
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        "go.uber.org/zap"
+)
+
+type contextKey string
+
+const (
+        UserIDContextKey    contextKey = "userID"
+        SessionIDContextKey contextKey = "sessionID"
+)
+
+type SessionsService interface {
+        GetSession(
+                ctx context.Context,
+                sessionID uuid.UUID,
+        ) (domain.Session, error)
+}
+
+func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">ctx := r.Context()
+                        log := core_logger.FromContext(ctx)
+</span>
+                        <span class="cov0" title="0">cookie, err := r.Cookie("session_id")
+                        if err != nil </span>{
+                                <span class="cov0" title="0">log.Debug("no session cookie found")
+                                http.Error(w, "Unauthorized", http.StatusUnauthorized)
+                                return
+</span>                        }
+
+                        <span class="cov0" title="0">sessionID, err := uuid.Parse(cookie.Value)
+                        if err != nil </span>{
+                                <span class="cov0" title="0">log.Debug("invalid session ID format")
+                                http.Error(w, "Invalid session", http.StatusUnauthorized)
+                                return
+</span>                        }
+
+                        <span class="cov0" title="0">session, err := sessionsService.GetSession(ctx, sessionID)
+                        if err != nil </span>{
+                                <span class="cov0" title="0">log.Debug("session not found or expired", zap.Error(err))
+                                http.Error(w, "Session not found or expired", http.StatusUnauthorized)
+                                return
+</span>                        }
+
+                        <span class="cov0" title="0">ctx = context.WithValue(ctx, UserIDContextKey, session.UserID)
+                        ctx = context.WithValue(ctx, SessionIDContextKey, sessionID)
+</span>
+                        <span class="cov0" title="0">next.ServeHTTP(w, r.WithContext(ctx))</span>
+                })
+        }
+}
+
+func GetUserIDFromContext(ctx context.Context) (int64, bool) {
+        <span class="cov0" title="0">userID, ok := ctx.Value(UserIDContextKey).(int64)
+        return userID, ok
+</span>}
+
+func GetSessionIDFromContext(ctx context.Context) (uuid.UUID, bool) {
+        <span class="cov0" title="0">sessionID, ok := ctx.Value(SessionIDContextKey).(uuid.UUID)
+        return sessionID, ok
+</span>}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package core_http_middleware
+
+import "net/http"
+
+func CORS(allowedOriginsList []string) Middleware {
+        <span class="cov0" title="0">allowedOrigins := make(map[string]struct{})
+        for _, origin := range allowedOriginsList </span>{
+                <span class="cov0" title="0">allowedOrigins[origin] = struct{}{}
+</span>        }
+
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">origin := r.Header.Get("Origin")
+</span>
+                        <span class="cov0" title="0">if _, ok := allowedOrigins[origin]; ok </span>{
+                                <span class="cov0" title="0">w.Header().Set("Access-Control-Allow-Origin", origin)
+                                w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+                                w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                                w.Header().Set("Access-Control-Allow-Credentials", "true")
+</span>                        }
+
+                        <span class="cov0" title="0">if r.Method == http.MethodOptions </span>{
+                                <span class="cov0" title="0">w.WriteHeader(http.StatusOK)
+                                return
+</span>                        }
+
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package core_http_middleware
+
+import (
+        "bytes"
+        "io"
+        "net/http"
+        "strings"
+        "time"
+
+        "github.com/google/uuid"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        "go.uber.org/zap"
+)
+
+const requestIDHeader = "X-Request-ID"
+
+func RequestID() Middleware {
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">requestID := r.Header.Get(requestIDHeader)
+                        if requestID == "" </span>{
+                                <span class="cov0" title="0">requestID = uuid.NewString()
+</span>                        }
+
+                        <span class="cov0" title="0">r.Header.Set(requestIDHeader, requestID)
+                        w.Header().Set(requestIDHeader, requestID)
+</span>
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+
+type responseWriter struct {
+        http.ResponseWriter
+        statusCode int
+        body       *bytes.Buffer
+}
+
+func newResponseWriter(w http.ResponseWriter) *responseWriter {
+        <span class="cov0" title="0">return &amp;responseWriter{
+                ResponseWriter: w,
+                statusCode:     http.StatusOK,
+                body:           &amp;bytes.Buffer{},
+</span>        }
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+        <span class="cov0" title="0">rw.statusCode = code
+        rw.ResponseWriter.WriteHeader(code)
+</span>}
+
+func (rw *responseWriter) Write(b []byte) (int, error) {
+        <span class="cov0" title="0">rw.body.Write(b)
+        return rw.ResponseWriter.Write(b)
+</span>}
+
+var sensitivePathPrefixes = []string{
+        "/api/v1/auth",
+}
+
+func isSensitivePath(path string) bool {
+        <span class="cov0" title="0">for _, p := range sensitivePathPrefixes </span>{
+                <span class="cov0" title="0">if path == p || strings.HasPrefix(path, p+"/") </span>{
+                        <span class="cov0" title="0">return true
+</span>                }
+        }
+        <span class="cov0" title="0">return false</span>
+}
+
+func Logger(logger *core_logger.Logger) Middleware {
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">start := time.Now()
+</span>
+                        <span class="cov0" title="0">requestID := r.Header.Get(requestIDHeader)
+</span>
+                        <span class="cov0" title="0">l := logger.With(
+                                zap.String("request_id", requestID),
+                                zap.String("url", r.URL.String()),
+                        )
+</span>
+                        <span class="cov0" title="0">ctx := core_logger.ToContext(r.Context(), l)
+</span>
+                        <span class="cov0" title="0">sensitive := isSensitivePath(r.URL.Path)
+</span>
+                        <span class="cov0" title="0">var requestBody string
+                        if !sensitive &amp;&amp; r.Body != nil </span>{
+                                <span class="cov0" title="0">bodyBytes, err := io.ReadAll(r.Body)
+                                if err == nil </span>{
+                                        <span class="cov0" title="0">requestBody = string(bodyBytes)
+                                        r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+</span>                                }
+                        }
+
+                        <span class="cov0" title="0">wrappedWriter := newResponseWriter(w)
+</span>
+                        <span class="cov0" title="0">next.ServeHTTP(wrappedWriter, r.WithContext(ctx))
+</span>
+                        <span class="cov0" title="0">duration := time.Since(start)
+                        durationMs := float64(duration.Microseconds()) / 100.0
+</span>
+                        <span class="cov0" title="0">reqField := r.Method + " " + r.RequestURI
+                        respField := wrappedWriter.body.String()
+</span>
+                        <span class="cov0" title="0">if sensitive </span>{
+                                <span class="cov0" title="0">reqField += " Body: [REDACTED]"
+                                respField = "[REDACTED]"
+</span>                        }
+
+                        <span class="cov0" title="0">if requestBody != "" </span>{
+                                <span class="cov0" title="0">reqField += " Body: " + requestBody
+</span>                        }
+
+                        <span class="cov0" title="0">l.Info("HTTP Request",
+                                zap.String("time", start.Format(time.RFC3339)),
+                                zap.String("req", reqField),
+                                zap.String("resp", respField),
+                                zap.Int("code", wrappedWriter.statusCode),
+                                zap.Float64("duration_ms", durationMs),
+                        )</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package core_http_middleware
+
+import "net/http"
+
+type Middleware func(http.Handler) http.Handler
+
+func ChainMiddleware(
+        h http.Handler,
+        m ...Middleware,
+) http.Handler {
+        <span class="cov0" title="0">if len(m) == 0 </span>{
+                <span class="cov0" title="0">return h
+</span>        }
+
+        <span class="cov0" title="0">for i := len(m) - 1; i &gt;= 0; i-- </span>{
+                <span class="cov0" title="0">h = m[i](h)
+</span>        }
+
+        <span class="cov0" title="0">return h</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package core_http_middleware
+
+import (
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+func Panic() Middleware {
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">ctx := r.Context()
+                        log := core_logger.FromContext(ctx)
+                        responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
+</span>
+                        <span class="cov0" title="0">defer func() </span>{
+                                <span class="cov0" title="0">if p := recover(); p != nil </span>{
+                                        <span class="cov0" title="0">responseHandler.PanicResponse(
+                                                p,
+                                                "during handle HTTP request got unexpected panic",
+                                        )
+</span>                                }
+                        }()
+
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package core_http_middleware
+
+import (
+        "net/http"
+        "time"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "go.uber.org/zap"
+)
+
+func Trace() Middleware {
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span>{
+                <span class="cov0" title="0">return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span>{
+                        <span class="cov0" title="0">ctx := r.Context()
+                        log := core_logger.FromContext(ctx)
+                        rw := core_http_response.NewResponseWriter(w)
+</span>
+                        <span class="cov0" title="0">before := time.Now()
+                        log.Debug(
+                                "&gt;&gt;&gt; incoming HTTP request",
+                                zap.String("http method", r.Method),
+                                zap.Time("time", before.UTC()),
+                        )
+</span>
+                        <span class="cov0" title="0">next.ServeHTTP(rw, r)
+</span>
+                        <span class="cov0" title="0">log.Debug(
+                                "&lt;&lt;&lt; done HTTP request",
+                                zap.Int("status_code", rw.GetStatusCode()),
+                                zap.Duration("latency", time.Since(before)),
+                        )
+</span>                })
+        }
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package core_http_request
+
+import (
+        "encoding/json"
+        "fmt"
+        "net/http"
+
+        "github.com/go-playground/validator/v10"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+var requestValidator = validator.New()
+
+type validatable interface {
+        Validate() error
+}
+
+func DecodeAndValidateRequest(r *http.Request, dest any) error {
+        <span class="cov0" title="0">if err := json.NewDecoder(r.Body).Decode(&amp;dest); err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf(
+                        "decode json: %v: %w",
+                        err,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">var (
+                err error
+        )
+</span>
+        <span class="cov0" title="0">v, ok := dest.(validatable)
+        if ok </span>{
+                <span class="cov0" title="0">err = v.Validate()
+</span>        } else {
+                <span class="cov0" title="0">err = requestValidator.Struct(dest)
+</span>        }
+
+        <span class="cov0" title="0">if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf(
+                        "request validation: %v: %w",
+                        err,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package core_http_request
+
+import (
+        "fmt"
+        "net/http"
+        "strconv"
+
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+func GetInt64PathValue(r *http.Request, key string) (int64, error) {
+        <span class="cov0" title="0">pathValue := r.PathValue(key)
+        if pathValue == "" </span>{
+                <span class="cov0" title="0">return 0, fmt.Errorf(
+                        "no key='%s' in path values: %w",
+                        key,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">val, err := strconv.ParseInt(pathValue, 10, 64)
+        if err != nil </span>{
+                <span class="cov0" title="0">return 0, fmt.Errorf(
+                        "path value='%s' by key='%s' not a valid integer: %v: %w",
+                        pathValue,
+                        key,
+                        err,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">return val, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package core_http_request
+
+import (
+        "fmt"
+        "net/http"
+        "strconv"
+
+        "github.com/go-playground/validator/v10"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+var validate = validator.New()
+
+func GetIntQueryParam(r *http.Request, key string) (*int, error) {
+        <span class="cov0" title="0">param := r.URL.Query().Get(key)
+        if param == "" </span>{
+                <span class="cov0" title="0">return nil, nil
+</span>        }
+
+        <span class="cov0" title="0">val, err := strconv.Atoi(param)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf(
+                        "param='%s' by key='%s' not a valid integer: %v: %w",
+                        param,
+                        key,
+                        err,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">return &amp;val, nil</span>
+}
+
+func GetFloat64QueryParam(r *http.Request, key string) (float64, error) {
+        <span class="cov0" title="0">param := r.URL.Query().Get(key)
+        if param == "" </span>{
+                <span class="cov0" title="0">return 0, fmt.Errorf(
+                        "query parameter '%s' is required: %w",
+                        key,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">val, err := strconv.ParseFloat(param, 64)
+        if err != nil </span>{
+                <span class="cov0" title="0">return 0, fmt.Errorf(
+                        "param='%s' by key='%s' not a valid float: %v: %w",
+                        param,
+                        key,
+                        err,
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov0" title="0">return val, nil</span>
+}
+
+// ParseQueryParams parses query parameters from request and validates them
+func ParseQueryParams(r *http.Request, target interface{}) error {
+        // This is a simplified implementation that works with struct tags
+        // For more complex scenarios, consider using a library like gorilla/schema
+
+        // Use reflection to parse query params based on struct tags
+        // For now, we'll return an error that suggests using manual parsing
+        <span class="cov0" title="0">return fmt.Errorf("ParseQueryParams not fully implemented, use GetFloat64QueryParam: %w", core_errors.ErrInvalidArgument)
+</span>}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package core_http_response
+
+import (
+        "encoding/json"
+        "errors"
+        "fmt"
+        "net/http"
+        "runtime/debug"
+
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        "go.uber.org/zap"
+)
+
+type HTTPResponseHandler struct {
+        log *core_logger.Logger
+        rw  http.ResponseWriter
+}
+
+func NewHTTPResponseHandler(
+        log *core_logger.Logger,
+        rw http.ResponseWriter,
+) *HTTPResponseHandler {
+        <span class="cov8" title="1">return &amp;HTTPResponseHandler{log: log, rw: rw}
+</span>}
+
+func (h *HTTPResponseHandler) JSONResponse(responseBody any, statusCode int) {
+        <span class="cov8" title="1">h.rw.Header().Set("Content-Type", "application/json")
+        h.rw.WriteHeader(statusCode)
+</span>
+        <span class="cov8" title="1">if err := json.NewEncoder(h.rw).Encode(responseBody); err != nil </span>{
+                <span class="cov0" title="0">h.log.Error("write HTTP response", zap.Error(err))
+</span>        }
+}
+
+func (h *HTTPResponseHandler) NoContentResponse() {
+        <span class="cov8" title="1">h.rw.WriteHeader(http.StatusNoContent)
+</span>}
+
+func (h *HTTPResponseHandler) HTMLResponse(html []byte) {
+        <span class="cov8" title="1">h.rw.Header().Set("Content-Type", "text/html; charset=utf-8")
+        h.rw.WriteHeader(http.StatusOK)
+</span>
+        <span class="cov8" title="1">if _, err := h.rw.Write(html); err != nil </span>{
+                <span class="cov0" title="0">h.log.Error("write HTML HTTP response", zap.Error(err))
+</span>        }
+}
+
+func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
+        <span class="cov8" title="1">var (
+                statusCode int
+                logFunc    func(string, ...zap.Field)
+                publicErr  string
+        )
+</span>
+        <span class="cov8" title="1">switch </span>{
+        case errors.Is(err, core_errors.ErrInvalidArgument):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrInvalidArgument.Error()</span>
+
+        case errors.Is(err, core_errors.ErrNotFound):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusNotFound, h.log.Debug, core_errors.ErrNotFound.Error()</span>
+
+        case errors.Is(err, core_errors.ErrConflict):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrConflict.Error()</span>
+
+        case errors.Is(err, core_errors.ErrLoginAlreadyExists):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLoginAlreadyExists.Error()</span>
+
+        case errors.Is(err, core_errors.ErrLocationAlreadyExists):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLocationAlreadyExists.Error()</span>
+
+        case errors.Is(err, core_errors.ErrPasswordDoNotMatch):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrPasswordDoNotMatch.Error()</span>
+
+        case errors.Is(err, core_errors.ErrInvalidCredentials):
+                <span class="cov0" title="0">statusCode, logFunc, publicErr = http.StatusUnauthorized, h.log.Warn, core_errors.ErrInvalidCredentials.Error()</span>
+
+        default:
+                <span class="cov8" title="1">statusCode, logFunc, publicErr = http.StatusInternalServerError, h.log.Error, ""</span>
+        }
+
+        <span class="cov8" title="1">logFunc(msg, zap.Error(err))
+</span>
+        <span class="cov8" title="1">h.errorResponse(statusCode, publicErr, msg)</span>
+}
+
+func (h *HTTPResponseHandler) PanicResponse(p any, msg string) {
+        <span class="cov8" title="1">h.log.Error(
+                msg,
+                zap.String("panic", fmt.Sprint(p)),
+                zap.ByteString("stack", debug.Stack()),
+        )
+</span>
+        <span class="cov8" title="1">h.errorResponse(http.StatusInternalServerError, "", msg)
+</span>}
+
+func (h *HTTPResponseHandler) errorResponse(
+        statusCode int,
+        publicErr string,
+        msg string,
+) {
+        <span class="cov8" title="1">h.JSONResponse(
+                ErrorResponse{
+                        Error:   publicErr,
+                        Message: msg,
+                },
+                statusCode,
+        )
+</span>}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package core_http_response
+
+import "net/http"
+
+var (
+        StatusCodeUninitialized = -1
+)
+
+type ResponseWriter struct {
+        http.ResponseWriter
+        statusCode int
+}
+
+func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
+        <span class="cov0" title="0">return &amp;ResponseWriter{
+                ResponseWriter: w,
+</span>        }
+}
+
+func (rw *ResponseWriter) WriteHeader(statusCode int) {
+        <span class="cov0" title="0">rw.ResponseWriter.WriteHeader(statusCode)
+        rw.statusCode = statusCode
+</span>}
+
+func (rw *ResponseWriter) GetStatusCode() int {
+        <span class="cov0" title="0">if rw.statusCode == StatusCodeUninitialized </span>{
+                <span class="cov0" title="0">return http.StatusOK
+</span>        }
+
+        <span class="cov0" title="0">return rw.statusCode</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package core_http_server
+
+import (
+        "fmt"
+        "time"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        Addr            string        `envconfig:"ADDR" required:"true"`
+        ShutdownTimeout time.Duration `envconfig:"SHUTDOWN_TIMEOUT" default:"30s"`
+        AllowedOrigins  []string      `envconfig:"ALLOWED_ORIGINS" required:"true"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov0" title="0">var config Config
+</span>
+        <span class="cov0" title="0">if err := envconfig.Process("HTTP", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get HTTP server config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package core_http_server
+
+import (
+        "github.com/go-chi/chi/v5"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+)
+
+type ApiVersion string
+
+var (
+        ApiVersion1 = ApiVersion("v1")
+)
+
+type APIVersionRouter struct {
+        chi.Router
+        apiVersion ApiVersion
+}
+
+func NewAPIVersionRouter(
+        apiVersion ApiVersion,
+) *APIVersionRouter {
+        <span class="cov0" title="0">r := chi.NewRouter()
+</span>
+        <span class="cov0" title="0">return &amp;APIVersionRouter{
+                Router:     r,
+                apiVersion: apiVersion,
+</span>        }
+}
+
+func (r *APIVersionRouter) RegisterRoutes(routes ...Route) {
+        <span class="cov0" title="0">for _, route := range routes </span>{
+                <span class="cov0" title="0">handler := core_http_middleware.ChainMiddleware(route.Handler, route.Middlewares...)
+                r.Method(route.Method, route.Path, handler)
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package core_http_server
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "net/http"
+
+        "github.com/go-chi/chi/v5"
+        "go.uber.org/zap"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+)
+
+type HTTPServer struct {
+        router     chi.Router
+        config     Config
+        log        *core_logger.Logger
+        middleware []core_http_middleware.Middleware
+}
+
+func NewHTTPServer(
+        config Config,
+        log *core_logger.Logger,
+        middleware ...core_http_middleware.Middleware,
+) *HTTPServer {
+        <span class="cov0" title="0">r := chi.NewRouter()
+</span>
+        <span class="cov0" title="0">for _, mw := range middleware </span>{
+                <span class="cov0" title="0">r.Use(mw)
+</span>        }
+
+        <span class="cov0" title="0">return &amp;HTTPServer{
+                router:     r,
+                config:     config,
+                log:        log,
+                middleware: middleware,
+</span>        }
+}
+
+func (s *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
+        <span class="cov0" title="0">for _, router := range routers </span>{
+                <span class="cov0" title="0">prefix := "/api/" + string(router.apiVersion)
+                s.router.Mount(prefix, router.Router)
+</span>        }
+}
+
+func (s *HTTPServer) Run(ctx context.Context) error {
+        <span class="cov0" title="0">server := &amp;http.Server{
+                Addr:    s.config.Addr,
+                Handler: s.router,
+</span>        }
+
+        <span class="cov0" title="0">ch := make(chan error, 1)
+</span>
+        <span class="cov0" title="0">go func() </span>{
+                <span class="cov0" title="0">defer close(ch)
+</span>
+                <span class="cov0" title="0">s.log.Warn("start HTTP server", zap.String("addr", s.config.Addr))
+</span>
+                <span class="cov0" title="0">err := server.ListenAndServe()
+</span>
+                <span class="cov0" title="0">if !errors.Is(err, http.ErrServerClosed) </span>{
+                        <span class="cov0" title="0">ch &lt;- err
+</span>                }
+        }()
+
+        <span class="cov0" title="0">select </span>{
+        case err := &lt;-ch:
+                <span class="cov0" title="0">if err != nil </span>{
+                        <span class="cov0" title="0">return fmt.Errorf("listen and serve HTTP: %w", err)
+</span>                }
+        case &lt;-ctx.Done():
+                <span class="cov0" title="0">s.log.Warn("shutdown HTTP server...")
+</span>
+                <span class="cov0" title="0">shutdownCtx, cancel := context.WithTimeout(
+                        context.Background(),
+                        s.config.ShutdownTimeout,
+                )
+                defer cancel()
+</span>
+                <span class="cov0" title="0">if err := server.Shutdown(shutdownCtx); err != nil </span>{
+                        <span class="cov0" title="0">_ = server.Close()
+</span>
+                        <span class="cov0" title="0">return fmt.Errorf("shutdown HTTP server: %w", err)
+</span>                }
+
+                <span class="cov0" title="0">s.log.Warn("HTTP server stopped")</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package locations_repository_postgres
+
+import (
+        "context"
+        "errors"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+func (r *LocationsRepository) CreateLocation(
+        ctx context.Context,
+        location domain.Location,
+) (domain.Location, error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+                INSERT INTO weather.locations (user_id, name, latitude, longitude)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id, user_id, name, latitude, longitude
+        `
+</span>
+        <span class="cov0" title="0">row := r.pool.QueryRow(
+                ctx,
+                query,
+                location.UserID,
+                location.Name,
+                location.Latitude,
+                location.Longitude,
+        )
+</span>
+        <span class="cov0" title="0">var locationModel LocationModel
+        err := row.Scan(
+                &amp;locationModel.ID,
+                &amp;locationModel.UserID,
+                &amp;locationModel.Name,
+                &amp;locationModel.Latitude,
+                &amp;locationModel.Longitude,
+        )
+</span>
+        <span class="cov0" title="0">if err != nil </span>{
+                <span class="cov0" title="0">if errors.Is(err, core_postgres_pool.ErrUniqueViolation) </span>{
+                        <span class="cov0" title="0">return domain.Location{}, fmt.Errorf(
+                                "location with coordinates (%v, %v) for user %d: %w",
+                                location.Latitude,
+                                location.Longitude,
+                                location.UserID,
+                                core_errors.ErrLocationAlreadyExists,
+                        )
+</span>                }
+
+                <span class="cov0" title="0">return domain.Location{}, fmt.Errorf("scan location: %w", err)</span>
+        }
+
+        <span class="cov0" title="0">locationDomain := locationDomainFromModel(locationModel)
+</span>
+        <span class="cov0" title="0">return locationDomain, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package locations_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+func (r *LocationsRepository) DeleteLocation(
+        ctx context.Context,
+        id int64,
+        userID int64,
+) error {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+        DELETE FROM weather.locations
+        WHERE id=$1 AND user_id=$2;
+        `
+</span>
+        <span class="cov0" title="0">cmdTag, err := r.pool.Exec(ctx, query, id, userID)
+        if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf("exec query: %w", err)
+</span>        }
+        <span class="cov0" title="0">if cmdTag.RowsAffected() == 0 </span>{
+                <span class="cov0" title="0">return fmt.Errorf("location with id='%d': %w", id, core_errors.ErrNotFound)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">package locations_repository_postgres
+
+import (
+        "context"
+        "errors"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+func (r *LocationsRepository) GetLocation(
+        ctx context.Context,
+        id int64,
+        userID int64,
+) (domain.Location, error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+                SELECT id, user_id, name, latitude, longitude
+                FROM weather.locations
+                WHERE id = $1 AND user_id = $2
+        `
+</span>
+        <span class="cov0" title="0">row := r.pool.QueryRow(
+                ctx,
+                query,
+                id,
+                userID,
+        )
+</span>
+        <span class="cov0" title="0">var locationModel LocationModel
+        err := row.Scan(
+                &amp;locationModel.ID,
+                &amp;locationModel.UserID,
+                &amp;locationModel.Name,
+                &amp;locationModel.Latitude,
+                &amp;locationModel.Longitude,
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">if errors.Is(err, core_postgres_pool.ErrNoRows) </span>{
+                        <span class="cov0" title="0">return domain.Location{}, fmt.Errorf("location id=%d for user_id=%d: %w", id, userID, core_errors.ErrNotFound)
+</span>                }
+                <span class="cov0" title="0">return domain.Location{}, fmt.Errorf("scan location: %w", err)</span>
+        }
+
+        <span class="cov0" title="0">locationDomain := locationDomainFromModel(locationModel)
+</span>
+        <span class="cov0" title="0">return locationDomain, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package locations_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (r *LocationsRepository) GetLocations(
+        ctx context.Context,
+        userID int64,
+        limit *int,
+        offset *int,
+) ([]domain.Location, error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+        SELECT id, user_id, name, latitude, longitude
+        FROM weather.locations
+        WHERE user_id = $1
+        ORDER BY id ASC
+        LIMIT $2
+        OFFSET $3;
+        `
+</span>
+        <span class="cov0" title="0">rows, err := r.pool.Query(
+                ctx,
+                query,
+                userID,
+                limit,
+                offset,
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("select locations: %w", err)
+</span>        }
+        <span class="cov0" title="0">defer rows.Close()
+</span>
+        <span class="cov0" title="0">var locationModels []LocationModel
+        for rows.Next() </span>{
+                <span class="cov0" title="0">var locationModel LocationModel
+</span>
+                <span class="cov0" title="0">err := rows.Scan(
+                        &amp;locationModel.ID,
+                        &amp;locationModel.UserID,
+                        &amp;locationModel.Name,
+                        &amp;locationModel.Latitude,
+                        &amp;locationModel.Longitude,
+                )
+                if err != nil </span>{
+                        <span class="cov0" title="0">return nil, fmt.Errorf("scan locations: %w", err)
+</span>                }
+
+                <span class="cov0" title="0">locationModels = append(locationModels, locationModel)</span>
+        }
+        <span class="cov0" title="0">if err := rows.Err(); err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("next rows: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">locationDomains := locationDomainsFromModels(locationModels)
+</span>
+        <span class="cov0" title="0">return locationDomains, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package locations_repository_postgres
+
+import "github.com/vladpann/backend/golang-weather/internal/core/domain"
+
+type LocationModel struct {
+        ID        int64
+        UserID    int64
+        Name      string
+        Latitude  float64
+        Longitude float64
+}
+
+func locationDomainFromModel(location LocationModel) domain.Location {
+        <span class="cov0" title="0">return domain.NewLocation(
+                location.ID,
+                location.UserID,
+                location.Name,
+                location.Latitude,
+                location.Longitude,
+        )
+</span>}
+
+func locationDomainsFromModels(locationModels []LocationModel) []domain.Location {
+        <span class="cov0" title="0">userDomains := make([]domain.Location, len(locationModels))
+</span>
+        <span class="cov0" title="0">for i, model := range locationModels </span>{
+                <span class="cov0" title="0">userDomains[i] = locationDomainFromModel(model)
+</span>        }
+
+        <span class="cov0" title="0">return userDomains</span>
+}
+</pre>
+		
+		<pre class="file" id="file29" style="display: none">package locations_repository_postgres
+
+import (
+        core_repository_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+type LocationsRepository struct {
+        pool core_repository_postgres_pool.Pool
+}
+
+func NewLocationsRepository(
+        pool core_repository_postgres_pool.Pool,
+) *LocationsRepository {
+        <span class="cov0" title="0">return &amp;LocationsRepository{
+                pool: pool,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file30" style="display: none">package locations_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *LocationsService) CreateLocation(
+        ctx context.Context,
+        location domain.Location,
+) (domain.Location, error) {
+        <span class="cov8" title="1">createdLocation, err := s.locationsRepository.CreateLocation(ctx, location)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.Location{}, fmt.Errorf("create location in repository: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return createdLocation, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file31" style="display: none">package locations_service
+
+import (
+        "context"
+        "fmt"
+)
+
+func (s *LocationsService) DeleteLocation(
+        ctx context.Context,
+        id int64,
+        userID int64,
+) error {
+        <span class="cov8" title="1">err := s.locationsRepository.DeleteLocation(ctx, id, userID)
+        if err != nil </span>{
+                <span class="cov8" title="1">return fmt.Errorf("delete location in repository: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file32" style="display: none">package locations_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *LocationsService) GetLocation(
+        ctx context.Context,
+        id int64,
+        userID int64,
+) (domain.Location, error) {
+        <span class="cov8" title="1">location, err := s.locationsRepository.GetLocation(ctx, id, userID)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.Location{}, fmt.Errorf("get location in repository: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return location, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file33" style="display: none">package locations_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+func (s *LocationsService) GetLocations(
+        ctx context.Context,
+        userID int64,
+        limit *int,
+        offset *int,
+) ([]domain.Location, error) {
+        <span class="cov8" title="1">if limit != nil &amp;&amp; *limit &lt; 0 </span>{
+                <span class="cov8" title="1">return nil, fmt.Errorf(
+                        "limit must be non-negative: %w",
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov8" title="1">if offset != nil &amp;&amp; *offset &lt; 0 </span>{
+                <span class="cov8" title="1">return nil, fmt.Errorf(
+                        "offset must be non-negative: %w",
+                        core_errors.ErrInvalidArgument,
+                )
+</span>        }
+
+        <span class="cov8" title="1">users, err := s.locationsRepository.GetLocations(
+                ctx,
+                userID,
+                limit,
+                offset,
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, fmt.Errorf("get users from repository: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return users, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file34" style="display: none">package locations_service
+
+import (
+        "context"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+type LocationsService struct {
+        locationsRepository LocationsRepository
+}
+
+type LocationsRepository interface {
+        CreateLocation(
+                ctx context.Context,
+                location domain.Location,
+        ) (domain.Location, error)
+
+        GetLocation(
+                ctx context.Context,
+                id int64,
+                userID int64,
+        ) (domain.Location, error)
+
+        GetLocations(
+                ctx context.Context,
+                userID int64,
+                limit *int,
+                offset *int,
+        ) ([]domain.Location, error)
+
+        DeleteLocation(
+                ctx context.Context,
+                id int64,
+                userID int64,
+        ) error
+}
+
+func NewLocationsService(
+        locationsRepository LocationsRepository,
+) *LocationsService {
+        <span class="cov8" title="1">return &amp;LocationsService{
+                locationsRepository: locationsRepository,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file35" style="display: none">package locations_transport_http
+
+import (
+        "net/http"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+type CreateLocationRequest struct {
+        Name      string  `json:"name"`
+        Latitude  float64 `json:"latitude"`
+        Longitude float64 `json:"longitude"`
+}
+
+func (h *LocationsHTTPHandler) CreateLocation(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov0" title="0">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov0" title="0">log.Debug("invoke CreateLocation handler")
+</span>
+        <span class="cov0" title="0">userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
+        if !ok </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(nil, "user not authenticated")
+                return
+</span>        }
+
+        <span class="cov0" title="0">var request CreateLocationRequest
+        if err := core_http_request.DecodeAndValidateRequest(r, &amp;request); err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+                return
+</span>        }
+
+        <span class="cov0" title="0">location := locationDomainFromDTO(request, userID)
+</span>
+        <span class="cov0" title="0">response, err := h.locationsService.CreateLocation(ctx, location)
+        if err != nil </span>{
+                <span class="cov0" title="0">log.Debug("failed to create location")
+                responseHandler.ErrorResponse(err, "failed to create location")
+                return
+</span>        }
+
+        <span class="cov0" title="0">responseHandler.JSONResponse(response, http.StatusCreated)</span>
+}
+
+func locationDomainFromDTO(dto CreateLocationRequest, userID int64) domain.Location {
+        <span class="cov0" title="0">return domain.Location{
+                UserID:    userID,
+                Name:      dto.Name,
+                Latitude:  dto.Latitude,
+                Longitude: dto.Longitude,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file36" style="display: none">package locations_transport_http
+
+import (
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+func (h *LocationsHTTPHandler) DeleteLocation(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov8" title="1">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov8" title="1">log.Debug("invoke DeleteLocation handler")
+</span>
+        <span class="cov8" title="1">id, err := core_http_request.GetInt64PathValue(r, "id")
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(
+                        err,
+                        "failed to get location id path value",
+                )
+</span>
+                <span class="cov0" title="0">return
+</span>        }
+
+        <span class="cov8" title="1">userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
+        if !ok </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(nil, "user not authenticated")
+                return
+</span>        }
+
+        <span class="cov8" title="1">err = h.locationsService.DeleteLocation(ctx, id, userID)
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "failed to delete location")
+</span>
+                <span class="cov8" title="1">return
+</span>        }
+
+        <span class="cov8" title="1">responseHandler.NoContentResponse()</span>
+}
+</pre>
+		
+		<pre class="file" id="file37" style="display: none">package locations_transport_http
+
+import "github.com/vladpann/backend/golang-weather/internal/core/domain"
+
+type LocationDTOResponse struct {
+        ID        int64   `json:"id"`
+        UserID    int64   `json:"user_id"`
+        Name      string  `json:"name"`
+        Latitude  float64 `json:"latitude"`
+        Longitude float64 `json:"longitude"`
+}
+
+func locationDTOFromDomains(locations []domain.Location) []LocationDTOResponse {
+        <span class="cov0" title="0">locationsDTO := make([]LocationDTOResponse, len(locations))
+</span>
+        <span class="cov0" title="0">for i, location := range locations </span>{
+                <span class="cov0" title="0">locationsDTO[i] = LocationDTOResponse(location)
+</span>        }
+
+        <span class="cov0" title="0">return locationsDTO</span>
+}
+</pre>
+		
+		<pre class="file" id="file38" style="display: none">package locations_transport_http
+
+import (
+        "fmt"
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+type GetLocationsResponse []LocationDTOResponse
+
+func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov0" title="0">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov0" title="0">log.Debug("invoke GetLocations handler")
+</span>
+        <span class="cov0" title="0">userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
+        if !ok </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(nil, "user not authenticated")
+                return
+</span>        }
+
+        <span class="cov0" title="0">limit, offset, err := getLimitOffsetQueryParams(r)
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(
+                        err,
+                        "failed to get 'limit'/'offset' query param",
+                )
+</span>        }
+
+        <span class="cov0" title="0">locationDomains, err := h.locationsService.GetLocations(ctx, userID, limit, offset)
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(
+                        err,
+                        "failed to get locations",
+                )
+</span>
+                <span class="cov0" title="0">return
+</span>        }
+
+        <span class="cov0" title="0">response := GetLocationsResponse(locationDTOFromDomains(locationDomains))
+</span>
+        <span class="cov0" title="0">responseHandler.JSONResponse(response, http.StatusOK)</span>
+}
+
+func getLimitOffsetQueryParams(r *http.Request) (*int, *int, error) {
+        <span class="cov0" title="0">const (
+                limitQueryParamKey  = "limit"
+                offsetQueryParamKey = "offset"
+        )
+</span>
+        <span class="cov0" title="0">limit, err := core_http_request.GetIntQueryParam(r, limitQueryParamKey)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, nil, fmt.Errorf("get 'limit' query param: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">offset, err := core_http_request.GetIntQueryParam(r, offsetQueryParamKey)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, nil, fmt.Errorf("get 'offset' query param: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return limit, offset, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file39" style="display: none">package locations_transport_http
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
+)
+
+type LocationsHTTPHandler struct {
+        locationsService LocationsService
+        authMiddleware   core_http_middleware.Middleware
+}
+
+type LocationsService interface {
+        CreateLocation(
+                ctx context.Context,
+                location domain.Location,
+        ) (domain.Location, error)
+
+        GetLocation(
+                ctx context.Context,
+                id int64,
+                userID int64,
+        ) (domain.Location, error)
+
+        GetLocations(
+                ctx context.Context,
+                userID int64,
+                limit *int,
+                offset *int,
+        ) ([]domain.Location, error)
+
+        DeleteLocation(
+                ctx context.Context,
+                id int64,
+                userID int64,
+        ) error
+}
+
+func NewLocationsHTTPHandler(
+        locationsService LocationsService,
+        authMiddleware core_http_middleware.Middleware,
+) *LocationsHTTPHandler {
+        <span class="cov8" title="1">return &amp;LocationsHTTPHandler{
+                locationsService: locationsService,
+                authMiddleware:   authMiddleware,
+</span>        }
+}
+
+func (h *LocationsHTTPHandler) Routes() []core_http_server.Route {
+        <span class="cov8" title="1">return []core_http_server.Route{
+                {
+                        Method:      http.MethodPost,
+                        Path:        "/locations",
+                        Handler:     h.CreateLocation,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+                {
+                        Method:      http.MethodGet,
+                        Path:        "/locations",
+                        Handler:     h.GetLocations,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+                {
+                        Method:      http.MethodDelete,
+                        Path:        "/locations/{id}",
+                        Handler:     h.DeleteLocation,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file40" style="display: none">package ratelimiter
+
+import "fmt"
+
+// Config holds rate limiter configuration
+type Config struct {
+        RequestsPerMinute int
+        QueueSize         int
+}
+
+// Validate checks if the configuration is valid
+func (c Config) Validate() error {
+        <span class="cov8" title="1">if c.RequestsPerMinute &lt;= 0 </span>{
+                <span class="cov8" title="1">return fmt.Errorf("requests per minute must be greater than 0, got %d", c.RequestsPerMinute)
+</span>        }
+        <span class="cov8" title="1">if c.QueueSize &lt;= 0 </span>{
+                <span class="cov8" title="1">return fmt.Errorf("queue size must be greater than 0, got %d", c.QueueSize)
+</span>        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// DefaultConfig returns a configuration with default values
+func DefaultConfig() Config {
+        <span class="cov0" title="0">return Config{
+                RequestsPerMinute: 60,
+                QueueSize:         100,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file41" style="display: none">package ratelimiter
+
+import (
+        "context"
+        "sync"
+        "time"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        "go.uber.org/zap"
+)
+
+// queuedRequest represents a request waiting in the queue
+type queuedRequest struct {
+        ctx       context.Context
+        allowChan chan struct{}
+        errChan   chan error
+}
+
+// RateLimiter manages API request rate limiting using token bucket algorithm
+type RateLimiter struct {
+        mu             sync.Mutex
+        requestsPerMin int
+        windowDuration time.Duration
+        tokens         int
+        lastRefill     time.Time
+        queue          chan *queuedRequest
+        queueSize      int
+        logger         *core_logger.Logger
+        stopChan       chan struct{}
+        wg             sync.WaitGroup
+        closed         bool // Track if already closed
+}
+
+// NewRateLimiter creates a new rate limiter instance
+func NewRateLimiter(config Config, logger *core_logger.Logger) (*RateLimiter, error) {
+        <span class="cov8" title="1">if err := config.Validate(); err != nil </span>{
+                <span class="cov8" title="1">return nil, err
+</span>        }
+
+        <span class="cov8" title="1">rl := &amp;RateLimiter{
+                requestsPerMin: config.RequestsPerMinute,
+                windowDuration: time.Minute,
+                tokens:         config.RequestsPerMinute,
+                lastRefill:     time.Now(),
+                queue:          make(chan *queuedRequest, config.QueueSize),
+                queueSize:      config.QueueSize,
+                logger:         logger,
+                stopChan:       make(chan struct{}),
+</span>        }
+
+        // Start background queue processor
+        <span class="cov8" title="1">rl.wg.Add(1)
+        go rl.processQueue()
+</span>
+        <span class="cov8" title="1">logger.Info("rate limiter initialized",
+                zap.Int("requests_per_minute", config.RequestsPerMinute),
+                zap.Int("queue_size", config.QueueSize))
+</span>
+        <span class="cov8" title="1">return rl, nil</span>
+}
+
+// Allow blocks until the request can proceed or context is cancelled
+func (rl *RateLimiter) Allow(ctx context.Context) error {
+        <span class="cov8" title="1">if err := ctx.Err(); err != nil </span>{
+                <span class="cov8" title="1">return err
+</span>        }
+
+        // Try to acquire token immediately
+        <span class="cov8" title="1">if rl.tryAcquireToken() </span>{
+                <span class="cov8" title="1">rl.logger.Debug("token acquired immediately")
+                return nil
+</span>        }
+
+        // Token not available, queue the request
+        <span class="cov8" title="1">qr := &amp;queuedRequest{
+                ctx:       ctx,
+                allowChan: make(chan struct{}),
+                errChan:   make(chan error, 1),
+</span>        }
+
+        // Try to add to queue
+        <span class="cov8" title="1">select </span>{
+        case rl.queue &lt;- qr:
+                <span class="cov8" title="1">rl.logger.Debug("request queued", zap.Int("queue_size", len(rl.queue)))</span>
+        case &lt;-ctx.Done():
+                <span class="cov0" title="0">return ctx.Err()</span>
+        default:
+                <span class="cov8" title="1">rl.logger.Warn("rate limit queue is full")
+                return ErrQueueFull</span>
+        }
+
+        // Wait for either allow signal or context cancellation
+        <span class="cov8" title="1">select </span>{
+        case &lt;-qr.allowChan:
+                <span class="cov8" title="1">rl.logger.Debug("queued request allowed")
+                return nil</span>
+        case err := &lt;-qr.errChan:
+                <span class="cov0" title="0">return err</span>
+        case &lt;-ctx.Done():
+                <span class="cov8" title="1">rl.logger.Warn("request timed out while waiting in queue")
+                return ctx.Err()</span>
+        }
+}
+
+// tryAcquireToken attempts to acquire a token immediately
+func (rl *RateLimiter) tryAcquireToken() bool {
+        <span class="cov8" title="1">rl.mu.Lock()
+        defer rl.mu.Unlock()
+</span>
+        <span class="cov8" title="1">rl.refillTokens()
+</span>
+        <span class="cov8" title="1">if rl.tokens &gt; 0 </span>{
+                <span class="cov8" title="1">rl.tokens--
+                rl.logger.Debug("token acquired", zap.Int("remaining_tokens", rl.tokens))
+                return true
+</span>        }
+
+        <span class="cov8" title="1">return false</span>
+}
+
+// refillTokens updates available tokens based on elapsed time
+func (rl *RateLimiter) refillTokens() {
+        <span class="cov8" title="1">now := time.Now()
+        elapsed := now.Sub(rl.lastRefill)
+</span>
+        // If a full window has passed, reset to full capacity
+        <span class="cov8" title="1">if elapsed &gt;= rl.windowDuration </span>{
+                <span class="cov0" title="0">oldTokens := rl.tokens
+                rl.tokens = rl.requestsPerMin
+                rl.lastRefill = now
+                rl.logger.Debug("token bucket refilled",
+                        zap.Int("old_tokens", oldTokens),
+                        zap.Int("new_tokens", rl.tokens),
+                        zap.Duration("elapsed", elapsed))
+                return
+</span>        }
+
+        // Otherwise, add tokens proportionally to elapsed time
+        <span class="cov8" title="1">tokensToAdd := int(float64(rl.requestsPerMin) * elapsed.Seconds() / rl.windowDuration.Seconds())
+        if tokensToAdd &gt; 0 </span>{
+                <span class="cov8" title="1">oldTokens := rl.tokens
+                rl.tokens = min(rl.tokens+tokensToAdd, rl.requestsPerMin)
+                rl.lastRefill = now
+                rl.logger.Debug("tokens added",
+                        zap.Int("old_tokens", oldTokens),
+                        zap.Int("new_tokens", rl.tokens),
+                        zap.Int("added", tokensToAdd))
+</span>        }
+}
+
+// processQueue handles queued requests as tokens become available
+func (rl *RateLimiter) processQueue() {
+        <span class="cov8" title="1">defer rl.wg.Done()
+</span>
+        <span class="cov8" title="1">ticker := time.NewTicker(100 * time.Millisecond)
+        defer ticker.Stop()
+</span>
+        <span class="cov8" title="1">for </span>{
+                <span class="cov8" title="1">select </span>{
+                case &lt;-rl.stopChan:
+                        <span class="cov8" title="1">return</span>
+                case &lt;-ticker.C:
+                        <span class="cov8" title="1">rl.processQueuedRequests()</span>
+                }
+        }
+}
+
+// processQueuedRequests attempts to process pending requests
+func (rl *RateLimiter) processQueuedRequests() {
+        <span class="cov8" title="1">for </span>{
+                // Check if there are queued requests
+                <span class="cov8" title="1">if len(rl.queue) == 0 </span>{
+                        <span class="cov8" title="1">return
+</span>                }
+
+                // Try to acquire a token
+                <span class="cov8" title="1">if !rl.tryAcquireToken() </span>{
+                        <span class="cov8" title="1">return
+</span>                }
+
+                // Get next request from queue
+                <span class="cov8" title="1">select </span>{
+                case qr := &lt;-rl.queue:
+                        // Check if context is still valid
+                        <span class="cov8" title="1">select </span>{
+                        case &lt;-qr.ctx.Done():
+                                <span class="cov8" title="1">rl.logger.Warn("queued request context expired, skipping")
+</span>                                // Return token since we didn't use it
+                                <span class="cov8" title="1">rl.returnToken()
+                                continue</span>
+                        default:
+                                // Context is valid, allow the request
+                                <span class="cov8" title="1">close(qr.allowChan)</span>
+                        }
+                default:
+                        // No request available, return token
+                        <span class="cov0" title="0">rl.returnToken()
+                        return</span>
+                }
+        }
+}
+
+// returnToken returns a token to the bucket (called when a queued request is cancelled)
+func (rl *RateLimiter) returnToken() {
+        <span class="cov8" title="1">rl.mu.Lock()
+        defer rl.mu.Unlock()
+</span>
+        <span class="cov8" title="1">if rl.tokens &lt; rl.requestsPerMin </span>{
+                <span class="cov8" title="1">rl.tokens++
+                rl.logger.Debug("token returned", zap.Int("remaining_tokens", rl.tokens))
+</span>        }
+}
+
+// IsClosed returns whether the rate limiter has been closed
+func (rl *RateLimiter) IsClosed() bool {
+        <span class="cov8" title="1">rl.mu.Lock()
+        defer rl.mu.Unlock()
+        return rl.closed
+</span>}
+
+// Close stops the rate limiter and cleans up resources
+func (rl *RateLimiter) Close() {
+        <span class="cov8" title="1">rl.mu.Lock()
+        if rl.closed </span>{
+                <span class="cov8" title="1">rl.mu.Unlock()
+                return // Already closed
+</span>        }
+        <span class="cov8" title="1">rl.closed = true
+        rl.mu.Unlock()
+</span>
+        <span class="cov8" title="1">close(rl.stopChan)
+        rl.wg.Wait()
+        close(rl.queue)</span>
+}
+</pre>
+		
+		<pre class="file" id="file42" style="display: none">package openweather_service
+
+import (
+        "fmt"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        APIBaseUrl        string `envconfig:"API_BASE_URL" required:"true"`
+        APIKey            string `envconfig:"API_KEY" required:"true"`
+        RequestsPerMinute int    `envconfig:"REQUESTS_PER_MINUTE" default:"60"`
+        QueueSize         int    `envconfig:"QUEUE_SIZE" default:"100"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov0" title="0">var config Config
+</span>
+        <span class="cov0" title="0">if err := envconfig.Process("OPENWEATHER", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get OpenWeather config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file43" style="display: none">package openweather_transport_http
+
+import (
+        "errors"
+        "fmt"
+        "net/url"
+)
+
+// sanitizeRequestError removes the URL (and, with it, the appid) from net/http errors
+func sanitizeRequestError(err error) error {
+        <span class="cov8" title="1">var urlErr *url.Error
+        if errors.As(err, &amp;urlErr) </span>{
+                <span class="cov8" title="1">return fmt.Errorf("openweather request %s failed: %w", urlErr.Op, urlErr.Err)
+</span>        }
+        <span class="cov0" title="0">return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file44" style="display: none">package openweather_transport_http
+
+import (
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "net/url"
+        "strconv"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "go.uber.org/zap"
+)
+
+type GetOpenWeatherRequest struct {
+        Latitude  float64 `query:"latitude" validate:"required"`
+        Longitude float64 `query:"longitude" validate:"required"`
+}
+
+type GetOpenWeatherResponse OpenWeatherDTOResponse
+
+func (h *OpenWeatherHTTPHandler) GetOpenWeather(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov8" title="1">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov8" title="1">log.Debug("invoke GetOpenWeatherLocation handler")
+</span>
+        <span class="cov8" title="1">latitude, err := core_http_request.GetFloat64QueryParam(r, "latitude")
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "invalid or missing latitude parameter")
+                return
+</span>        }
+
+        <span class="cov8" title="1">longitude, err := core_http_request.GetFloat64QueryParam(r, "longitude")
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "invalid or missing longitude parameter")
+                return
+</span>        }
+
+        <span class="cov8" title="1">if err := h.rateLimiter.Allow(ctx); err != nil </span>{
+                <span class="cov8" title="1">log.Warn("rate limit check failed", zap.Error(err))
+                h.handleRateLimitError(responseHandler, err)
+                return
+</span>        }
+
+        <span class="cov8" title="1">query := url.Values{}
+        query.Set("lat", strconv.FormatFloat(latitude, 'f', -1, 64))
+        query.Set("lon", strconv.FormatFloat(longitude, 'f', -1, 64))
+        query.Set("appid", h.config.APIKey)
+</span>
+        <span class="cov8" title="1">reqURL := fmt.Sprintf("%s/data/2.5/weather?%s", h.config.APIBaseUrl, query.Encode())
+</span>
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to create HTTP request")
+                return
+</span>        }
+
+        <span class="cov8" title="1">resp, err := httpClient.Do(req)
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to get open weather location")
+                return
+</span>        }
+        <span class="cov8" title="1">defer resp.Body.Close()
+</span>
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span>{
+                <span class="cov8" title="1">log.Debug("failed to get open weather data", zap.Int("status", resp.StatusCode))
+                responseHandler.ErrorResponse(
+                        fmt.Errorf("OpenWeather API returned status %d", resp.StatusCode),
+                        "failed to get weather data",
+                )
+                return
+</span>        }
+
+        <span class="cov8" title="1">var weatherData GetOpenWeatherResponse
+        if err := json.NewDecoder(resp.Body).Decode(&amp;weatherData); err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "failed to decode weather response")
+                return
+</span>        }
+
+        <span class="cov8" title="1">responseHandler.JSONResponse(weatherData, http.StatusOK)</span>
+}
+</pre>
+		
+		<pre class="file" id="file45" style="display: none">package openweather_transport_http
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "net/http"
+
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
+)
+
+// handleRateLimitError converts rate limiter errors to appropriate HTTP responses
+func (h *OpenWeatherHTTPHandler) handleRateLimitError(
+        responseHandler *core_http_response.HTTPResponseHandler,
+        err error,
+) {
+        <span class="cov8" title="1">switch </span>{
+        case errors.Is(err, ratelimiter.ErrQueueFull):
+                <span class="cov0" title="0">responseHandler.JSONResponse(
+                        map[string]interface{}{
+                                "error": "Service temporarily unavailable",
+                                "message": fmt.Sprintf(
+                                        "Rate limit queue is full (max queue size: %d). Please try again in a few seconds.",
+                                        h.config.QueueSize,
+                                ),
+                                "rate_limit": map[string]interface{}{
+                                        "requests_per_minute": h.config.RequestsPerMinute,
+                                        "retry_after_seconds": 5,
+                                },
+                        },
+                        http.StatusServiceUnavailable,
+                )</span>
+
+        case errors.Is(err, context.DeadlineExceeded):
+                <span class="cov0" title="0">responseHandler.JSONResponse(
+                        map[string]interface{}{
+                                "error":   "Request timeout",
+                                "message": "Request timed out while waiting for rate limit. Please try again.",
+                                "rate_limit": map[string]interface{}{
+                                        "requests_per_minute": h.config.RequestsPerMinute,
+                                        "retry_after_seconds": 5,
+                                },
+                        },
+                        http.StatusRequestTimeout,
+                )</span>
+
+        case errors.Is(err, context.Canceled):
+                <span class="cov8" title="1">responseHandler.JSONResponse(
+                        map[string]interface{}{
+                                "error":   "Request canceled",
+                                "message": "Request was canceled",
+                        },
+                        http.StatusRequestTimeout,
+                )</span>
+
+        default:
+                // Generic rate limit error
+                <span class="cov0" title="0">responseHandler.JSONResponse(
+                        map[string]interface{}{
+                                "error": "Rate limit exceeded",
+                                "message": fmt.Sprintf(
+                                        "Too many requests. Rate limit: %d requests per minute. Please try again in a few seconds.",
+                                        h.config.RequestsPerMinute,
+                                ),
+                                "rate_limit": map[string]interface{}{
+                                        "requests_per_minute": h.config.RequestsPerMinute,
+                                        "retry_after_seconds": 5,
+                                },
+                        },
+                        http.StatusTooManyRequests,
+                )</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file46" style="display: none">package openweather_transport_http
+
+import (
+        "encoding/json"
+        "fmt"
+        "net/http"
+        "net/url"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "go.uber.org/zap"
+)
+
+type GeocodingResponse struct {
+        Name       string            `json:"name"`
+        Lat        float64           `json:"lat"`
+        Lon        float64           `json:"lon"`
+        Country    string            `json:"country"`
+        State      string            `json:"state,omitempty"`
+        LocalNames map[string]string `json:"local_names,omitempty"`
+}
+
+func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov8" title="1">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov8" title="1">log.Debug("invoke SearchLocation handler")
+</span>
+        <span class="cov8" title="1">cityName := r.URL.Query().Get("city_name")
+        if cityName == "" </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(fmt.Errorf("city_name is required"), "city_name parameter is required")
+                return
+</span>        }
+
+        <span class="cov8" title="1">if err := h.rateLimiter.Allow(ctx); err != nil </span>{
+                <span class="cov8" title="1">log.Warn("rate limit check failed", zap.Error(err))
+                h.handleRateLimitError(responseHandler, err)
+                return
+</span>        }
+
+        <span class="cov8" title="1">query := url.Values{}
+        query.Set("q", cityName)
+        query.Set("limit", "5")
+        query.Set("appid", h.config.APIKey)
+</span>
+        <span class="cov8" title="1">apiURL := fmt.Sprintf("%s/geo/1.0/direct?%s", h.config.APIBaseUrl, query.Encode())
+</span>
+        <span class="cov8" title="1">log.Debug("calling OpenWeather Geocoding API", zap.String("city", cityName))
+</span>
+        <span class="cov8" title="1">req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to create HTTP request")
+                return
+</span>        }
+
+        <span class="cov8" title="1">resp, err := httpClient.Do(req)
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to search locations")
+                return
+</span>        }
+        <span class="cov8" title="1">defer resp.Body.Close()
+</span>
+        <span class="cov8" title="1">if resp.StatusCode != http.StatusOK </span>{
+                <span class="cov8" title="1">log.Debug("OpenWeather API error",
+                        zap.Int("status", resp.StatusCode),
+                        zap.String("city", cityName))
+                responseHandler.ErrorResponse(
+                        fmt.Errorf("OpenWeather API returned status %d", resp.StatusCode),
+                        "failed to search locations",
+                )
+                return
+</span>        }
+
+        <span class="cov8" title="1">var locations []GeocodingResponse
+        if err := json.NewDecoder(resp.Body).Decode(&amp;locations); err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "failed to decode geocoding response")
+                return
+</span>        }
+
+        <span class="cov8" title="1">responseHandler.JSONResponse(locations, http.StatusOK)</span>
+}
+</pre>
+		
+		<pre class="file" id="file47" style="display: none">package openweather_transport_http
+
+import (
+        "context"
+        "net/http"
+        "time"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
+        "github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
+        openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
+)
+
+type OpenWeatherHTTPHandler struct {
+        locationsService LocationsService
+        config           openweather_service.Config
+        authMiddleware   core_http_middleware.Middleware
+        rateLimiter      *ratelimiter.RateLimiter
+}
+
+type LocationsService interface {
+        CreateLocation(
+                ctx context.Context,
+                location domain.Location,
+        ) (domain.Location, error)
+
+        GetLocation(
+                ctx context.Context,
+                id int64,
+                userID int64,
+        ) (domain.Location, error)
+}
+
+func NewOpenWeatherHTTPHandler(
+        locationsService LocationsService,
+        config openweather_service.Config,
+        authMiddleware core_http_middleware.Middleware,
+        rateLimiter *ratelimiter.RateLimiter,
+) *OpenWeatherHTTPHandler {
+        <span class="cov8" title="1">return &amp;OpenWeatherHTTPHandler{
+                locationsService: locationsService,
+                config:           config,
+                authMiddleware:   authMiddleware,
+                rateLimiter:      rateLimiter,
+</span>        }
+}
+
+var httpClient = &amp;http.Client{
+        Timeout: 10 * time.Second,
+}
+
+func (h *OpenWeatherHTTPHandler) Routes() []core_http_server.Route {
+        <span class="cov8" title="1">return []core_http_server.Route{
+                {
+                        Method:      http.MethodGet,
+                        Path:        "/open-weather/search-location",
+                        Handler:     h.SearchLocation,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+                {
+                        Method:      http.MethodGet,
+                        Path:        "/open-weather/get-weather",
+                        Handler:     h.GetOpenWeather,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file48" style="display: none">package sessions_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (r *SessionsRepository) CreateSession(
+        ctx context.Context,
+        session domain.Session,
+) (domain.Session, error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+                INSERT INTO weather.sessions (id, user_id, expires_at)
+                VALUES ($1, $2, $3)
+                RETURNING id, user_id, expires_at
+        `
+</span>
+        <span class="cov0" title="0">row := r.pool.QueryRow(
+                ctx,
+                query,
+                session.ID,
+                session.UserID,
+                session.ExpiresAt,
+        )
+</span>
+        <span class="cov0" title="0">var sessionModel SessionModel
+        if err := row.Scan(
+                &amp;sessionModel.ID,
+                &amp;sessionModel.UserID,
+                &amp;sessionModel.ExpiresAt,
+        ); err != nil </span>{
+                <span class="cov0" title="0">return domain.Session{}, fmt.Errorf("scan session: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">sessionDomain := sessionDomainFromModel(sessionModel)
+</span>
+        <span class="cov0" title="0">return sessionDomain, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file49" style="display: none">package sessions_repository_postgres
+
+import (
+        "context"
+        "fmt"
+        "time"
+)
+
+func (r *SessionsRepository) DeleteExpiredSession(
+        ctx context.Context,
+) error {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+        DELETE FROM weather.sessions
+        WHERE expires_at &lt;= $1;
+        `
+</span>
+        <span class="cov0" title="0">_, err := r.pool.Exec(ctx, query, time.Now())
+        if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf("exec query: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file50" style="display: none">package sessions_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/google/uuid"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+func (r *SessionsRepository) DeleteSession(
+        ctx context.Context,
+        sessionID uuid.UUID,
+) error {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+        DELETE FROM weather.sessions
+        WHERE id=$1;
+        `
+</span>
+        <span class="cov0" title="0">cmdTag, err := r.pool.Exec(ctx, query, sessionID)
+        if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf("exec query: %w", err)
+</span>        }
+        <span class="cov0" title="0">if cmdTag.RowsAffected() == 0 </span>{
+                <span class="cov0" title="0">return fmt.Errorf("session with id='%s': %w", sessionID, core_errors.ErrNotFound)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file51" style="display: none">package sessions_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (r *SessionsRepository) GetSession(
+        ctx context.Context,
+        sessionID uuid.UUID,
+) (domain.Session, error) {
+        <span class="cov0" title="0">query := `
+                SELECT id, user_id, expires_at
+                FROM weather.sessions
+                WHERE id = $1 AND expires_at &gt; NOW()
+        `
+</span>
+        <span class="cov0" title="0">var model SessionModel
+        err := r.pool.QueryRow(ctx, query, sessionID).Scan(
+                &amp;model.ID,
+                &amp;model.UserID,
+                &amp;model.ExpiresAt,
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">return domain.Session{}, fmt.Errorf("query row: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return sessionDomainFromModel(model), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file52" style="display: none">package sessions_repository_postgres
+
+import (
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+type SessionModel struct {
+        ID        uuid.UUID
+        UserID    int64
+        ExpiresAt time.Time
+}
+
+func sessionDomainFromModel(session SessionModel) domain.Session {
+        <span class="cov0" title="0">return domain.NewSession(
+                session.ID,
+                session.UserID,
+                session.ExpiresAt,
+        )
+</span>}
+</pre>
+		
+		<pre class="file" id="file53" style="display: none">package sessions_repository_postgres
+
+import (
+        core_repository_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+type SessionsRepository struct {
+        pool core_repository_postgres_pool.Pool
+}
+
+func NewSessionsRepository(
+        pool core_repository_postgres_pool.Pool,
+) *SessionsRepository {
+        <span class="cov0" title="0">return &amp;SessionsRepository{
+                pool: pool,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file54" style="display: none">package sessions_service
+
+import (
+        "fmt"
+        "time"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        TTL time.Duration `envconfig:"TTL" default:"24h"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov8" title="1">var config Config
+</span>
+        <span class="cov8" title="1">if err := envconfig.Process("SESSION", &amp;config); err != nil </span>{
+                <span class="cov8" title="1">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov8" title="1">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov8" title="1">err = fmt.Errorf("get Sessions config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file55" style="display: none">package sessions_service
+
+import (
+        "context"
+        "fmt"
+        "time"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *SessionsService) CreateSession(
+        ctx context.Context,
+        userID int64,
+) (domain.Session, error) {
+        <span class="cov8" title="1">session := domain.NewSession(
+                uuid.New(),
+                userID,
+                time.Now().Add(s.config.TTL),
+        )
+</span>
+        <span class="cov8" title="1">session, err := s.sessionsRepository.CreateSession(ctx, session)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.Session{}, fmt.Errorf("create session: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return session, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file56" style="display: none">package sessions_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/google/uuid"
+)
+
+func (s *SessionsService) DeleteSession(
+        ctx context.Context,
+        sessionID uuid.UUID,
+) error {
+        <span class="cov0" title="0">err := s.sessionsRepository.DeleteSession(ctx, sessionID)
+        if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf("delete session: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file57" style="display: none">package sessions_service
+
+import (
+        "context"
+        "fmt"
+)
+
+func (s *SessionsService) DeleteExpiredSession(
+        ctx context.Context,
+) error {
+        <span class="cov0" title="0">err := s.sessionsRepository.DeleteExpiredSession(ctx)
+        if err != nil </span>{
+                <span class="cov0" title="0">return fmt.Errorf("delete session: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file58" style="display: none">package sessions_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *SessionsService) GetSession(
+        ctx context.Context,
+        sessionID uuid.UUID,
+) (domain.Session, error) {
+        <span class="cov8" title="1">session, err := s.sessionsRepository.GetSession(ctx, sessionID)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.Session{}, fmt.Errorf("get session from repository: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return session, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file59" style="display: none">package sessions_service
+
+import (
+        "context"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+type SessionsService struct {
+        config             Config
+        sessionsRepository SessionsRepository
+}
+
+type SessionsRepository interface {
+        CreateSession(
+                ctx context.Context,
+                session domain.Session,
+        ) (domain.Session, error)
+
+        GetSession(
+                ctx context.Context,
+                sessionID uuid.UUID,
+        ) (domain.Session, error)
+
+        DeleteSession(
+                ctx context.Context,
+                sessionID uuid.UUID,
+        ) error
+
+        DeleteExpiredSession(
+                ctx context.Context,
+        ) error
+}
+
+func NewSessionsService(
+        config Config,
+        sessionsRepository SessionsRepository,
+) *SessionsService {
+        <span class="cov8" title="1">return &amp;SessionsService{
+                config:             config,
+                sessionsRepository: sessionsRepository,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file60" style="display: none">package sessions_worker
+
+import (
+        "context"
+        "time"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        "go.uber.org/zap"
+)
+
+type SessionsService interface {
+        DeleteExpiredSession(ctx context.Context) error
+}
+
+type SessionsCleaner struct {
+        config          Config
+        sessionsService SessionsService
+        log             *core_logger.Logger
+}
+
+func NewSessionsCleaner(
+        config Config,
+        sessionsService SessionsService,
+        log *core_logger.Logger,
+) *SessionsCleaner {
+        <span class="cov8" title="1">return &amp;SessionsCleaner{
+                config:          config,
+                sessionsService: sessionsService,
+                log:             log,
+</span>        }
+}
+
+func (c *SessionsCleaner) Run(ctx context.Context) error {
+        <span class="cov8" title="1">ticker := time.NewTicker(c.config.CleanupInterval)
+        defer ticker.Stop()
+</span>
+        <span class="cov8" title="1">c.log.Info("session cleaner started", zap.Duration("interval", c.config.CleanupInterval))
+</span>
+        <span class="cov8" title="1">for </span>{
+                <span class="cov8" title="1">select </span>{
+                case &lt;-ctx.Done():
+                        <span class="cov8" title="1">c.log.Info("session cleaner stopped")
+                        return nil</span>
+
+                case &lt;-ticker.C:
+                        <span class="cov8" title="1">if err := c.sessionsService.DeleteExpiredSession(ctx); err != nil </span>{
+                                <span class="cov8" title="1">c.log.Error("delete expired sessions", zap.Error(err))
+                                continue</span>
+                        }
+                        <span class="cov8" title="1">c.log.Debug("expired sessions have been cleared")</span>
+                }
+        }
+}
+</pre>
+		
+		<pre class="file" id="file61" style="display: none">package sessions_worker
+
+import (
+        "fmt"
+        "time"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        CleanupInterval time.Duration `envconfig:"CLEANUP_INTERVAL" default:"10h"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov0" title="0">var config Config
+</span>
+        <span class="cov0" title="0">if err := envconfig.Process("SESSION", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov0" title="0">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get Sessions config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file62" style="display: none">package users_repository_postgres
+
+import (
+        "context"
+        "errors"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+func (r *UsersRepository) CreateUser(
+        ctx context.Context,
+        login string,
+        passwordHash []byte,
+) (domain.User, error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+        INSERT INTO weather.users (login, password)
+        VALUES ($1, $2)
+        RETURNING id, login;
+        `
+</span>
+        <span class="cov0" title="0">row := r.pool.QueryRow(ctx, query, login, passwordHash)
+</span>
+        <span class="cov0" title="0">var userModel UserModel
+        err := row.Scan(
+                &amp;userModel.ID,
+                &amp;userModel.Login,
+        )
+</span>
+        <span class="cov0" title="0">if err != nil </span>{
+                <span class="cov0" title="0">if errors.Is(err, core_postgres_pool.ErrUniqueViolation) </span>{
+                        <span class="cov0" title="0">return domain.User{}, core_errors.ErrLoginAlreadyExists
+</span>                }
+                <span class="cov0" title="0">return domain.User{}, err</span>
+        }
+
+        <span class="cov0" title="0">userDomain := userDomainFromModel(userModel)
+</span>
+        <span class="cov0" title="0">return userDomain, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file63" style="display: none">package users_repository_postgres
+
+import (
+        "context"
+        "errors"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+func (r *UsersRepository) GetUser(
+        ctx context.Context,
+        login string,
+) (user domain.User, passwordHash []byte, err error) {
+        <span class="cov0" title="0">ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+        defer cancel()
+</span>
+        <span class="cov0" title="0">query := `
+                SELECT id, login, password
+                FROM weather.users
+                WHERE login = $1
+        `
+</span>
+        <span class="cov0" title="0">row := r.pool.QueryRow(ctx, query, login)
+</span>
+        <span class="cov0" title="0">var userModel UserModel
+        var password []byte
+</span>
+        <span class="cov0" title="0">err = row.Scan(
+                &amp;userModel.ID,
+                &amp;userModel.Login,
+                &amp;password,
+        )
+</span>
+        <span class="cov0" title="0">if err != nil </span>{
+                <span class="cov0" title="0">if errors.Is(err, core_postgres_pool.ErrNoRows) </span>{
+                        <span class="cov0" title="0">return domain.User{}, nil, fmt.Errorf("user with login='%s': %w",
+                                login,
+                                core_errors.ErrNotFound,
+                        )
+</span>                }
+
+                <span class="cov0" title="0">return domain.User{}, nil, fmt.Errorf("scan user: %w", err)</span>
+        }
+
+        <span class="cov0" title="0">userDomain := userDomainFromModel(userModel)
+</span>
+        <span class="cov0" title="0">return userDomain, password, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file64" style="display: none">package users_repository_postgres
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (r *UsersRepository) GetUserByID(
+        ctx context.Context,
+        userID int64,
+) (domain.User, error) {
+        <span class="cov0" title="0">const query = `
+                SELECT id, login
+                FROM weather.users
+                WHERE id = $1
+        `
+</span>
+        <span class="cov0" title="0">var user domain.User
+        err := r.pool.QueryRow(ctx, query, userID).Scan(&amp;user.ID, &amp;user.Login)
+        if err != nil </span>{
+                <span class="cov0" title="0">return domain.User{}, fmt.Errorf("query row: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return user, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file65" style="display: none">package users_repository_postgres
+
+import "github.com/vladpann/backend/golang-weather/internal/core/domain"
+
+type UserModel struct {
+        ID    int64
+        Login string
+}
+
+func userDomainFromModel(user UserModel) domain.User {
+        <span class="cov0" title="0">return domain.NewUser(
+                user.ID,
+                user.Login,
+        )
+</span>}
+</pre>
+		
+		<pre class="file" id="file66" style="display: none">package users_repository_postgres
+
+import (
+        core_repository_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
+)
+
+type UsersRepository struct {
+        pool core_repository_postgres_pool.Pool
+}
+
+func NewUsersRepository(
+        pool core_repository_postgres_pool.Pool,
+) *UsersRepository {
+        <span class="cov0" title="0">return &amp;UsersRepository{
+                pool: pool,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file67" style="display: none">package users_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *UsersService) CreateUser(
+        ctx context.Context,
+        login string,
+        password string,
+        repeatPassword string,
+) (domain.User, error) {
+        <span class="cov8" title="1">var op = "create user"
+</span>
+        <span class="cov8" title="1">input := CreateUserInput{
+                Login:          login,
+                Password:       password,
+                RepeatPassword: repeatPassword,
+</span>        }
+        <span class="cov8" title="1">if err := input.CreateUserValidate(); err != nil </span>{
+                <span class="cov8" title="1">return domain.User{}, fmt.Errorf("%s validate input: %w", op, err)
+</span>        }
+
+        <span class="cov8" title="1">passwordHash, err := s.passwordHasher.Hash(password)
+        if err != nil </span>{
+                <span class="cov0" title="0">return domain.User{}, fmt.Errorf("%s password hash: %w", op, err)
+</span>        }
+
+        <span class="cov8" title="1">user, err := s.usersRepository.CreateUser(ctx, login, passwordHash)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.User{}, fmt.Errorf("%s: %w", op, err)
+</span>        }
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file68" style="display: none">package users_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *UsersService) GetUser(
+        ctx context.Context,
+        login string,
+        password string,
+) (domain.User, error) {
+        <span class="cov8" title="1">user, passwordHash, err := s.usersRepository.GetUser(ctx, login)
+        if err != nil </span>{
+                <span class="cov8" title="1">return domain.User{}, fmt.Errorf("get user: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">if err := s.passwordHasher.Compare(passwordHash, password); err != nil </span>{
+                <span class="cov8" title="1">return domain.User{}, fmt.Errorf("invalid password: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file69" style="display: none">package users_service
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+func (s *UsersService) GetUserByID(
+        ctx context.Context,
+        userID int64,
+) (domain.User, error) {
+        <span class="cov0" title="0">user, err := s.usersRepository.GetUserByID(ctx, userID)
+        if err != nil </span>{
+                <span class="cov0" title="0">return domain.User{}, fmt.Errorf("get user by id: %w", err)
+</span>        }
+
+        <span class="cov0" title="0">return user, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file70" style="display: none">package users_service
+
+import (
+        "errors"
+        "fmt"
+
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        "golang.org/x/crypto/bcrypt"
+)
+
+type Hasher struct{}
+
+func NewPasswordHasher() *Hasher {
+        <span class="cov8" title="1">return &amp;Hasher{}
+</span>}
+
+func (p *Hasher) Hash(password string) ([]byte, error) {
+        <span class="cov8" title="1">passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+        if err != nil </span>{
+                <span class="cov0" title="0">return nil, err
+</span>        }
+
+        <span class="cov8" title="1">return passwordHash, nil</span>
+}
+
+func (p *Hasher) Compare(hash []byte, password string) error {
+        <span class="cov8" title="1">err := bcrypt.CompareHashAndPassword(hash, []byte(password))
+        if err != nil </span>{
+                <span class="cov8" title="1">if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) </span>{
+                        <span class="cov8" title="1">return core_errors.ErrInvalidCredentials
+</span>                }
+                <span class="cov0" title="0">return fmt.Errorf("compare password: %w", err)</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file71" style="display: none">package users_service
+
+import (
+        "context"
+
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+)
+
+type PasswordHasher interface {
+        Hash(password string) ([]byte, error)
+        Compare(hash []byte, password string) error
+}
+
+type UsersService struct {
+        usersRepository UsersRepository
+        passwordHasher  PasswordHasher
+}
+
+type UsersRepository interface {
+        CreateUser(
+                ctx context.Context,
+                login string,
+                passwordHash []byte,
+        ) (domain.User, error)
+
+        GetUser(
+                ctx context.Context,
+                login string,
+        ) (user domain.User, passwordHash []byte, err error)
+
+        GetUserByID(
+                ctx context.Context,
+                userID int64,
+        ) (domain.User, error)
+}
+
+func NewUsersService(
+        usersRepository UsersRepository,
+        passwordHasher PasswordHasher,
+) *UsersService {
+        <span class="cov8" title="1">return &amp;UsersService{
+                usersRepository: usersRepository,
+                passwordHasher:  passwordHasher,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file72" style="display: none">package users_service
+
+import "fmt"
+
+type CreateUserInput struct {
+        Login          string
+        Password       string
+        RepeatPassword string
+}
+
+func (i *CreateUserInput) CreateUserValidate() error {
+        <span class="cov8" title="1">if i.Login == "" </span>{
+                <span class="cov8" title="1">return fmt.Errorf("login is required")
+</span>        }
+
+        <span class="cov8" title="1">if i.Password == "" </span>{
+                <span class="cov0" title="0">return fmt.Errorf("password is required")
+</span>        }
+
+        <span class="cov8" title="1">if len(i.Password) &lt; 4 || len(i.Password) &gt; 72 </span>{
+                <span class="cov8" title="1">return fmt.Errorf("password must be between 4 and 72 characters")
+</span>        }
+
+        <span class="cov8" title="1">if i.Password != i.RepeatPassword </span>{
+                <span class="cov8" title="1">return fmt.Errorf("password do not match")
+</span>        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file73" style="display: none">package users_transport_http
+
+import (
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "go.uber.org/zap"
+)
+
+type CheckAuthResponse struct {
+        Authenticated bool    `json:"authenticated"`
+        UserID        *int64  `json:"user_id,omitempty"`
+        Login         *string `json:"login,omitempty"`
+}
+
+func (h *UsersHTTPHandler) CheckAuth(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov0" title="0">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov0" title="0">log.Debug("invoke CheckAuth handler")
+</span>
+        <span class="cov0" title="0">response := CheckAuthResponse{
+                Authenticated: true,
+</span>        }
+
+        <span class="cov0" title="0">userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
+        if !ok </span>{
+                <span class="cov0" title="0">log.Debug("no user ID in context")
+</span>        }
+
+        <span class="cov0" title="0">log.Debug("got user ID from context", zap.Int64("user_id", userID))
+        user, err := h.usersService.GetUserByID(ctx, userID)
+        if err != nil </span>{
+                <span class="cov0" title="0">log.Error("failed to get user by id", zap.Int64("user_id", userID), zap.Error(err))
+</span>        } else {
+                <span class="cov0" title="0">log.Debug("got user from service", zap.String("login", user.Login))
+                response.UserID = &amp;user.ID
+                response.Login = &amp;user.Login
+</span>        }
+
+        <span class="cov0" title="0">responseHandler.JSONResponse(response, http.StatusOK)</span>
+}
+</pre>
+		
+		<pre class="file" id="file74" style="display: none">package users_transport_http
+
+import (
+        "fmt"
+
+        "github.com/kelseyhightower/envconfig"
+)
+
+type Config struct {
+        Secure bool `envconfig:"SECURE" default:"true"`
+}
+
+func NewConfig() (Config, error) {
+        <span class="cov8" title="1">var config Config
+</span>
+        <span class="cov8" title="1">if err := envconfig.Process("COOKIE", &amp;config); err != nil </span>{
+                <span class="cov0" title="0">return Config{}, fmt.Errorf("process envconfig: %w", err)
+</span>        }
+
+        <span class="cov8" title="1">return config, nil</span>
+}
+
+func NewConfigMust() Config {
+        <span class="cov8" title="1">config, err := NewConfig()
+        if err != nil </span>{
+                <span class="cov0" title="0">err = fmt.Errorf("get Userss config: %w", err)
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">return config</span>
+}
+</pre>
+		
+		<pre class="file" id="file75" style="display: none">package users_transport_http
+
+import (
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+type CreateUserRequest struct {
+        Login          string `json:"login"`
+        Password       string `json:"password" validate:"required,min=4,max=72"`
+        RepeatPassword string `json:"repeat_password"`
+}
+
+type CreateUserResponse UserDTOResponse
+
+func (h *UsersHTTPHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov8" title="1">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov8" title="1">log.Debug("invoke CreateUser handler")
+</span>
+        <span class="cov8" title="1">var request CreateUserRequest
+        if err := core_http_request.DecodeAndValidateRequest(r, &amp;request); err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+</span>
+                <span class="cov8" title="1">return
+</span>        }
+
+        <span class="cov8" title="1">login, password, repeatPassword := domainFromDTO(request)
+</span>
+        <span class="cov8" title="1">userDomain, err := h.usersService.CreateUser(ctx, login, password, repeatPassword)
+        if err != nil </span>{
+                <span class="cov8" title="1">responseHandler.ErrorResponse(err, "failed to create user")
+</span>
+                <span class="cov8" title="1">return
+</span>        }
+
+        <span class="cov8" title="1">response := CreateUserResponse(userDTOFromDomain(userDomain))
+</span>
+        <span class="cov8" title="1">responseHandler.JSONResponse(response, http.StatusCreated)</span>
+}
+
+func domainFromDTO(dto CreateUserRequest) (login string, password string, repeatPassword string) {
+        <span class="cov8" title="1">return dto.Login, dto.Password, dto.RepeatPassword
+</span>}
+</pre>
+		
+		<pre class="file" id="file76" style="display: none">package users_transport_http
+
+import "github.com/vladpann/backend/golang-weather/internal/core/domain"
+
+type UserDTOResponse struct {
+        ID    int64  `json:"id"`
+        Login string `json:"login"`
+}
+
+func userDTOFromDomain(user domain.User) UserDTOResponse {
+        <span class="cov8" title="1">return UserDTOResponse{
+                ID:    user.ID,
+                Login: user.Login,
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file77" style="display: none">package users_transport_http
+
+import (
+        "net/http"
+
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+        "go.uber.org/zap"
+)
+
+type SignInUserRequest struct {
+        Login    string `json:"login" validate:"required"`
+        Password string `json:"password" validate:"required,min=4,max=72"`
+}
+
+func (h *UsersHTTPHandler) SignInUser(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov8" title="1">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov8" title="1">log.Debug("invoke SignInUser handler")
+</span>
+        <span class="cov8" title="1">var request SignInUserRequest
+        if err := core_http_request.DecodeAndValidateRequest(r, &amp;request); err != nil </span>{
+                <span class="cov8" title="1">log.Error("failed to decode and validate HTTP request", zap.Error(err))
+                responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+</span>
+                <span class="cov8" title="1">return
+</span>        }
+
+        <span class="cov8" title="1">log.Debug("attempting to sign in user", zap.String("login", request.Login))
+</span>
+        <span class="cov8" title="1">login, password := domainFromSignInUserDTO(request)
+</span>
+        <span class="cov8" title="1">user, err := h.usersService.GetUser(ctx, login, password)
+        if err != nil </span>{
+                <span class="cov8" title="1">log.Error("failed to sign-in user", zap.String("login", login), zap.Error(err))
+                responseHandler.ErrorResponse(err, "failed to sign-in user")
+</span>
+                <span class="cov8" title="1">return
+</span>        }
+
+        <span class="cov8" title="1">log.Debug("user authenticated successfully", zap.Int64("user_id", user.ID))
+</span>
+        <span class="cov8" title="1">session, err := h.sessionsService.CreateSession(ctx, user.ID)
+        if err != nil </span>{
+                <span class="cov0" title="0">log.Error("failed to create user session", zap.Int64("user_id", user.ID), zap.Error(err))
+                responseHandler.ErrorResponse(err, "failed to create user session")
+</span>
+                <span class="cov0" title="0">return
+</span>        }
+
+        <span class="cov8" title="1">log.Debug("session created successfully")
+</span>
+        <span class="cov8" title="1">http.SetCookie(rw, &amp;http.Cookie{
+                Name:     "session_id",
+                Value:    session.ID.String(),
+                Path:     "/",
+                HttpOnly: true,
+                Secure:   h.config.Secure,
+                SameSite: http.SameSiteLaxMode,
+                Expires:  session.ExpiresAt,
+        })
+</span>
+        <span class="cov8" title="1">responseHandler.NoContentResponse()</span>
+}
+
+func domainFromSignInUserDTO(dto SignInUserRequest) (login string, password string) {
+        <span class="cov8" title="1">return dto.Login, dto.Password
+</span>}
+</pre>
+		
+		<pre class="file" id="file78" style="display: none">package users_transport_http
+
+import (
+        "net/http"
+
+        core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+        core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+)
+
+func (h *UsersHTTPHandler) SignOutUser(rw http.ResponseWriter, r *http.Request) {
+        <span class="cov0" title="0">ctx := r.Context()
+        log := core_logger.FromContext(ctx)
+        responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
+</span>
+        <span class="cov0" title="0">log.Debug("invoke SignOutUser handler")
+</span>
+        <span class="cov0" title="0">sessionID, ok := core_http_middleware.GetSessionIDFromContext(ctx)
+        if !ok </span>{
+                <span class="cov0" title="0">log.Debug("no session ID in context")
+</span>        }
+
+        <span class="cov0" title="0">err := h.sessionsService.DeleteSession(ctx, sessionID)
+        if err != nil </span>{
+                <span class="cov0" title="0">responseHandler.ErrorResponse(err, "failed to delete session")
+</span>
+                <span class="cov0" title="0">return
+</span>        }
+
+        <span class="cov0" title="0">http.SetCookie(rw, &amp;http.Cookie{
+                Name:     "session_id",
+                Value:    sessionID.String(),
+                Path:     "/",
+                HttpOnly: true,
+                Secure:   h.config.Secure,
+                SameSite: http.SameSiteLaxMode,
+                MaxAge:   -1,
+        })
+</span>
+        <span class="cov0" title="0">responseHandler.ErrorResponse(core_errors.ErrInvalidCredentials, "user is not authorised")</span>
+}
+</pre>
+		
+		<pre class="file" id="file79" style="display: none">package users_transport_http
+
+import (
+        "context"
+        "net/http"
+
+        "github.com/google/uuid"
+        "github.com/vladpann/backend/golang-weather/internal/core/domain"
+        core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
+        core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
+)
+
+type UsersHTTPHandler struct {
+        config          Config
+        usersService    UsersService
+        sessionsService SessionsService
+        authMiddleware  core_http_middleware.Middleware
+}
+
+type UsersService interface {
+        CreateUser(
+                ctx context.Context,
+                login string,
+                password string,
+                repeatPassword string,
+        ) (domain.User, error)
+
+        GetUser(
+                ctx context.Context,
+                login string,
+                password string,
+        ) (domain.User, error)
+
+        GetUserByID(
+                ctx context.Context,
+                userID int64,
+        ) (domain.User, error)
+}
+
+type SessionsService interface {
+        CreateSession(
+                ctx context.Context,
+                userID int64,
+        ) (domain.Session, error)
+
+        DeleteSession(
+                ctx context.Context,
+                sessionID uuid.UUID,
+        ) error
+}
+
+func NewUsersHTTPHandler(
+        config Config,
+        usersService UsersService,
+        sessionsService SessionsService,
+        authMiddleware core_http_middleware.Middleware,
+) *UsersHTTPHandler {
+        <span class="cov8" title="1">return &amp;UsersHTTPHandler{
+                config:          config,
+                usersService:    usersService,
+                sessionsService: sessionsService,
+                authMiddleware:  authMiddleware,
+</span>        }
+}
+
+func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
+        <span class="cov8" title="1">return []core_http_server.Route{
+                {
+                        Method:  http.MethodPost,
+                        Path:    "/auth/sign-up",
+                        Handler: h.CreateUser,
+                },
+                {
+                        Method:  http.MethodPost,
+                        Path:    "/auth/sign-in",
+                        Handler: h.SignInUser,
+                },
+                {
+                        Method:      http.MethodPost,
+                        Path:        "/auth/sign-out",
+                        Handler:     h.SignOutUser,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+                {
+                        Method:      http.MethodGet,
+                        Path:        "/auth/check",
+                        Handler:     h.CheckAuth,
+                        Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
+                },
+</span>        }
+}
+</pre>
+		
+		<pre class="file" id="file80" style="display: none">package testutil
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "path/filepath"
+        "sort"
+        "sync"
+        "testing"
+        "time"
+
+        "github.com/stretchr/testify/require"
+        "github.com/testcontainers/testcontainers-go/modules/postgres"
+
+        core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
+)
+
+const (
+        pgImage    = "postgres:18.1-bookworm"
+        pgDBName   = "weather_db_test"
+        pgUser     = "test"
+        pgPassword = "test"
+)
+
+var (
+        pgOnce sync.Once
+        pgHost string
+        pgPort string
+        pgErr  error
+)
+
+func findMigrationsDir() (string, error) {
+        <span class="cov0" title="0">dir, err := os.Getwd()
+        if err != nil </span>{
+                <span class="cov0" title="0">return "", err
+</span>        }
+
+        <span class="cov0" title="0">for </span>{
+                <span class="cov0" title="0">candidate := filepath.Join(dir, "migrations")
+                if st, err := os.Stat(candidate); err == nil &amp;&amp; st.IsDir() </span>{
+                        <span class="cov0" title="0">return candidate, nil
+</span>                }
+
+                <span class="cov0" title="0">parent := filepath.Dir(dir)
+                if parent == dir </span>{
+                        <span class="cov0" title="0">return "", fmt.Errorf("migrations dir not found")
+</span>                }
+                <span class="cov0" title="0">dir = parent</span>
+        }
+}
+
+func startPostgres() {
+        <span class="cov0" title="0">ctx := context.Background()
+</span>
+        <span class="cov0" title="0">migrationsDir, err := findMigrationsDir()
+        if err != nil </span>{
+                <span class="cov0" title="0">pgErr = err
+                return
+</span>        }
+
+        <span class="cov0" title="0">scripts, err := filepath.Glob(filepath.Join(migrationsDir, "*.up.sql"))
+        if err != nil </span>{
+                <span class="cov0" title="0">pgErr = err
+                return
+</span>        }
+        <span class="cov0" title="0">sort.Strings(scripts)
+</span>
+        <span class="cov0" title="0">container, err := postgres.Run(ctx, pgImage,
+                postgres.WithDatabase(pgDBName),
+                postgres.WithUsername(pgUser),
+                postgres.WithPassword(pgPassword),
+                postgres.WithInitScripts(scripts...),
+                postgres.BasicWaitStrategies(),
+        )
+        if err != nil </span>{
+                <span class="cov0" title="0">pgErr = fmt.Errorf("start postgres container: %w", err)
+                return
+</span>        }
+
+        <span class="cov0" title="0">if pgHost, err = container.Host(ctx); err != nil </span>{
+                <span class="cov0" title="0">pgErr = err
+                return
+</span>        }
+
+        <span class="cov0" title="0">port, err := container.MappedPort(ctx, "5432/tcp")
+        if err != nil </span>{
+                <span class="cov0" title="0">pgErr = err
+                return
+</span>        }
+        <span class="cov0" title="0">pgPort = port.Port()</span>
+}
+
+func SetupTestDB(t *testing.T) *core_pgx_pool.Pool {
+        <span class="cov0" title="0">t.Helper()
+</span>
+        <span class="cov0" title="0">pgOnce.Do(startPostgres)
+        require.NoError(t, pgErr, "failed to start postgres testcontainer")
+</span>
+        <span class="cov0" title="0">t.Setenv("POSTGRES_HOST", pgHost)
+        t.Setenv("POSTGRES_PORT", pgPort)
+        t.Setenv("POSTGRES_USER", pgUser)
+        t.Setenv("POSTGRES_PASSWORD", pgPassword)
+        t.Setenv("POSTGRES_DB", pgDBName)
+        if os.Getenv("POSTGRES_TIMEOUT") == "" </span>{
+                <span class="cov0" title="0">t.Setenv("POSTGRES_TIMEOUT", (10 * time.Second).String())
+</span>        }
+
+        <span class="cov0" title="0">ctx := context.Background()
+        config := core_pgx_pool.NewConfigMust()
+</span>
+        <span class="cov0" title="0">pool, err := core_pgx_pool.NewPool(ctx, config)
+        require.NoError(t, err, "failed to create test database pool")
+</span>
+        <span class="cov0" title="0">t.Cleanup(pool.Close)
+</span>
+        <span class="cov0" title="0">return pool</span>
+}
+
+func CleanupTestDB(t *testing.T, pool *core_pgx_pool.Pool) {
+        <span class="cov0" title="0">t.Helper()
+        pool.Close()
+</span>}
+
+func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
+        <span class="cov0" title="0">t.Helper()
+</span>
+        <span class="cov0" title="0">ctx := context.Background()
+</span>
+        <span class="cov0" title="0">queries := []string{
+                "TRUNCATE TABLE weather.locations RESTART IDENTITY CASCADE",
+                "TRUNCATE TABLE weather.sessions RESTART IDENTITY CASCADE",
+                "TRUNCATE TABLE weather.users RESTART IDENTITY CASCADE",
+</span>        }
+
+        <span class="cov0" title="0">for _, query := range queries </span>{
+                <span class="cov0" title="0">_, err := pool.Exec(ctx, query)
+                require.NoError(t, err, fmt.Sprintf("failed to clear table: %s", query))
+</span>        }
+}
+
+func GetTestDBName() string {
+        <span class="cov0" title="0">return pgDBName
+</span>}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

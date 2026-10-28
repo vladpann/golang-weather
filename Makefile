@@ -3,10 +3,9 @@ export
 
 export PROJECT_ROOT=$(shell pwd)
 
-.PHONY: help env-up env-down env-cleanup env-port-forward env-port-close \
+.PHONY: help build-local weather-run weather-deploy weather-undeploy logs-cleanup ps \
+	env-up env-down env-cleanup env-port-forward env-port-close \
 	migrate-create migrate-up migrate-down migrate-action \
-	migrate-up-test migrate-down-test migrate-action-test \
-	logs-cleanup weather-run weather-deploy weather-undeploy ps \
 	test test-all test-integration test-users test-sessions test-openweather
 
 help: ## Показать справку
@@ -30,7 +29,7 @@ weather-run: ## Запустить приложение локально
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/weather/main.go
 
-weather-deploy: ## Деплой с локально собранным бинарником 
+weather-deploy: ## Деплой с локально собранным бинарником
 	@echo "🔨 Building binary locally..."
 	@$(MAKE) build-local
 	@echo "🐳 Deploying to Docker..."
@@ -53,33 +52,34 @@ ps: ## Показать статус контейнеров
 	@docker compose ps
 
 # ============================================
-# Окружение (PostgreSQL dev + test)
+# Окружение (PostgreSQL dev)
+# Тестовая БД поднимается сама через testcontainers
 # ============================================
 
-env-up: ## Запустить PostgreSQL (dev + test)
-	@docker compose up -d weather-postgres weather-postgres-test
+env-up: ## Запустить PostgreSQL (dev)
+	@docker compose up -d weather-postgres
 
-env-down: ## Остановить PostgreSQL (dev + test)
-	@docker compose down weather-postgres weather-postgres-test
+env-down: ## Остановить PostgreSQL (dev)
+	@docker compose down weather-postgres
 
 env-cleanup: ## Удалить данные PostgreSQL (ОСТОРОЖНО!)
 	@read -p "Delete all environment volume files? Risk of data loss. [y/N]: " ans; \
 	if [ "$$ans" = "y" ]; then \
-		docker compose down weather-postgres weather-postgres-test port-forwarder port-forwarder-test && \
-		rm -rf ${PROJECT_ROOT}/out/pgdata ${PROJECT_ROOT}/out/pgdata-test && \
+		docker compose down weather-postgres port-forwarder && \
+		rm -rf ${PROJECT_ROOT}/out/pgdata && \
 		echo "Environment files have been cleared"; \
 	else \
 		echo "Environment clean-up cancelled"; \
 	fi;
 
-env-port-forward: ## Пробросить порты БД на localhost (dev 5432, test 5433)
-	@docker compose up -d port-forwarder port-forwarder-test
+env-port-forward: ## Пробросить порт dev БД на localhost (5432)
+	@docker compose up -d port-forwarder
 
-env-port-close: ## Закрыть проброшенные порты БД
-	@docker compose down port-forwarder port-forwarder-test
+env-port-close: ## Закрыть проброшенный порт БД
+	@docker compose down port-forwarder
 
 # ============================================
-# Миграции
+# Миграции (dev база)
 # ============================================
 
 migrate-create: ## Создать миграцию (make migrate-create seq=init)
@@ -109,43 +109,27 @@ migrate-action: ## Выполнить действие миграции на dev
 		-database "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@weather-postgres:5432/${POSTGRES_DB}?sslmode=disable" \
 		"$(action)"
 
-migrate-up-test: ## Применить миграции к test базе
-	@make migrate-action-test action=up
-
-migrate-down-test: ## Откатить миграции test базы
-	@make migrate-action-test action=down
-
-migrate-action-test: ## Выполнить действие миграции на test базе
-	@if [ -z "$(action)" ]; then \
-		echo "The required \"action\" parameter is missing. Example: make migrate-action-test action=up"; \
-		exit 1; \
-	fi; \
-	docker compose run --rm weather-postgres-migrate \
-		-path /migrations \
-		-database "postgres://${POSTGRES_USER_TEST}:${POSTGRES_PASSWORD_TEST}@weather-postgres-test:5432/${POSTGRES_DB_TEST}?sslmode=disable" \
-		"$(action)"
-
 # ============================================
-# Тесты
+# Тесты (требуется запущенный Docker)
 # ============================================
 
 test: ## Запустить все тесты
-	@go test ./... -v -p=1
+	@go test ./... -v -timeout 5m
 
 test-all: ## Запустить все тесты с покрытием
-	@go test ./... -v -cover -coverprofile=coverage.out -p=1 -count=1
+	@go test ./... -v -cover -coverprofile=coverage.out -count=1 -timeout 5m
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "📊 Отчет о покрытии сохранен в coverage.html"
 
 test-integration: ## Запустить только интеграционные тесты
-	@go test ./internal/features/users/service -v -count=1
-	@go test ./internal/features/sessions/service -v -count=1
+	@go test ./internal/features/users/service -v -count=1 -timeout 5m
+	@go test ./internal/features/sessions/service -v -count=1 -timeout 5m
 
 test-users: ## Запустить тесты сервиса пользователей
-	@go test ./internal/features/users/service -v -count=1
+	@go test ./internal/features/users/service -v -count=1 -timeout 5m
 
 test-sessions: ## Запустить тесты сервиса сессий
-	@go test ./internal/features/sessions/service -v -count=1
+	@go test ./internal/features/sessions/service -v -count=1 -timeout 5m
 
 test-openweather: ## Запустить тесты OpenWeather HTTP транспорта
 	@go test ./internal/features/openweather/transport/http -v -count=1

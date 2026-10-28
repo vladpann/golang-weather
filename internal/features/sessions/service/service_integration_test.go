@@ -30,7 +30,7 @@ func TestSessionsService_CreateSession_Integration(t *testing.T) {
 		TTL: 1 * time.Hour,
 	}
 	t.Logf("Test config TTL: %v", sessionsConfig.TTL)
-	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
+	sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
 
 	ctx := context.Background()
 
@@ -108,7 +108,7 @@ func TestSessionExpiration_Integration(t *testing.T) {
 		shortTTLConfig := sessions_service.Config{
 			TTL: 1 * time.Second,
 		}
-		shortTTLSessionsService := sessions_service.NewSessionsService(sessionsRepository, shortTTLConfig)
+		shortTTLSessionsService := sessions_service.NewSessionsService(shortTTLConfig, sessionsRepository)
 
 		// Создаем пользователя
 		login := "expireuser"
@@ -141,7 +141,7 @@ func TestSessionExpiration_Integration(t *testing.T) {
 		longTTLConfig := sessions_service.Config{
 			TTL: 1 * time.Hour,
 		}
-		longTTLSessionsService := sessions_service.NewSessionsService(sessionsRepository, longTTLConfig)
+		longTTLSessionsService := sessions_service.NewSessionsService(longTTLConfig, sessionsRepository)
 
 		// Создаем пользователя
 		login := "longuser"
@@ -178,7 +178,7 @@ func TestRegistrationWithSessionCreation_Integration(t *testing.T) {
 	sessionsConfig := sessions_service.Config{
 		TTL: 24 * time.Hour,
 	}
-	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
+	sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
 
 	ctx := context.Background()
 

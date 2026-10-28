@@ -5,45 +5,105 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"sync"
 	"testing"
+	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+
 	core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
 )
 
-func findEnvTest() (string, error) {
+const (
+	pgImage    = "postgres:18.1-bookworm"
+	pgDBName   = "weather_db_test"
+	pgUser     = "test"
+	pgPassword = "test"
+)
+
+var (
+	pgOnce sync.Once
+	pgHost string
+	pgPort string
+	pgErr  error
+)
+
+func findMigrationsDir() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
 		return "", err
 	}
 
 	for {
-		candidate := filepath.Join(dir, ".env.test")
-		if _, err := os.Stat(candidate); err == nil {
+		candidate := filepath.Join(dir, "migrations")
+		if st, err := os.Stat(candidate); err == nil && st.IsDir() {
 			return candidate, nil
 		}
 
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return "", fmt.Errorf(".env.test not found")
+			return "", fmt.Errorf("migrations dir not found")
 		}
 		dir = parent
 	}
 }
 
-// SetupTestDB connection to test DB
+func startPostgres() {
+	ctx := context.Background()
+
+	migrationsDir, err := findMigrationsDir()
+	if err != nil {
+		pgErr = err
+		return
+	}
+
+	scripts, err := filepath.Glob(filepath.Join(migrationsDir, "*.up.sql"))
+	if err != nil {
+		pgErr = err
+		return
+	}
+	sort.Strings(scripts)
+
+	container, err := postgres.Run(ctx, pgImage,
+		postgres.WithDatabase(pgDBName),
+		postgres.WithUsername(pgUser),
+		postgres.WithPassword(pgPassword),
+		postgres.WithInitScripts(scripts...),
+		postgres.BasicWaitStrategies(),
+	)
+	if err != nil {
+		pgErr = fmt.Errorf("start postgres container: %w", err)
+		return
+	}
+
+	if pgHost, err = container.Host(ctx); err != nil {
+		pgErr = err
+		return
+	}
+
+	port, err := container.MappedPort(ctx, "5432/tcp")
+	if err != nil {
+		pgErr = err
+		return
+	}
+	pgPort = port.Port()
+}
+
 func SetupTestDB(t *testing.T) *core_pgx_pool.Pool {
 	t.Helper()
 
-	path, err := findEnvTest()
-	if err == nil {
-		require.NoError(t, godotenv.Overload(path), "failed to load .env.test")
-		t.Logf("Loaded config from: %s", path)
-	} else {
-		require.NotEmpty(t, os.Getenv("POSTGRES_DB"),
-			".env.test not found and POSTGRES_* env vars are not set")
-		t.Log("Using POSTGRES_* from environment (CI)")
+	pgOnce.Do(startPostgres)
+	require.NoError(t, pgErr, "failed to start postgres testcontainer")
+
+	t.Setenv("POSTGRES_HOST", pgHost)
+	t.Setenv("POSTGRES_PORT", pgPort)
+	t.Setenv("POSTGRES_USER", pgUser)
+	t.Setenv("POSTGRES_PASSWORD", pgPassword)
+	t.Setenv("POSTGRES_DB", pgDBName)
+	if os.Getenv("POSTGRES_TIMEOUT") == "" {
+		t.Setenv("POSTGRES_TIMEOUT", (10 * time.Second).String())
 	}
 
 	ctx := context.Background()
@@ -52,23 +112,21 @@ func SetupTestDB(t *testing.T) *core_pgx_pool.Pool {
 	pool, err := core_pgx_pool.NewPool(ctx, config)
 	require.NoError(t, err, "failed to create test database pool")
 
+	t.Cleanup(pool.Close)
+
 	return pool
 }
 
-// CleanupTestDB закрывает подключение к базе данных
 func CleanupTestDB(t *testing.T, pool *core_pgx_pool.Pool) {
 	t.Helper()
 	pool.Close()
 }
 
-// ClearTables очищает таблицы в тестовой базе данных
 func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
 	t.Helper()
 
 	ctx := context.Background()
 
-	// Очищаем в обратном порядке зависимостей:
-	// сначала зависимые таблицы, потом главные
 	queries := []string{
 		"TRUNCATE TABLE weather.locations RESTART IDENTITY CASCADE",
 		"TRUNCATE TABLE weather.sessions RESTART IDENTITY CASCADE",
@@ -81,11 +139,6 @@ func ClearTables(t *testing.T, pool *core_pgx_pool.Pool) {
 	}
 }
 
-// GetTestDBName возвращает имя тестовой базы данных
 func GetTestDBName() string {
-	dbName := os.Getenv("POSTGRES_DB")
-	if dbName == "" {
-		return "weather_db_test"
-	}
-	return dbName
+	return pgDBName
 }

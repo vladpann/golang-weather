@@ -12,29 +12,29 @@ type SessionsService interface {
 	DeleteExpiredSession(ctx context.Context) error
 }
 
-type SessionCleaner struct {
+type SessionsCleaner struct {
 	config          Config
 	sessionsService SessionsService
 	log             *core_logger.Logger
 }
 
-func NewSessionCleaner(
+func NewSessionsCleaner(
 	config Config,
 	sessionsService SessionsService,
 	log *core_logger.Logger,
-) *SessionCleaner {
-	return &SessionCleaner{
+) *SessionsCleaner {
+	return &SessionsCleaner{
 		config:          config,
 		sessionsService: sessionsService,
 		log:             log,
 	}
 }
 
-func (c *SessionCleaner) Run(ctx context.Context) error {
-	ticker := time.NewTicker(c.config.Cleanup_Inverval)
+func (c *SessionsCleaner) Run(ctx context.Context) error {
+	ticker := time.NewTicker(c.config.CleanupInterval)
 	defer ticker.Stop()
 
-	c.log.Info("session cleaner started", zap.Duration("interval", c.config.Cleanup_Inverval))
+	c.log.Info("session cleaner started", zap.Duration("interval", c.config.CleanupInterval))
 
 	for {
 		select {

@@ -41,7 +41,6 @@ type testEnv struct {
 	logger  *core_logger.Logger
 }
 
-// newTestEnv поднимает handler, который ходит в upstream-сервер по upstreamURL.
 func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 	t.Helper()
 
@@ -58,7 +57,7 @@ func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
 		RequestsPerMinute: config.RequestsPerMinute,
 		QueueSize:         config.QueueSize,
-	}, zapLogger)
+	}, &core_logger.Logger{Logger: zapLogger})
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 
@@ -94,7 +93,7 @@ func newTestEnvWithAuth(
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
 		RequestsPerMinute: config.RequestsPerMinute,
 		QueueSize:         config.QueueSize,
-	}, zapLogger)
+	}, &core_logger.Logger{Logger: zapLogger})
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 
@@ -208,12 +207,11 @@ func TestGetOpenWeather_UpstreamErrors(t *testing.T) {
 
 			rr := env.doCoords(t, context.Background(), 55.7522, 37.6156)
 
-			// Handler сейчас оборачивает любой не-200 в общую ошибку -> 500.
 			assert.Equal(t, http.StatusInternalServerError, rr.Code)
 
 			var resp map[string]any
 			require.NoError(t, json.NewDecoder(rr.Body).Decode(&resp))
-			assert.Contains(t, resp, "error")
+			assert.Contains(t, resp, "message")
 		})
 	}
 }
