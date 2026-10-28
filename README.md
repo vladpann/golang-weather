@@ -8,19 +8,7 @@
 
 Проект доступен по ссылке:
 
-http://77.223.99.64
-
-Username
-
-```
-Demo
-```
-
-Password
-
-```
-Demo123
-```
+https://77.223.99.64
 
 ## Архитектура
 
@@ -85,7 +73,8 @@ Demo123
 ├── migrations/           # SQL миграции
 ├── public/               # Статические файлы (frontend)
 ├── docs/                 # Документация
-├── nginx.conf            # Конфигурация Nginx
+├── nginx.conf            # Конфигурация Nginx (dev)
+├── nginx.conf.prod       # Конфигурация Nginx (prod)
 └── docker-compose.yml    # Docker Compose конфигурация
 ```
 
@@ -93,6 +82,7 @@ Demo123
 
 - **Аутентификация**: Сессии на основе cookies с bcrypt хешированием паролей
 - **Rate Limiting**: Ограничение запросов к OpenWeather API (60 req/min по умолчанию)
+- **Cleanup Interval**: Автоочистка истекших сессий из БД (10h по умолчанию)
 - **ON DELETE CASCADE**: При удалении пользователя автоматически удаляются все его сессии и локации
 - **CORS**: Настроен для работы с frontend
 - **Логирование**: Структурированные логи с помощью zap
