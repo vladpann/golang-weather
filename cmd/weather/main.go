@@ -22,10 +22,12 @@ import (
 	openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
 	sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
 	sessions_service "github.com/vladpann/backend/golang-weather/internal/features/sessions/service"
+	sessions_worker "github.com/vladpann/backend/golang-weather/internal/features/sessions/worker"
 	users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
 	users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
 	users_transport_http "github.com/vladpann/backend/golang-weather/internal/features/users/transport/http"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -69,7 +71,9 @@ func main() {
 	logger.Debug("initializing feature", zap.String("feature", "sessions"))
 	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
 	sessionsConfig := sessions_service.NewConfigMust()
-	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
+	sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
+	sessionsWorkerConfig := sessions_worker.NewConfigMust()
+	sessionsWorkerCleaner := sessions_worker.NewSessionCleaner(sessionsWorkerConfig, sessionsService, logger)
 
 	authMiddleware := core_http_middleware.Auth(sessionsService)
 	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService, authMiddleware)
@@ -87,7 +91,7 @@ func main() {
 		RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
 		QueueSize:         openWeatherConfig.QueueSize,
 	}
-	rateLimiter, err := ratelimiter.NewRateLimiter(rateLimiterConfig, logger.Logger)
+	rateLimiter, err := ratelimiter.NewRateLimiter(rateLimiterConfig, logger)
 	if err != nil {
 		logger.Fatal("failed to init rate limiter", zap.Error(err))
 	}
@@ -121,7 +125,12 @@ func main() {
 		apiVersionRouter,
 	)
 
-	if err := httpServer.Run(ctx); err != nil {
-		logger.Error("HTTP server run error", zap.Error(err))
+	egroup, ectx := errgroup.WithContext(ctx)
+
+	egroup.Go(func() error { return httpServer.Run(ectx) })
+	egroup.Go(func() error { return sessionsWorkerCleaner.Run(ectx) })
+
+	if err := egroup.Wait(); err != nil {
+		logger.Error("app stopped with error", zap.Error(err))
 	}
 }

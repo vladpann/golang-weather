@@ -16,8 +16,24 @@ import (
 
 // mockSessionsRepository - мок репозитория для юнит-тестов
 type mockSessionsRepository struct {
-	createSessionFunc func(ctx context.Context, session domain.Session) (domain.Session, error)
-	getSessionFunc    func(ctx context.Context, sessionID uuid.UUID) (domain.Session, error)
+	createSessionFunc        func(ctx context.Context, session domain.Session) (domain.Session, error)
+	getSessionFunc           func(ctx context.Context, sessionID uuid.UUID) (domain.Session, error)
+	deleteSessionFunc        func(ctx context.Context, sessionID uuid.UUID) error
+	deleteExpiredSessionFunc func(ctx context.Context) error
+}
+
+func (m *mockSessionsRepository) DeleteSession(ctx context.Context, sessionID uuid.UUID) error {
+	if m.deleteSessionFunc != nil {
+		return m.deleteSessionFunc(ctx, sessionID)
+	}
+	return nil
+}
+
+func (m *mockSessionsRepository) DeleteExpiredSession(ctx context.Context) error {
+	if m.deleteExpiredSessionFunc != nil {
+		return m.deleteExpiredSessionFunc(ctx)
+	}
+	return nil
 }
 
 func (m *mockSessionsRepository) CreateSession(ctx context.Context, session domain.Session) (domain.Session, error) {
@@ -107,7 +123,7 @@ func TestCreateSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: 1 * time.Hour}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		session, err := service.CreateSession(ctx, userID)
 
@@ -127,7 +143,7 @@ func TestCreateSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: 1 * time.Hour}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		_, err := service.CreateSession(ctx, userID)
 
@@ -146,7 +162,7 @@ func TestCreateSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: customTTL}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		beforeCreate := time.Now()
 		session, err := service.CreateSession(ctx, userID)
@@ -189,7 +205,7 @@ func TestGetSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: 1 * time.Hour}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		session, err := service.GetSession(ctx, sessionID)
 
@@ -210,7 +226,7 @@ func TestGetSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: 1 * time.Hour}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		_, err := service.GetSession(ctx, sessionID)
 
@@ -228,7 +244,7 @@ func TestGetSession_Unit(t *testing.T) {
 		}
 
 		config := sessions_service.Config{TTL: 1 * time.Hour}
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		_, err := service.GetSession(ctx, nonExistentID)
 
@@ -242,7 +258,7 @@ func TestNewSessionsService(t *testing.T) {
 		mockRepo := &mockSessionsRepository{}
 		config := sessions_service.Config{TTL: 1 * time.Hour}
 
-		service := sessions_service.NewSessionsService(mockRepo, config)
+		service := sessions_service.NewSessionsService(config, mockRepo)
 
 		assert.NotNil(t, service)
 	})

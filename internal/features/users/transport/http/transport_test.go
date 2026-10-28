@@ -45,7 +45,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 
 	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
 	sessionsConfig := sessions_service.Config{TTL: 24 * time.Hour}
-	sessionsService := sessions_service.NewSessionsService(sessionsRepository, sessionsConfig)
+	sessionsService := sessions_service.NewSessionsService(sessionsConfig, sessionsRepository)
 
 	// Middleware-заглушка (без проверки аутентификации)
 	noopAuth := func(next http.Handler) http.Handler { return next }

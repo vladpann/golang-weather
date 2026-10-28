@@ -115,6 +115,7 @@ Demo123
 - `HTTP_ADDR` - адрес HTTP сервера (по умолчанию :5050)
 - `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - настройки подключения к PostgreSQL
 - `SESSION_TTL` - время жизни сессии (по умолчанию 24h)
+- `SESSION_CLEANUP_INTERVAL` - время автоочистки истекших сессий (по умолчанию 10h)
 - `OPENWEATHER_API_KEY` - API ключ OpenWeather
 - `OPENWEATHER_REQUESTS_PER_MINUTE` - лимит запросов к OpenWeather API (по умолчанию 60)
 - `LOGGER_LEVEL` - уровень логирования (DEBUG, INFO, WARN, ERROR)

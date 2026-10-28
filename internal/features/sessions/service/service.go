@@ -8,8 +8,8 @@ import (
 )
 
 type SessionsService struct {
-	sessionsRepository SessionsRepository
 	config             Config
+	sessionsRepository SessionsRepository
 }
 
 type SessionsRepository interface {
@@ -17,18 +17,28 @@ type SessionsRepository interface {
 		ctx context.Context,
 		session domain.Session,
 	) (domain.Session, error)
+
 	GetSession(
 		ctx context.Context,
 		sessionID uuid.UUID,
 	) (domain.Session, error)
+
+	DeleteSession(
+		ctx context.Context,
+		sessionID uuid.UUID,
+	) error
+
+	DeleteExpiredSession(
+		ctx context.Context,
+	) error
 }
 
 func NewSessionsService(
-	sessionsRepository SessionsRepository,
 	config Config,
+	sessionsRepository SessionsRepository,
 ) *SessionsService {
 	return &SessionsService{
-		sessionsRepository: sessionsRepository,
 		config:             config,
+		sessionsRepository: sessionsRepository,
 	}
 }

@@ -9,7 +9,7 @@ async function signOut() {
       credentials: 'include',
     });
 
-    if (response.ok || response.status === 204) {
+    if (response.status === 401) {
       // Sign-out successful, redirect to sign-in page
       window.location.href = SIGN_IN_PAGE;
     } else {

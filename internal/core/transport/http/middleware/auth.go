@@ -12,7 +12,10 @@ import (
 
 type contextKey string
 
-const UserIDContextKey contextKey = "userID"
+const (
+	UserIDContextKey    contextKey = "userID"
+	SessionIDContextKey contextKey = "sessionID"
+)
 
 type SessionsService interface {
 	GetSession(
@@ -49,6 +52,7 @@ func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
 			}
 
 			ctx = context.WithValue(ctx, UserIDContextKey, session.UserID)
+			ctx = context.WithValue(ctx, SessionIDContextKey, sessionID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -58,4 +62,9 @@ func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
 func GetUserIDFromContext(ctx context.Context) (int64, bool) {
 	userID, ok := ctx.Value(UserIDContextKey).(int64)
 	return userID, ok
+}
+
+func GetSessionIDFromContext(ctx context.Context) (uuid.UUID, bool) {
+	sessionID, ok := ctx.Value(SessionIDContextKey).(uuid.UUID)
+	return sessionID, ok
 }

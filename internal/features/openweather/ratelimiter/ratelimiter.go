@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 )
 
@@ -24,14 +25,14 @@ type RateLimiter struct {
 	lastRefill     time.Time
 	queue          chan *queuedRequest
 	queueSize      int
-	logger         *zap.Logger
+	logger         *core_logger.Logger
 	stopChan       chan struct{}
 	wg             sync.WaitGroup
 	closed         bool // Track if already closed
 }
 
 // NewRateLimiter creates a new rate limiter instance
-func NewRateLimiter(config Config, logger *zap.Logger) (*RateLimiter, error) {
+func NewRateLimiter(config Config, logger *core_logger.Logger) (*RateLimiter, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
 	}

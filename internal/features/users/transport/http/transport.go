@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
 	core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
@@ -40,6 +41,11 @@ type SessionsService interface {
 		ctx context.Context,
 		userID int64,
 	) (domain.Session, error)
+
+	DeleteSession(
+		ctx context.Context,
+		sessionID uuid.UUID,
+	) error
 }
 
 func NewUsersHTTPHandler(
@@ -67,9 +73,10 @@ func (h *UsersHTTPHandler) Routes() []core_http_server.Route {
 			Handler: h.SignInUser,
 		},
 		{
-			Method:  http.MethodPost,
-			Path:    "/auth/sign-out",
-			Handler: h.SignOutUser,
+			Method:      http.MethodPost,
+			Path:        "/auth/sign-out",
+			Handler:     h.SignOutUser,
+			Middlewares: []core_http_middleware.Middleware{h.authMiddleware},
 		},
 		{
 			Method:      http.MethodGet,
