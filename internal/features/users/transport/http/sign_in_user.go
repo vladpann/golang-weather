@@ -58,6 +58,7 @@ func (h *UsersHTTPHandler) SignInUser(rw http.ResponseWriter, r *http.Request) {
 		Value:    session.ID.String(),
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   h.config.Secure,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  session.ExpiresAt,
 	})

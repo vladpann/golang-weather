@@ -11,6 +11,7 @@ import (
 )
 
 type UsersHTTPHandler struct {
+	config          Config
 	usersService    UsersService
 	sessionsService SessionsService
 	authMiddleware  core_http_middleware.Middleware
@@ -49,11 +50,13 @@ type SessionsService interface {
 }
 
 func NewUsersHTTPHandler(
+	config Config,
 	usersService UsersService,
 	sessionsService SessionsService,
 	authMiddleware core_http_middleware.Middleware,
 ) *UsersHTTPHandler {
 	return &UsersHTTPHandler{
+		config:          config,
 		usersService:    usersService,
 		sessionsService: sessionsService,
 		authMiddleware:  authMiddleware,

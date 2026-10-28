@@ -30,9 +30,11 @@ func (h *UsersHTTPHandler) SignOutUser(rw http.ResponseWriter, r *http.Request) 
 
 	http.SetCookie(rw, &http.Cookie{
 		Name:     "session_id",
-		Value:    "",
+		Value:    sessionID.String(),
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   h.config.Secure,
+		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
 	})
 

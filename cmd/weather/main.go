@@ -67,6 +67,7 @@ func main() {
 	usersRepository := users_repository_postgres.NewUsersRepository(pool)
 	passwordHasher := users_service.NewPasswordHasher()
 	usersService := users_service.NewUsersService(usersRepository, passwordHasher)
+	usersTransportHTTPConfig := users_transport_http.NewConfigMust()
 
 	logger.Debug("initializing feature", zap.String("feature", "sessions"))
 	sessionsRepository := sessions_repository_postgres.NewSessionsRepository(pool)
@@ -76,7 +77,12 @@ func main() {
 	sessionsWorkerCleaner := sessions_worker.NewSessionCleaner(sessionsWorkerConfig, sessionsService, logger)
 
 	authMiddleware := core_http_middleware.Auth(sessionsService)
-	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(usersService, sessionsService, authMiddleware)
+	usersTransportHTTP := users_transport_http.NewUsersHTTPHandler(
+		usersTransportHTTPConfig,
+		usersService,
+		sessionsService,
+		authMiddleware,
+	)
 
 	logger.Debug("initializing feature", zap.String("feature", "locations"))
 	locationsRepository := locations_repository_postgres.NewLocationsRepository(pool)
