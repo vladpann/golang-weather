@@ -1,3 +1,5 @@
+.idea
+.vscode
 .env
 .env.*
 !.env.example
@@ -7,6 +9,7 @@ out
 
 # Test coverage files
 coverage.out
+coverage.html
 coverage.html*.exe
 exe
 *.exe
