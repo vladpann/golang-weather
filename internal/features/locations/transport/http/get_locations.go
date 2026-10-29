@@ -31,6 +31,8 @@ func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Requ
 			err,
 			"failed to get 'limit'/'offset' query param",
 		)
+
+		return
 	}
 
 	locationDomains, err := h.locationsService.GetLocations(ctx, userID, limit, offset)
