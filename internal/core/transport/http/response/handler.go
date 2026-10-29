@@ -66,8 +66,14 @@ func (h *HTTPResponseHandler) ErrorResponse(err error, msg string) {
 	case errors.Is(err, core_errors.ErrLoginAlreadyExists):
 		statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLoginAlreadyExists.Error()
 
-	case errors.Is(err, core_errors.ErrLocationAlreadyExists):
-		statusCode, logFunc, publicErr = http.StatusConflict, h.log.Warn, core_errors.ErrLocationAlreadyExists.Error()
+	case errors.Is(err, core_errors.ErrLoginRequired):
+		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrLoginRequired.Error()
+
+	case errors.Is(err, core_errors.ErrPasswordRequired):
+		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrPasswordRequired.Error()
+
+	case errors.Is(err, core_errors.ErrPasswordRequired):
+		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrPasswordRequired.Error()
 
 	case errors.Is(err, core_errors.ErrPasswordDoNotMatch):
 		statusCode, logFunc, publicErr = http.StatusBadRequest, h.log.Warn, core_errors.ErrPasswordDoNotMatch.Error()

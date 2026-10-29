@@ -173,7 +173,7 @@ func TestUsersHTTPHandler_CreateUser(t *testing.T) {
 		rr := httptest.NewRecorder()
 		env.handler.CreateUser(rr, req)
 
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
 	t.Run("регистрация с невалидным JSON возвращает 400", func(t *testing.T) {
@@ -288,7 +288,7 @@ func TestUsersHTTPHandler_SignIn(t *testing.T) {
 		assert.Empty(t, cookies)
 	})
 
-	t.Run("авторизация несуществующего пользователя возвращает 404", func(t *testing.T) {
+	t.Run("авторизация несуществующего пользователя возвращает 401", func(t *testing.T) {
 		testutil.ClearTables(t, testutil.SetupTestDB(t))
 
 		reqBody := map[string]string{
@@ -304,7 +304,7 @@ func TestUsersHTTPHandler_SignIn(t *testing.T) {
 		rr := httptest.NewRecorder()
 		env.handler.SignInUser(rr, req)
 
-		assert.Equal(t, http.StatusNotFound, rr.Code)
+		assert.Equal(t, http.StatusUnauthorized, rr.Code)
 	})
 
 	t.Run("авторизация с невалидным JSON возвращает 400", func(t *testing.T) {

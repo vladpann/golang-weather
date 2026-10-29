@@ -1,28 +1,30 @@
 package users_service
 
-import "fmt"
+import (
+	"fmt"
 
-type CreateUserInput struct {
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+)
+
+type UserInput struct {
 	Login          string
 	Password       string
-	RepeatPassword string
+	RepeatPassword *string
 }
 
-func (i *CreateUserInput) CreateUserValidate() error {
-	if i.Login == "" {
-		return fmt.Errorf("login is required")
-	}
-
-	if i.Password == "" {
-		return fmt.Errorf("password is required")
+func (i *UserInput) UserValidate() error {
+	if i.Login == "" || i.Password == "" {
+		return fmt.Errorf(
+			"login and password are required: %w", core_errors.ErrInvalidArgument,
+		)
 	}
 
 	if len(i.Password) < 4 || len(i.Password) > 72 {
-		return fmt.Errorf("password must be between 4 and 72 characters")
+		return core_errors.ErrPasswordConstrains
 	}
 
-	if i.Password != i.RepeatPassword {
-		return fmt.Errorf("password do not match")
+	if i.RepeatPassword != nil && i.Password != *i.RepeatPassword {
+		return core_errors.ErrPasswordDoNotMatch
 	}
 
 	return nil

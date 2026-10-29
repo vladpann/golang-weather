@@ -15,12 +15,12 @@ func (s *UsersService) CreateUser(
 ) (domain.User, error) {
 	var op = "create user"
 
-	input := CreateUserInput{
+	input := UserInput{
 		Login:          login,
 		Password:       password,
-		RepeatPassword: repeatPassword,
+		RepeatPassword: &repeatPassword,
 	}
-	if err := input.CreateUserValidate(); err != nil {
+	if err := input.UserValidate(); err != nil {
 		return domain.User{}, fmt.Errorf("%s validate input: %w", op, err)
 	}
 

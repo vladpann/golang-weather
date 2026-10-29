@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
 	"go.uber.org/zap"
@@ -29,7 +30,7 @@ func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.
 
 	cityName := r.URL.Query().Get("city_name")
 	if cityName == "" {
-		responseHandler.ErrorResponse(fmt.Errorf("city_name is required"), "city_name parameter is required")
+		responseHandler.ErrorResponse(core_errors.ErrCityNameRequired, "city_name parameter is required")
 		return
 	}
 

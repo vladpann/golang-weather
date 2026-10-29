@@ -38,7 +38,7 @@ func (r *UsersRepository) GetUser(
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
 			return domain.User{}, nil, fmt.Errorf("user with login='%s': %w",
 				login,
-				core_errors.ErrNotFound,
+				core_errors.ErrInvalidCredentials,
 			)
 		}
 
