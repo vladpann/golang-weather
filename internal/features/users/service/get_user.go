@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
-	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
 func (s *UsersService) GetUser(
@@ -13,21 +12,23 @@ func (s *UsersService) GetUser(
 	login string,
 	password string,
 ) (domain.User, error) {
+	var op = "get user"
+
 	input := UserInput{
 		Login:    login,
 		Password: password,
 	}
 	if err := input.UserValidate(); err != nil {
-		return domain.User{}, fmt.Errorf("get user validate input: %w", err)
+		return domain.User{}, fmt.Errorf("%s validate input: %w", op, err)
 	}
 
 	user, passwordHash, err := s.usersRepository.GetUser(ctx, login)
 	if err != nil {
-		return domain.User{}, core_errors.ErrInvalidArgument
+		return domain.User{}, fmt.Errorf("%s repository: %w", op, err)
 	}
 
 	if err := s.passwordHasher.Compare(passwordHash, password); err != nil {
-		return domain.User{}, core_errors.ErrInvalidArgument
+		return domain.User{}, fmt.Errorf("%s password hash: %w", op, err)
 	}
 
 	return user, nil

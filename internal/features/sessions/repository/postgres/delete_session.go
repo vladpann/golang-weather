@@ -17,7 +17,7 @@ func (r *SessionsRepository) DeleteSession(
 
 	query := `
 	DELETE FROM weather.sessions
-	WHERE id=$1;
+	WHERE id=$1
 	`
 
 	cmdTag, err := r.pool.Exec(ctx, query, sessionID)

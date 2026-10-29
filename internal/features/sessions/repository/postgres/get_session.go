@@ -2,10 +2,13 @@ package sessions_repository_postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
+	core_postgres_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool"
 )
 
 func (r *SessionsRepository) GetSession(
@@ -25,7 +28,11 @@ func (r *SessionsRepository) GetSession(
 		&model.ExpiresAt,
 	)
 	if err != nil {
-		return domain.Session{}, fmt.Errorf("query row: %w", err)
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
+			return domain.Session{}, fmt.Errorf("session %s: %w", sessionID, core_errors.ErrNotFound)
+		}
+
+		return domain.Session{}, fmt.Errorf("get session: %w", err)
 	}
 
 	return sessionDomainFromModel(model), nil

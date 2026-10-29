@@ -2,10 +2,12 @@ package core_http_middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
+	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	"go.uber.org/zap"
 )
@@ -46,8 +48,19 @@ func Auth(sessionsService SessionsService) func(http.Handler) http.Handler {
 
 			session, err := sessionsService.GetSession(ctx, sessionID)
 			if err != nil {
-				log.Debug("session not found or expired", zap.Error(err))
-				http.Error(w, "Session not found or expired", http.StatusUnauthorized)
+				switch {
+				case errors.Is(err, core_errors.ErrNotFound):
+					log.Debug("session not found or expired", zap.Error(err))
+					http.Error(w, "unauthorized", http.StatusUnauthorized)
+
+				case errors.Is(err, context.Canceled):
+					log.Debug("request canceled while checking session", zap.Error(err))
+
+				default:
+					log.Error("failed to get session", zap.Error(err))
+					http.Error(w, "service temporarily unavailable", http.StatusServiceUnavailable)
+				}
+
 				return
 			}
 

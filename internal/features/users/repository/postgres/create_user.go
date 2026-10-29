@@ -33,7 +33,7 @@ func (r *UsersRepository) CreateUser(
 
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrUniqueViolation) {
-			return domain.User{}, core_errors.ErrLoginAlreadyExists
+			return domain.User{}, core_errors.ErrInvalidCredentials
 		}
 		return domain.User{}, err
 	}

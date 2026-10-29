@@ -11,9 +11,9 @@ import (
 )
 
 type CreateLocationRequest struct {
-	Name      string  `json:"name"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Name      string  `json:"name" validate:"required,min=1,max=255"`
+	Latitude  float64 `json:"latitude" validate:"required,gte=-90,lte=90"`
+	Longitude float64 `json:"longitude" validate:"required,gte=-180,lte=180"`
 }
 
 func (h *LocationsHTTPHandler) CreateLocation(rw http.ResponseWriter, r *http.Request) {
@@ -26,12 +26,14 @@ func (h *LocationsHTTPHandler) CreateLocation(rw http.ResponseWriter, r *http.Re
 	userID, ok := core_http_middleware.GetUserIDFromContext(ctx)
 	if !ok {
 		responseHandler.ErrorResponse(nil, "user not authenticated")
+
 		return
 	}
 
 	var request CreateLocationRequest
 	if err := core_http_request.DecodeAndValidateRequest(r, &request); err != nil {
 		responseHandler.ErrorResponse(err, "failed to decode and validate HTTP request")
+
 		return
 	}
 
@@ -41,6 +43,7 @@ func (h *LocationsHTTPHandler) CreateLocation(rw http.ResponseWriter, r *http.Re
 	if err != nil {
 		log.Debug("failed to create location")
 		responseHandler.ErrorResponse(err, "failed to create location")
+
 		return
 	}
 

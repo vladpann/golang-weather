@@ -3,7 +3,6 @@ package sessions_repository_postgres
 import (
 	"context"
 	"fmt"
-	"time"
 )
 
 func (r *SessionsRepository) DeleteExpiredSession(
@@ -14,10 +13,10 @@ func (r *SessionsRepository) DeleteExpiredSession(
 
 	query := `
 	DELETE FROM weather.sessions
-	WHERE expires_at <= $1;
+	WHERE expires_at <= NOW()
 	`
 
-	_, err := r.pool.Exec(ctx, query, time.Now())
+	_, err := r.pool.Exec(ctx, query)
 	if err != nil {
 		return fmt.Errorf("exec query: %w", err)
 	}

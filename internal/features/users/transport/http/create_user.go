@@ -9,9 +9,9 @@ import (
 )
 
 type CreateUserRequest struct {
-	Login          string `json:"login"`
+	Login          string `json:"login" validate:"required"`
 	Password       string `json:"password" validate:"required,min=4,max=72"`
-	RepeatPassword string `json:"repeat_password"`
+	RepeatPassword string `json:"repeat_password" validate:"required"`
 }
 
 type CreateUserResponse UserDTOResponse

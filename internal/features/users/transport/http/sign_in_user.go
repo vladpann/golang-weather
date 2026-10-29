@@ -3,7 +3,6 @@ package users_transport_http
 import (
 	"net/http"
 
-	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_http_request "github.com/vladpann/backend/golang-weather/internal/core/transport/http/request"
 	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
@@ -37,7 +36,7 @@ func (h *UsersHTTPHandler) SignInUser(rw http.ResponseWriter, r *http.Request) {
 	user, err := h.usersService.GetUser(ctx, login, password)
 	if err != nil {
 		log.Error("failed to sign-in user", zap.String("login", login), zap.Error(err))
-		responseHandler.ErrorResponse(core_errors.ErrInvalidCredentials, "failed to sign-in user")
+		responseHandler.ErrorResponse(err, "failed to sign-in user")
 
 		return
 	}

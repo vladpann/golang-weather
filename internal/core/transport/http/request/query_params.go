@@ -54,13 +54,3 @@ func GetFloat64QueryParam(r *http.Request, key string) (float64, error) {
 
 	return val, nil
 }
-
-// ParseQueryParams parses query parameters from request and validates them
-func ParseQueryParams(r *http.Request, target interface{}) error {
-	// This is a simplified implementation that works with struct tags
-	// For more complex scenarios, consider using a library like gorilla/schema
-
-	// Use reflection to parse query params based on struct tags
-	// For now, we'll return an error that suggests using manual parsing
-	return fmt.Errorf("ParseQueryParams not fully implemented, use GetFloat64QueryParam: %w", core_errors.ErrInvalidArgument)
-}

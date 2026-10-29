@@ -13,7 +13,10 @@ CREATE TABLE weather.locations (
     latitude      NUMERIC(9, 6)   NOT NULL,
     longitude     NUMERIC(9, 6)   NOT NULL,
 
-    CONSTRAINT locations_user_id_coords_key UNIQUE (user_id, latitude, longitude)
+    CONSTRAINT locations_user_id_coords_key UNIQUE (user_id, latitude, longitude),
+    CONSTRAINT locations_name_not_blank     CHECK (btrim(name) <> ''),
+    CONSTRAINT locations_latitude_range     CHECK (latitude  BETWEEN -90  AND 90),
+    CONSTRAINT locations_longitude_range    CHECK (longitude BETWEEN -180 AND 180)
 );
 
 CREATE TABLE weather.sessions (
