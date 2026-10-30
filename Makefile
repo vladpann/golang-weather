@@ -114,22 +114,22 @@ migrate-action: ## Выполнить действие миграции на dev
 # ============================================
 
 test: ## Запустить все тесты
-	@go test ./... -v -timeout 5m
+	@go test -race ./... -v
 
 test-all: ## Запустить все тесты с покрытием
-	@go test ./... -v -cover -coverprofile=coverage.out -count=1 -timeout 5m
+	@go test ./... -v -cover -coverprofile=coverage.out -count=1
 	@go tool cover -html=coverage.out -o coverage.html
 	@echo "📊 Отчет о покрытии сохранен в coverage.html"
 
 test-integration: ## Запустить только интеграционные тесты
-	@go test ./internal/features/users/service -v -count=1 -timeout 5m
-	@go test ./internal/features/sessions/service -v -count=1 -timeout 5m
+	@go test ./internal/features/users/service -v -count=1
+	@go test ./internal/features/sessions/service -v -count=1
 
 test-users: ## Запустить тесты сервиса пользователей
-	@go test ./internal/features/users/service -v -count=1 -timeout 5m
+	@go test ./internal/features/users/service -v -count=1
 
 test-sessions: ## Запустить тесты сервиса сессий
-	@go test ./internal/features/sessions/service -v -count=1 -timeout 5m
+	@go test ./internal/features/sessions/service -v -count=1
 
 test-openweather: ## Запустить тесты OpenWeather HTTP транспорта
 	@go test ./internal/features/openweather/transport/http -v -count=1

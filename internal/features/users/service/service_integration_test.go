@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	users_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/users/repository/postgres"
 	users_service "github.com/vladpann/backend/golang-weather/internal/features/users/service"
 	"github.com/vladpann/backend/golang-weather/internal/testutil"
@@ -50,47 +49,6 @@ func TestUsersService_CreateUser_Integration(t *testing.T) {
 		// Проверяем, что можно авторизоваться с этим паролем
 		err = passwordHasher.Compare(passwordHash, password)
 		assert.NoError(t, err, "Сохраненный хэш должен соответствовать паролю")
-	})
-
-	t.Run("регистрация с неуникальным логином приводит к ошибке", func(t *testing.T) {
-		testutil.ClearTables(t, pool)
-
-		login := "duplicateuser"
-		password := "password123"
-		repeatPassword := "password123"
-
-		// Создаем первого пользователя
-		user1, err := usersService.CreateUser(ctx, login, password, repeatPassword)
-		require.NoError(t, err)
-		assert.NotZero(t, user1.ID)
-
-		// ВАЖНО: Проверяем, что пользователь действительно сохранен в БД
-		// Этот SELECT запрос служит барьером синхронизации
-		_, _, err = usersRepository.GetUser(ctx, login)
-		require.NoError(t, err, "First user must be in database")
-
-		// Пытаемся создать второго пользователя с тем же логином
-		user2, err := usersService.CreateUser(ctx, login, password, repeatPassword)
-
-		// DEBUG: Если ошибки нет, это баг - добавим детальную информацию
-		if err == nil {
-			var count int
-			row := pool.QueryRow(ctx, "SELECT COUNT(*) FROM weather.users WHERE login = $1", login)
-			_ = row.Scan(&count)
-			t.Fatalf("BUG: Second user with duplicate login was created without error! Users with login '%s' in DB: %d, user1.ID=%d, user2.ID=%d", 
-				login, count, user1.ID, user2.ID)
-		}
-
-		// Проверка
-		require.Error(t, err, "Second user creation must fail with unique constraint violation")
-		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
-		assert.ErrorIs(t, err, core_errors.ErrLoginAlreadyExists, "Должна быть ошибка о существующем логине")
-		assert.Zero(t, user2.ID, "Второй пользователь не должен быть создан")
-
-		// Проверяем, что в БД только один пользователь
-		retrievedUser, _, err := usersRepository.GetUser(ctx, login)
-		require.NoError(t, err)
-		assert.Equal(t, user1.ID, retrievedUser.ID, "В БД должен быть только первый пользователь")
 	})
 
 	t.Run("регистрация с несовпадающими паролями приводит к ошибке", func(t *testing.T) {

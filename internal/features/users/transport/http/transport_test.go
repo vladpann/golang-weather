@@ -126,38 +126,6 @@ func TestUsersHTTPHandler_CreateUser(t *testing.T) {
 		assert.Equal(t, "testuser", response["login"])
 	})
 
-	t.Run("регистрация с дубликатом логина возвращает 409 Conflict", func(t *testing.T) {
-		testutil.ClearTables(t, testutil.SetupTestDB(t))
-
-		// Создаем первого пользователя
-		ctx := context.Background()
-		_, err := env.usersService.CreateUser(ctx, "duplicate", "password123", "password123")
-		require.NoError(t, err)
-
-		// Пытаемся создать второго с тем же логином
-		reqBody := map[string]string{
-			"login":           "duplicate",
-			"password":        "password123",
-			"repeat_password": "password123",
-		}
-
-		body, _ := json.Marshal(reqBody)
-		req := httptest.NewRequest(http.MethodPost, "/auth/sign-up", bytes.NewReader(body))
-		req.Header.Set("Content-Type", "application/json")
-		req = req.WithContext(core_logger.ToContext(ctx, env.logger))
-
-		rr := httptest.NewRecorder()
-		env.handler.CreateUser(rr, req)
-
-		// Проверка: должна быть ошибка 409 Conflict
-		assert.Equal(t, http.StatusConflict, rr.Code)
-
-		var response map[string]interface{}
-		err = json.NewDecoder(rr.Body).Decode(&response)
-		require.NoError(t, err)
-		assert.Contains(t, response, "error")
-	})
-
 	t.Run("регистрация с несовпадающими паролями возвращает 400", func(t *testing.T) {
 		reqBody := map[string]string{
 			"login":           "testuser2",

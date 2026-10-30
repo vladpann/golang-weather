@@ -23,12 +23,14 @@ type RateLimiter struct {
 	windowDuration time.Duration
 	tokens         int
 	lastRefill     time.Time
-	queue          chan *queuedRequest
-	queueSize      int
-	logger         *core_logger.Logger
-	stopChan       chan struct{}
-	wg             sync.WaitGroup
-	closed         bool // Track if already closed
+	// queue is never closed: closing a channel that other goroutines may still
+	// send to is what caused the panic. Shutdown is signalled via stopChan only.
+	queue     chan *queuedRequest
+	queueSize int
+	logger    *core_logger.Logger
+	stopChan  chan struct{} // closed exactly once by Close; wakes worker and all waiters
+	wg        sync.WaitGroup
+	closed    bool // guarded by mu
 }
 
 // NewRateLimiter creates a new rate limiter instance
@@ -59,10 +61,18 @@ func NewRateLimiter(config Config, logger *core_logger.Logger) (*RateLimiter, er
 	return rl, nil
 }
 
-// Allow blocks until the request can proceed or context is cancelled
+// Allow blocks until the request can proceed, the context is cancelled,
+// or the limiter is closed (ErrClosed).
 func (rl *RateLimiter) Allow(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+
+	// Fast path: a closed limiter hands out nothing
+	select {
+	case <-rl.stopChan:
+		return ErrClosed
+	default:
 	}
 
 	// Try to acquire token immediately
@@ -78,10 +88,14 @@ func (rl *RateLimiter) Allow(ctx context.Context) error {
 		errChan:   make(chan error, 1),
 	}
 
-	// Try to add to queue
+	// Try to add to queue. The queue channel is never closed, so this send
+	// can't panic; if Close happens concurrently we either get ErrClosed here
+	// or the wait below is woken by stopChan.
 	select {
 	case rl.queue <- qr:
 		rl.logger.Debug("request queued", zap.Int("queue_size", len(rl.queue)))
+	case <-rl.stopChan:
+		return ErrClosed
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
@@ -89,13 +103,22 @@ func (rl *RateLimiter) Allow(ctx context.Context) error {
 		return ErrQueueFull
 	}
 
-	// Wait for either allow signal or context cancellation
+	// Wait for allow signal, shutdown or context cancellation
 	select {
 	case <-qr.allowChan:
 		rl.logger.Debug("queued request allowed")
 		return nil
 	case err := <-qr.errChan:
 		return err
+	case <-rl.stopChan:
+		// The worker may have granted the request at the same moment Close
+		// happened; the token is already spent, so honour the grant.
+		select {
+		case <-qr.allowChan:
+			return nil
+		default:
+			return ErrClosed
+		}
 	case <-ctx.Done():
 		rl.logger.Warn("request timed out while waiting in queue")
 		return ctx.Err()
@@ -168,6 +191,13 @@ func (rl *RateLimiter) processQueue() {
 // processQueuedRequests attempts to process pending requests
 func (rl *RateLimiter) processQueuedRequests() {
 	for {
+		// Stop promptly on shutdown instead of draining the whole queue
+		select {
+		case <-rl.stopChan:
+			return
+		default:
+		}
+
 		// Check if there are queued requests
 		if len(rl.queue) == 0 {
 			return
@@ -218,7 +248,8 @@ func (rl *RateLimiter) IsClosed() bool {
 	return rl.closed
 }
 
-// Close stops the rate limiter and cleans up resources
+// Close stops the rate limiter and releases everyone who is waiting.
+// It is safe to call multiple times and concurrently with Allow.
 func (rl *RateLimiter) Close() {
 	rl.mu.Lock()
 	if rl.closed {
@@ -228,7 +259,25 @@ func (rl *RateLimiter) Close() {
 	rl.closed = true
 	rl.mu.Unlock()
 
+	// 1. Wake the worker and every Allow blocked in the wait select.
+	//    Later Allow calls see stopChan and return ErrClosed immediately.
 	close(rl.stopChan)
+
+	// 2. Wait for the worker to exit.
 	rl.wg.Wait()
-	close(rl.queue)
+
+	// 3. Explicitly fail whatever is still sitting in the queue.
+	//    queue itself is NOT closed. A racing Allow that enqueues after this
+	//    drain is still released by stopChan in its wait select.
+	for {
+		select {
+		case qr := <-rl.queue:
+			select {
+			case qr.errChan <- ErrClosed: // buffered (cap 1), never blocks
+			default:
+			}
+		default:
+			return
+		}
+	}
 }
