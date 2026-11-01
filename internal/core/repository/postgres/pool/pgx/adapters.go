@@ -1,6 +1,7 @@
 package core_pgx_pool
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -38,7 +39,11 @@ func mapErrors(err error) error {
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return core_postgres_pool.ErrNoRows
+	}
 
+	// Preserve context errors (deadline, cancellation) without wrapping
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return err
 	}
 
 	var pgErr *pgconn.PgError
@@ -46,22 +51,23 @@ func mapErrors(err error) error {
 		switch pgErr.Code {
 		case pgxViolatesForeignKeyErrorCode:
 			return fmt.Errorf(
-				"%v: %w",
+				"%w: %w",
 				err,
 				core_postgres_pool.ErrViolatesForeignKey,
 			)
 
 		case pgxUniqueViolationErrorCode:
 			return fmt.Errorf(
-				"%v: %w",
+				"%w: %w",
 				err,
 				core_postgres_pool.ErrUniqueViolation,
 			)
 		}
 	}
 
+	// Preserve error chain with %w for unknown errors
 	return fmt.Errorf(
-		"%v: %w",
+		"%w: %w",
 		err,
 		core_postgres_pool.ErrUnknown,
 	)

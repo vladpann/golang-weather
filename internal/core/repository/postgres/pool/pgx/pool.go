@@ -3,6 +3,7 @@ package core_pgx_pool
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,13 +19,15 @@ func NewPool(
 	ctx context.Context,
 	config Config,
 ) (*Pool, error) {
+	// Build connection string with proper URL encoding
 	connectionString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		config.User,
-		config.Password,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		url.QueryEscape(config.User),
+		url.QueryEscape(config.Password),
 		config.Host,
 		config.Port,
 		config.Database,
+		config.SSLMode,
 	)
 
 	pgxconfig, err := pgxpool.ParseConfig(connectionString)
@@ -32,12 +35,18 @@ func NewPool(
 		return nil, fmt.Errorf("parse pgxconfig: %w", err)
 	}
 
-	pool, err := pgxpool.NewWithConfig(ctx, pgxconfig)
+	// Add timeout for initial connection
+	connectCtx, cancel := context.WithTimeout(ctx, config.Timeout)
+	defer cancel()
+
+	pool, err := pgxpool.NewWithConfig(connectCtx, pgxconfig)
 	if err != nil {
 		return nil, fmt.Errorf("create pgxpool: %w", err)
 	}
 
-	if err := pool.Ping(ctx); err != nil {
+	// Ping to verify connection - close pool if ping fails
+	if err := pool.Ping(connectCtx); err != nil {
+		pool.Close()
 		return nil, fmt.Errorf("pgxpool ping: %w", err)
 	}
 
