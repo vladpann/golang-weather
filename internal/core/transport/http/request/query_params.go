@@ -2,6 +2,7 @@ package core_http_request
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -10,6 +11,11 @@ import (
 )
 
 var validate = validator.New()
+
+const (
+	DefaultPaginationLimit = 10
+	MaxPaginationLimit     = 100
+)
 
 func GetIntQueryParam(r *http.Request, key string) (*int, error) {
 	param := r.URL.Query().Get(key)
@@ -24,6 +30,15 @@ func GetIntQueryParam(r *http.Request, key string) (*int, error) {
 			param,
 			key,
 			err,
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if val < 0 {
+		return nil, fmt.Errorf(
+			"param='%s' by key='%s' must be non-negative: %w",
+			param,
+			key,
 			core_errors.ErrInvalidArgument,
 		)
 	}
@@ -52,5 +67,53 @@ func GetFloat64QueryParam(r *http.Request, key string) (float64, error) {
 		)
 	}
 
+	if math.IsInf(val, 0) {
+		return 0, fmt.Errorf(
+			"param='%s' by key='%s' is infinite: %w",
+			param,
+			key,
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
+	if math.IsNaN(val) {
+		return 0, fmt.Errorf(
+			"param='%s' by key='%s' is NaN: %w",
+			param,
+			key,
+			core_errors.ErrInvalidArgument,
+		)
+	}
+
 	return val, nil
+}
+
+func GetPaginationParams(r *http.Request) (limit int, offset int, err error) {
+	limitPtr, err := GetIntQueryParam(r, "limit")
+	if err != nil {
+		return 0, 0, fmt.Errorf("get 'limit' query param: %w", err)
+	}
+
+	offsetPtr, err := GetIntQueryParam(r, "offset")
+	if err != nil {
+		return 0, 0, fmt.Errorf("get 'offset' query param: %w", err)
+	}
+
+	if limitPtr == nil {
+		limit = DefaultPaginationLimit
+	} else {
+		limit = *limitPtr
+	}
+
+	if limit > MaxPaginationLimit {
+		limit = MaxPaginationLimit
+	}
+
+	if offsetPtr == nil {
+		offset = 0
+	} else {
+		offset = *offsetPtr
+	}
+
+	return limit, offset, nil
 }

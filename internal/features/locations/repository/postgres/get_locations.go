@@ -10,8 +10,8 @@ import (
 func (r *LocationsRepository) GetLocations(
 	ctx context.Context,
 	userID int64,
-	limit *int,
-	offset *int,
+	limit int,
+	offset int,
 ) ([]domain.Location, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()

@@ -85,7 +85,7 @@ func TestLocationsService_CreateLocation_Integration(t *testing.T) {
 		assert.ErrorIs(t, err, core_errors.ErrLocationAlreadyExists, "Должна быть ошибка о существующей локации")
 
 		// Проверяем, что в БД только одна локация
-		locations, err := locationsRepository.GetLocations(ctx, user.ID, nil, nil)
+		locations, err := locationsRepository.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Len(t, locations, 1, "В БД должна быть только одна локация")
 		assert.Equal(t, createdLocation1.ID, locations[0].ID)
@@ -261,7 +261,7 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 		}
 
 		// Получаем список локаций
-		retrievedLocations, err := locationsService.GetLocations(ctx, user.ID, nil, nil)
+		retrievedLocations, err := locationsService.GetLocations(ctx, user.ID, 100, 0)
 
 		// Проверка
 		require.NoError(t, err)
@@ -288,7 +288,7 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Получаем список локаций
-		locations, err := locationsService.GetLocations(ctx, user.ID, nil, nil)
+		locations, err := locationsService.GetLocations(ctx, user.ID, 100, 0)
 
 		// Проверка
 		require.NoError(t, err)
@@ -320,7 +320,7 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// user1 получает свои локации
-		user1Locations, err := locationsService.GetLocations(ctx, user1.ID, nil, nil)
+		user1Locations, err := locationsService.GetLocations(ctx, user1.ID, 100, 0)
 
 		// Проверка
 		require.NoError(t, err)
@@ -351,7 +351,7 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 
 		// Получаем только 2 локации
 		limit := 2
-		locations, err := locationsService.GetLocations(ctx, user.ID, &limit, nil)
+		locations, err := locationsService.GetLocations(ctx, user.ID, limit, 0)
 
 		// Проверка
 		require.NoError(t, err)
@@ -375,7 +375,7 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 
 		// Пропускаем первые 2 локации
 		offset := 2
-		locations, err := locationsService.GetLocations(ctx, user.ID, nil, &offset)
+		locations, err := locationsService.GetLocations(ctx, user.ID, 100, offset)
 
 		// Проверка
 		require.NoError(t, err)
@@ -388,35 +388,6 @@ func TestLocationsService_GetLocations_Integration(t *testing.T) {
 		}
 	})
 
-	t.Run("ошибка при негативном limit", func(t *testing.T) {
-		testutil.ClearTables(t, pool)
-
-		user, err := usersService.CreateUser(ctx, "user", "password123", "password123")
-		require.NoError(t, err)
-
-		// Пытаемся использовать негативный limit
-		negativeLimit := -1
-		_, err = locationsService.GetLocations(ctx, user.ID, &negativeLimit, nil)
-
-		// Проверка
-		require.Error(t, err)
-		assert.ErrorIs(t, err, core_errors.ErrInvalidArgument)
-	})
-
-	t.Run("ошибка при негативном offset", func(t *testing.T) {
-		testutil.ClearTables(t, pool)
-
-		user, err := usersService.CreateUser(ctx, "user", "password123", "password123")
-		require.NoError(t, err)
-
-		// Пытаемся использовать негативный offset
-		negativeOffset := -1
-		_, err = locationsService.GetLocations(ctx, user.ID, nil, &negativeOffset)
-
-		// Проверка
-		require.Error(t, err)
-		assert.ErrorIs(t, err, core_errors.ErrInvalidArgument)
-	})
 }
 
 func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
@@ -457,7 +428,7 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		assert.ErrorIs(t, err, core_errors.ErrNotFound)
 
 		// Проверяем, что список локаций пуст
-		locations, err := locationsRepository.GetLocations(ctx, user.ID, nil, nil)
+		locations, err := locationsRepository.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Empty(t, locations, "Список локаций должен быть пустым после удаления")
 	})
@@ -506,12 +477,12 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		assert.Equal(t, user2.ID, retrievedLocation.UserID)
 
 		// Проверяем, что у user1 нет локаций
-		user1Locations, err := locationsRepository.GetLocations(ctx, user1.ID, nil, nil)
+		user1Locations, err := locationsRepository.GetLocations(ctx, user1.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Empty(t, user1Locations)
 
 		// Проверяем, что у user2 есть локация
-		user2Locations, err := locationsRepository.GetLocations(ctx, user2.ID, nil, nil)
+		user2Locations, err := locationsRepository.GetLocations(ctx, user2.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Len(t, user2Locations, 1)
 
@@ -550,7 +521,7 @@ func TestLocationsService_DeleteLocation_Integration(t *testing.T) {
 		require.NoError(t, err)
 
 		// Проверяем, что осталось 2 локации
-		locations, err := locationsRepository.GetLocations(ctx, user.ID, nil, nil)
+		locations, err := locationsRepository.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Len(t, locations, 2)
 
@@ -586,7 +557,7 @@ func TestLocationsService_CompleteScenario_Integration(t *testing.T) {
 		t.Logf("Пользователь создан: ID=%d, Login=%s", user.ID, user.Login)
 
 		// 2. Проверяем, что у пользователя пока нет локаций
-		locations, err := locationsService.GetLocations(ctx, user.ID, nil, nil)
+		locations, err := locationsService.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Empty(t, locations, "У нового пользователя не должно быть локаций")
 
@@ -603,7 +574,7 @@ func TestLocationsService_CompleteScenario_Integration(t *testing.T) {
 		t.Logf("Локация 2 создана: ID=%d, Name=%s", created2.ID, created2.Name)
 
 		// 5. Получаем список всех локаций
-		locations, err = locationsService.GetLocations(ctx, user.ID, nil, nil)
+		locations, err = locationsService.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Len(t, locations, 2, "Должно быть 2 локации")
 
@@ -619,7 +590,7 @@ func TestLocationsService_CompleteScenario_Integration(t *testing.T) {
 		t.Logf("Локация 1 удалена")
 
 		// 8. Проверяем, что осталась только вторая локация
-		locations, err = locationsService.GetLocations(ctx, user.ID, nil, nil)
+		locations, err = locationsService.GetLocations(ctx, user.ID, 100, 0)
 		require.NoError(t, err)
 		assert.Len(t, locations, 1, "Должна остаться 1 локация")
 		assert.Equal(t, created2.ID, locations[0].ID)

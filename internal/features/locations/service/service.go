@@ -25,8 +25,8 @@ type LocationsRepository interface {
 	GetLocations(
 		ctx context.Context,
 		userID int64,
-		limit *int,
-		offset *int,
+		limit int,
+		offset int,
 	) ([]domain.Location, error)
 
 	DeleteLocation(

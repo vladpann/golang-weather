@@ -1,7 +1,6 @@
 package locations_transport_http
 
 import (
-	"fmt"
 	"net/http"
 
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
@@ -25,11 +24,11 @@ func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	limit, offset, err := getLimitOffsetQueryParams(r)
+	limit, offset, err := core_http_request.GetPaginationParams(r)
 	if err != nil {
 		responseHandler.ErrorResponse(
 			err,
-			"failed to get 'limit'/'offset' query param",
+			"failed to get pagination params",
 		)
 
 		return
@@ -48,23 +47,4 @@ func (h *LocationsHTTPHandler) GetLocations(rw http.ResponseWriter, r *http.Requ
 	response := GetLocationsResponse(locationDTOFromDomains(locationDomains))
 
 	responseHandler.JSONResponse(response, http.StatusOK)
-}
-
-func getLimitOffsetQueryParams(r *http.Request) (*int, *int, error) {
-	const (
-		limitQueryParamKey  = "limit"
-		offsetQueryParamKey = "offset"
-	)
-
-	limit, err := core_http_request.GetIntQueryParam(r, limitQueryParamKey)
-	if err != nil {
-		return nil, nil, fmt.Errorf("get 'limit' query param: %w", err)
-	}
-
-	offset, err := core_http_request.GetIntQueryParam(r, offsetQueryParamKey)
-	if err != nil {
-		return nil, nil, fmt.Errorf("get 'offset' query param: %w", err)
-	}
-
-	return limit, offset, nil
 }
