@@ -15,6 +15,9 @@ func (r *SessionsRepository) GetSession(
 	ctx context.Context,
 	sessionID uuid.UUID,
 ) (domain.Session, error) {
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+	defer cancel()
+
 	query := `
 		SELECT id, user_id, expires_at
 		FROM weather.sessions

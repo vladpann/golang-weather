@@ -3,6 +3,9 @@ services:
     build:
       context: ${PROJECT_ROOT}
       dockerfile: ${PROJECT_ROOT}/cmd/weather/Dockerfile
+      args:
+        VERSION: ${VERSION:-prod}
+    image: weather:${VERSION:-prod}
     container_name: weather
     environment:
       - HTTP_ADDR=:5050
@@ -24,9 +27,28 @@ services:
       - LOGGER_FOLDER=/app/out/logs
       - TIME_ZONE=${TIME_ZONE}
     volumes:
+      #  mkdir -p out/logs && chown -R 10001:10001 out/logs
       - ${PROJECT_ROOT}/out/logs:/app/out/logs
     expose:
       - '5050'
+    depends_on:
+      weather-postgres:
+        condition: service_healthy
+      weather-postgres-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:5050/readyz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     restart: always
 
   weather-postgres:
@@ -38,12 +60,26 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - ${PROJECT_ROOT}/out/pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
     restart: always
 
   weather-postgres-migrate:
     image: migrate/migrate:v4.19.1
     volumes:
       - ${PROJECT_ROOT}/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@weather-postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      - "up"
+    depends_on:
+      weather-postgres:
+        condition: service_healthy
+    restart: "no"
 
   port-forwarder:
     image: alpine/socat:1.8.0.3
@@ -51,6 +87,9 @@ services:
     command: tcp-listen:5432,fork,reuseaddr tcp-connect:weather-postgres:5432
     ports:
       - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    depends_on:
+      weather-postgres:
+        condition: service_healthy
 
   nginx:
     image: nginx:1.27-alpine
@@ -65,4 +104,5 @@ services:
       - /var/www/certbot:/var/www/certbot:ro
     restart: always
     depends_on:
-      - weather
+      weather:
+        condition: service_healthy

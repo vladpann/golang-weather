@@ -35,7 +35,7 @@ func (s *LocationsService) GetLocations(
 		offset,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("get users from repository: %w", err)
+		return nil, fmt.Errorf("get locations from repository: %w", err)
 	}
 
 	return users, nil

@@ -3,7 +3,7 @@ export
 
 export PROJECT_ROOT=$(shell pwd)
 
-.PHONY: help build-local weather-run weather-deploy weather-undeploy logs-cleanup ps \
+.PHONY: help docker-build weather-run weather-deploy weather-undeploy logs-init logs-cleanup ps \
 	env-up env-down env-cleanup env-port-forward env-port-close \
 	migrate-create migrate-up migrate-down migrate-action \
 	test test-all test-integration test-users test-sessions test-openweather
@@ -15,29 +15,36 @@ help: ## Показать справку
 # Приложение
 # ============================================
 
-build-local: ## Собрать бинарник локально для Linux
-	@echo "Building binary for Linux..."
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-		-ldflags="-w -s" \
-		-o ${PROJECT_ROOT}/exe \
-		${PROJECT_ROOT}/cmd/weather/main.go
-	@echo "Binary built: ${PROJECT_ROOT}/exe"
+docker-build: ## Собрать образ weather (бинарник собирается внутри образа)
+	@docker compose build weather
 
-weather-run: ## Запустить приложение локально
+weather-run: ## Запустить приложение локально (127.0.0.1:5050)
 	@export LOGGER_FOLDER=${PROJECT_ROOT}/out/logs && \
 	export POSTGRES_HOST=localhost && \
 	go mod tidy && \
 	go run ${PROJECT_ROOT}/cmd/weather/main.go
 
-weather-deploy: ## Деплой с локально собранным бинарником
-	@echo "🔨 Building binary locally..."
-	@$(MAKE) build-local
+weather-deploy: ## Деплой: сборка образа, миграции, запуск weather + nginx
+	@$(MAKE) logs-init
 	@echo "🐳 Deploying to Docker..."
-	@docker compose -f docker-compose.yml up -d --build weather nginx
+	@docker compose -f docker-compose.yml up -d --build --wait weather nginx
 	@echo "✅ Deployment complete!"
 
 weather-undeploy: ## Остановить приложение + nginx
 	@docker compose down weather nginx
+
+logs-init: ## Создать out/logs с владельцем UID 10001 (пользователь контейнера)
+	@mkdir -p ${PROJECT_ROOT}/out/logs
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		echo "macOS detected: setting permissions 777 for Docker Desktop compatibility..."; \
+		sudo chmod -R 777 ${PROJECT_ROOT}/out/logs; \
+	else \
+		OWNER=$$(stat -c %u ${PROJECT_ROOT}/out/logs); \
+		if [ "$$OWNER" != "10001" ]; then \
+			echo "Setting owner 10001:10001 on out/logs (sudo)..."; \
+			sudo chown -R 10001:10001 ${PROJECT_ROOT}/out/logs; \
+		fi \
+	fi
 
 logs-cleanup: ## Удалить файлы логов (ОСТОРОЖНО!)
 	@read -p "Delete all log volume files? Risk of data loss. [y/N]: " ans; \
@@ -57,7 +64,7 @@ ps: ## Показать статус контейнеров
 # ============================================
 
 env-up: ## Запустить PostgreSQL (dev)
-	@docker compose up -d weather-postgres
+	@docker compose up -d --wait weather-postgres
 
 env-down: ## Остановить PostgreSQL (dev)
 	@docker compose down weather-postgres
@@ -87,7 +94,7 @@ migrate-create: ## Создать миграцию (make migrate-create seq=init
 		echo "The required \"seq\" parameter is missing. Example: make migrate-create seq=init"; \
 		exit 1; \
 	fi; \
-	docker compose run --rm weather-postgres-migrate \
+	docker compose run --rm --no-deps weather-postgres-migrate \
 		create \
 		-ext sql \
 		-dir /migrations \

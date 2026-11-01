@@ -64,7 +64,6 @@ func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 	noopAuth := func(next http.Handler) http.Handler { return next }
 
 	handler := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		new(MockLocationsService),
 		config,
 		noopAuth,
 		rl,
@@ -98,7 +97,6 @@ func newTestEnvWithAuth(
 	t.Cleanup(func() { rl.Close() })
 
 	handler := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		new(MockLocationsService),
 		config,
 		auth,
 		rl,

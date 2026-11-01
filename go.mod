@@ -7,11 +7,12 @@ require (
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
-	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.12.1
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.57.0
+	golang.org/x/sync v0.23.0
 )
 
 require (
@@ -59,7 +60,6 @@ require (
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/testcontainers/testcontainers-go v0.44.0 // indirect
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
@@ -70,7 +70,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )

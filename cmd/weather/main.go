@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
 	core_config "github.com/vladpann/backend/golang-weather/internal/core/config"
+	core_health "github.com/vladpann/backend/golang-weather/internal/core/health"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
@@ -17,7 +17,7 @@ import (
 	locations_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres"
 	locations_service "github.com/vladpann/backend/golang-weather/internal/features/locations/service"
 	locations_transport_http "github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http"
-	"github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
+	openweather_ratelimiter "github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
 	openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
 	openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
 	sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
@@ -39,10 +39,6 @@ func main() {
 		syscall.SIGINT, syscall.SIGTERM,
 	)
 	defer cancel()
-
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("failed to init env variables:", err)
-	}
 
 	logger, err := core_logger.NewLogger(core_logger.NewConfigMust())
 	if err != nil {
@@ -92,21 +88,23 @@ func main() {
 	logger.Debug("initializing feature", zap.String("feature", "openweather"))
 	openWeatherConfig := openweather_service.NewConfigMust()
 
-	rateLimiterConfig := ratelimiter.Config{
+	openWeatherRateLimiterConfig := openweather_ratelimiter.Config{
 		RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
 		QueueSize:         openWeatherConfig.QueueSize,
 	}
-	rateLimiter, err := ratelimiter.NewRateLimiter(rateLimiterConfig, logger)
+	openWeatherRateLimiter, err := openweather_ratelimiter.NewRateLimiter(
+		openWeatherRateLimiterConfig,
+		logger,
+	)
 	if err != nil {
-		logger.Fatal("failed to init rate limiter", zap.Error(err))
+		logger.Fatal("failed to init open weather rate limiter", zap.Error(err))
 	}
-	defer rateLimiter.Close()
+	defer openWeatherRateLimiter.Close()
 
 	openWeatherTransportHTTP := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		locationsService,
 		openWeatherConfig,
 		authMiddleware,
-		rateLimiter,
+		openWeatherRateLimiter,
 	)
 
 	logger.Debug("initializing HTTP server")
@@ -120,6 +118,12 @@ func main() {
 		core_http_middleware.Trace(),
 		core_http_middleware.Panic(),
 	)
+
+	healthChecker := core_health.New(pool.Ping, 2*time.Second, func(err error) {
+		logger.Warn("readiness check failed", zap.Error(err))
+	})
+	context.AfterFunc(ctx, healthChecker.SetShuttingDown)
+	httpServer.RegisterHealth(healthChecker.Healthz, healthChecker.Readyz)
 
 	apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
@@ -137,5 +141,6 @@ func main() {
 
 	if err := egroup.Wait(); err != nil {
 		logger.Error("app stopped with error", zap.Error(err))
+		os.Exit(1)
 	}
 }

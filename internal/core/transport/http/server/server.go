@@ -46,6 +46,11 @@ func (s *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	}
 }
 
+func (s *HTTPServer) RegisterHealth(liveness, readiness http.HandlerFunc) {
+	s.router.Get("/healthz", liveness)
+	s.router.Get("/readyz", readiness)
+}
+
 func (s *HTTPServer) Run(ctx context.Context) error {
 	server := &http.Server{
 		Addr:    s.config.Addr,

@@ -11,7 +11,10 @@ func (r *UsersRepository) GetUserByID(
 	ctx context.Context,
 	userID int64,
 ) (domain.User, error) {
-	const query = `
+	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
+	defer cancel()
+
+	query := `
 		SELECT id, login
 		FROM weather.users
 		WHERE id = $1
