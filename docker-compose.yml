@@ -28,8 +28,7 @@ services:
       - LOGGER_FOLDER=/app/out/logs
       - TIME_ZONE=${TIME_ZONE}
     volumes:
-      #  mkdir -p out/logs && chown -R 10001:10001 out/logs
-      - ${PROJECT_ROOT}/out/logs:/app/out/logs
+      - weather-logs:/app/out/logs
     expose:
       - '5050'
     depends_on:
@@ -144,5 +143,6 @@ services:
       - prometheus
 
 volumes:
+  weather-logs:
   prometheus-data:
   grafana-data:
