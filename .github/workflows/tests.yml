@@ -6,57 +6,6 @@ on:
   pull_request:
     branches: [main, develop]
 
-jobs:
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-
-    env:
-      POSTGRES_TIMEOUT: 5s
-      HTTP_ADDR: ':5050'
-      HTTP_SHUTDOWN_TIMEOUT: 30s
-      ALLOWED_ORIGINS: 'http://localhost'
-      LOGGER_LEVEL: DEBUG
-      LOGGER_FOLDER: out/logs
-      SESSION_TTL: 24h
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.26'
-          cache: true
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Pre-pull PostgreSQL image
-        run: docker pull postgres:18.1-bookworm
-
-      - name: Run all tests with coverage
-        env:
-          OPENWEATHER_API_KEY: ''
-          SKIP_TESTS_IF_NO_API_KEY: 'true'
-        run: go test ./... -v -count=1 -timeout 10m -coverprofile=coverage.out -covermode=atomic
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.out
-          flags: integration
-          name: codecov-umbrella
-
-name: Integration Tests
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
 permissions:
   contents: read
 
@@ -67,9 +16,9 @@ jobs:
 
     env:
       POSTGRES_TIMEOUT: 5s
-      HTTP_ADDR: ':5050'
+      HTTP_ADDR: ":5050"
       HTTP_SHUTDOWN_TIMEOUT: 30s
-      ALLOWED_ORIGINS: 'http://localhost'
+      ALLOWED_ORIGINS: "http://localhost"
       LOGGER_LEVEL: DEBUG
       LOGGER_FOLDER: out/logs
       SESSION_TTL: 24h
@@ -81,7 +30,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26'
+          go-version: "1.26"
           cache: true
 
       - name: Download dependencies
@@ -92,8 +41,8 @@ jobs:
 
       - name: Run all tests with coverage
         env:
-          OPENWEATHER_API_KEY: ''
-          SKIP_TESTS_IF_NO_API_KEY: 'true'
+          OPENWEATHER_API_KEY: ""
+          SKIP_TESTS_IF_NO_API_KEY: "true"
         run: go test ./... -v -count=1 -timeout 10m -coverprofile=coverage.out -covermode=atomic
 
       - name: Upload coverage to Codecov
@@ -115,14 +64,14 @@ jobs:
       POSTGRES_DB: weather
       POSTGRES_TIMEOUT: 5s
       HTTP_SHUTDOWN_TIMEOUT: 30s
-      ALLOWED_ORIGINS: 'http://localhost'
-      COOKIE_SECURE: 'false'
+      ALLOWED_ORIGINS: "http://localhost"
+      COOKIE_SECURE: "false"
       SESSION_TTL: 24h
       SESSION_CLEANUP_INTERVAL: 1h
       OPENWEATHER_API_BASE_URL: https://api.openweathermap.org
       OPENWEATHER_API_KEY: ci-dummy-key
-      OPENWEATHER_REQUESTS_PER_MINUTE: '60'
-      OPENWEATHER_QUEUE_SIZE: '100'
+      OPENWEATHER_REQUESTS_PER_MINUTE: "60"
+      OPENWEATHER_QUEUE_SIZE: "100"
       LOGGER_LEVEL: DEBUG
       TIME_ZONE: UTC
 
@@ -160,7 +109,7 @@ jobs:
           image-ref: weather:ci
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '1'
+          exit-code: "1"
 
       - name: Smoke test (postgres, migrations, app)
         run: |
