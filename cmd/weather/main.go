@@ -8,9 +8,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	core_config "github.com/vladpann/backend/golang-weather/internal/core/config"
 	core_health "github.com/vladpann/backend/golang-weather/internal/core/health"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_metrics "github.com/vladpann/backend/golang-weather/internal/core/metrics"
 	core_pgx_pool "github.com/vladpann/backend/golang-weather/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/vladpann/backend/golang-weather/internal/core/transport/http/middleware"
 	core_http_server "github.com/vladpann/backend/golang-weather/internal/core/transport/http/server"
@@ -48,6 +51,10 @@ func main() {
 	defer logger.Close()
 
 	logger.Debug("application time zone", zap.Any("zone", time.Local))
+
+	logger.Debug("initializing metrics")
+	metricsRegistry := prometheus.NewRegistry()
+	metrics := core_metrics.NewMetrics(metricsRegistry)
 
 	logger.Debug("initializing postgres connection pool")
 	pool, err := core_pgx_pool.NewPool(
@@ -88,7 +95,7 @@ func main() {
 	logger.Debug("initializing feature", zap.String("feature", "openweather"))
 	openWeatherClientConfig := openweather_client.NewConfigMust()
 
-	openWeatherClient, err := openweather_client.NewClient(openWeatherClientConfig, logger)
+	openWeatherClient, err := openweather_client.NewClient(openWeatherClientConfig, logger, metrics)
 	if err != nil {
 		logger.Fatal("failed to init open weather client", zap.Error(err))
 	}
@@ -101,6 +108,7 @@ func main() {
 	openWeatherRateLimiter, err := openweather_ratelimiter.NewRateLimiter(
 		openWeatherRateLimiterConfig,
 		logger,
+		metrics,
 	)
 	if err != nil {
 		logger.Fatal("failed to init open weather rate limiter", zap.Error(err))
@@ -134,6 +142,8 @@ func main() {
 		core_http_middleware.MaxBodySize(httpConfig.MaxBodyBytes),
 		// Logger reads body (now size-limited)
 		core_http_middleware.Logger(logger),
+		// Metrics middleware - records HTTP request duration and status
+		core_http_middleware.Metrics(metrics),
 		// Tracing and recovery
 		core_http_middleware.Trace(),
 		core_http_middleware.Panic(),
@@ -144,6 +154,11 @@ func main() {
 	})
 	context.AfterFunc(ctx, healthChecker.SetShuttingDown)
 	httpServer.RegisterHealth(healthChecker.Healthz, healthChecker.Readyz)
+
+	// Register Prometheus metrics endpoint
+	httpServer.RegisterMetrics(promhttp.HandlerFor(metricsRegistry, promhttp.HandlerOpts{
+		Registry: metricsRegistry,
+	}))
 
 	apiVersionRouter := core_http_server.NewAPIVersionRouter(core_http_server.ApiVersion1)
 	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)

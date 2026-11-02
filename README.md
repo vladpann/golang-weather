@@ -96,6 +96,23 @@ https://77.223.99.64
 - **Валидация**: Валидация входных данных с помощью go-playground/validator
 - **Connection Pooling**: Эффективное управление подключениями к БД с помощью pgx/v5
 
+## Monitoring
+
+The application exposes Prometheus metrics at `/metrics`:
+
+```bash
+curl http://localhost:8080/metrics
+```
+
+Metrics include:
+
+- **HTTP metrics**: requests, latency, in-flight requests
+- **Upstream metrics**: OpenWeather API calls, errors, latency
+- **Queue metrics**: rate limiter depth, wait time, rejections
+- **Runtime metrics**: Go memory, GC, goroutines
+
+See [docs/metrics-ru.md](docs/metrics-ru.md) for detailed documentation.
+
 ## Получение API ключа OpenWeather
 
 1. Зарегистрируйтесь на [OpenWeather](https://openweathermap.org/)

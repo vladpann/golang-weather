@@ -55,6 +55,10 @@ func (s *HTTPServer) RegisterHealth(liveness, readiness http.HandlerFunc) {
 	s.router.Get("/readyz", readiness)
 }
 
+func (s *HTTPServer) RegisterMetrics(handler http.Handler) {
+	s.router.Handle("/metrics", handler)
+}
+
 func (s *HTTPServer) Run(ctx context.Context) error {
 	server := &http.Server{
 		Addr:              s.config.Addr,

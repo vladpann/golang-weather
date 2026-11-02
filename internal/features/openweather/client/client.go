@@ -14,6 +14,7 @@ import (
 	"time"
 
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_metrics "github.com/vladpann/backend/golang-weather/internal/core/metrics"
 	"go.uber.org/zap"
 )
 
@@ -24,10 +25,11 @@ type Client struct {
 	cache        *Cache
 	deduplicator *Deduplicator
 	logger       *core_logger.Logger
+	metrics      *core_metrics.Metrics
 }
 
 // NewClient creates a new OpenWeather API client
-func NewClient(config Config, logger *core_logger.Logger) (*Client, error) {
+func NewClient(config Config, logger *core_logger.Logger, metrics *core_metrics.Metrics) (*Client, error) {
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
@@ -51,6 +53,7 @@ func NewClient(config Config, logger *core_logger.Logger) (*Client, error) {
 		cache:        cache,
 		deduplicator: deduplicator,
 		logger:       logger,
+		metrics:      metrics,
 	}, nil
 }
 
@@ -76,7 +79,23 @@ func (c *Client) GetWeather(ctx context.Context, lat, lon float64) (*WeatherResp
 		reqURL := fmt.Sprintf("%s/data/2.5/weather?%s", c.config.APIBaseURL, query.Encode())
 
 		var response WeatherResponse
-		if err := c.doRequestWithRetry(ctx, reqURL, &response); err != nil {
+		start := time.Now()
+		err := c.doRequestWithRetry(ctx, reqURL, &response)
+		duration := time.Since(start).Seconds()
+
+		// Record upstream metrics
+		if c.metrics != nil {
+			endpointGroup := "weather"
+			if err != nil {
+				c.metrics.UpstreamRequestsTotal.WithLabelValues(endpointGroup, "error").Inc()
+				c.recordUpstreamError(endpointGroup, err)
+			} else {
+				c.metrics.UpstreamRequestsTotal.WithLabelValues(endpointGroup, "success").Inc()
+			}
+			c.metrics.UpstreamRequestDuration.WithLabelValues(endpointGroup).Observe(duration)
+		}
+
+		if err != nil {
 			return nil, err
 		}
 
@@ -118,7 +137,23 @@ func (c *Client) SearchLocation(ctx context.Context, cityName string, limit int)
 		reqURL := fmt.Sprintf("%s/geo/1.0/direct?%s", c.config.APIBaseURL, query.Encode())
 
 		var response []GeocodingResponse
-		if err := c.doRequestWithRetry(ctx, reqURL, &response); err != nil {
+		start := time.Now()
+		err := c.doRequestWithRetry(ctx, reqURL, &response)
+		duration := time.Since(start).Seconds()
+
+		// Record upstream metrics
+		if c.metrics != nil {
+			endpointGroup := "geocoding"
+			if err != nil {
+				c.metrics.UpstreamRequestsTotal.WithLabelValues(endpointGroup, "error").Inc()
+				c.recordUpstreamError(endpointGroup, err)
+			} else {
+				c.metrics.UpstreamRequestsTotal.WithLabelValues(endpointGroup, "success").Inc()
+			}
+			c.metrics.UpstreamRequestDuration.WithLabelValues(endpointGroup).Observe(duration)
+		}
+
+		if err != nil {
 			return nil, err
 		}
 
@@ -328,6 +363,34 @@ func (c *Client) handleErrorResponse(resp *http.Response) error {
 // ClearCache clears all cached data
 func (c *Client) ClearCache() {
 	c.cache.Clear()
+}
+
+// recordUpstreamError categorizes and records upstream error metrics
+func (c *Client) recordUpstreamError(endpointGroup string, err error) {
+	if c.metrics == nil {
+		return
+	}
+
+	var upstreamErr *UpstreamError
+	if errors.As(err, &upstreamErr) {
+		errorType := "server_error"
+		if upstreamErr.IsClientAuth {
+			errorType = "auth"
+		} else if errors.Is(upstreamErr.Err, ErrRateLimitExceeded) {
+			errorType = "rate_limit"
+		} else if errors.Is(upstreamErr.Err, ErrGatewayTimeout) {
+			errorType = "timeout"
+		} else if upstreamErr.StatusCode >= 500 {
+			errorType = "server_error"
+		} else if upstreamErr.StatusCode >= 400 {
+			errorType = "client_error"
+		}
+		c.metrics.UpstreamErrors.WithLabelValues(endpointGroup, errorType).Inc()
+	} else if errors.Is(err, context.DeadlineExceeded) {
+		c.metrics.UpstreamErrors.WithLabelValues(endpointGroup, "timeout").Inc()
+	} else {
+		c.metrics.UpstreamErrors.WithLabelValues(endpointGroup, "network").Inc()
+	}
 }
 
 // Close releases resources used by the client

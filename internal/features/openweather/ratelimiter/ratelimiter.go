@@ -6,6 +6,7 @@ import (
 	"time"
 
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	core_metrics "github.com/vladpann/backend/golang-weather/internal/core/metrics"
 	"go.uber.org/zap"
 )
 
@@ -28,13 +29,14 @@ type RateLimiter struct {
 	queue     chan *queuedRequest
 	queueSize int
 	logger    *core_logger.Logger
+	metrics   *core_metrics.Metrics
 	stopChan  chan struct{} // closed exactly once by Close; wakes worker and all waiters
 	wg        sync.WaitGroup
 	closed    bool // guarded by mu
 }
 
 // NewRateLimiter creates a new rate limiter instance
-func NewRateLimiter(config Config, logger *core_logger.Logger) (*RateLimiter, error) {
+func NewRateLimiter(config Config, logger *core_logger.Logger, metrics *core_metrics.Metrics) (*RateLimiter, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
 	}
@@ -47,6 +49,7 @@ func NewRateLimiter(config Config, logger *core_logger.Logger) (*RateLimiter, er
 		queue:          make(chan *queuedRequest, config.QueueSize),
 		queueSize:      config.QueueSize,
 		logger:         logger,
+		metrics:        metrics,
 		stopChan:       make(chan struct{}),
 	}
 
@@ -93,20 +96,34 @@ func (rl *RateLimiter) Allow(ctx context.Context) error {
 	// or the wait below is woken by stopChan.
 	select {
 	case rl.queue <- qr:
-		rl.logger.Debug("request queued", zap.Int("queue_size", len(rl.queue)))
+		queueSize := len(rl.queue)
+		rl.logger.Debug("request queued", zap.Int("queue_size", queueSize))
+		if rl.metrics != nil {
+			rl.metrics.QueueDepth.Set(float64(queueSize))
+		}
 	case <-rl.stopChan:
 		return ErrClosed
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 		rl.logger.Warn("rate limit queue is full")
+		if rl.metrics != nil {
+			rl.metrics.QueueRejections.Inc()
+		}
 		return ErrQueueFull
 	}
+
+	// Track wait time
+	waitStart := time.Now()
 
 	// Wait for allow signal, shutdown or context cancellation
 	select {
 	case <-qr.allowChan:
 		rl.logger.Debug("queued request allowed")
+		if rl.metrics != nil {
+			rl.metrics.QueueWaitDuration.Observe(time.Since(waitStart).Seconds())
+			rl.metrics.QueueDepth.Set(float64(len(rl.queue)))
+		}
 		return nil
 	case err := <-qr.errChan:
 		return err
@@ -115,6 +132,9 @@ func (rl *RateLimiter) Allow(ctx context.Context) error {
 		// happened; the token is already spent, so honour the grant.
 		select {
 		case <-qr.allowChan:
+			if rl.metrics != nil {
+				rl.metrics.QueueWaitDuration.Observe(time.Since(waitStart).Seconds())
+			}
 			return nil
 		default:
 			return ErrClosed

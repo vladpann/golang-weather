@@ -40,7 +40,7 @@ func newTestClient(t *testing.T, serverURL string) *openweather_client.Client {
 
 	logger := &core_logger.Logger{Logger: zapLogger}
 
-	client, err := openweather_client.NewClient(config, logger)
+	client, err := openweather_client.NewClient(config, logger, nil)
 	require.NoError(t, err)
 
 	t.Cleanup(func() { client.Close() })

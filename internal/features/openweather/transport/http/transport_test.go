@@ -64,14 +64,14 @@ func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 
 	logger := &core_logger.Logger{Logger: zapLogger}
 
-	client, err := openweather_client.NewClient(clientConfig, logger)
+	client, err := openweather_client.NewClient(clientConfig, logger, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { client.Close() })
 
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
 		RequestsPerMinute: clientConfig.RequestsPerMinute,
 		QueueSize:         clientConfig.QueueSize,
-	}, logger)
+	}, logger, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 
@@ -111,14 +111,14 @@ func newTestEnvWithAuth(
 
 	logger := &core_logger.Logger{Logger: zapLogger}
 
-	client, err := openweather_client.NewClient(clientConfig, logger)
+	client, err := openweather_client.NewClient(clientConfig, logger, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { client.Close() })
 
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
 		RequestsPerMinute: clientConfig.RequestsPerMinute,
 		QueueSize:         clientConfig.QueueSize,
-	}, logger)
+	}, logger, nil)
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 

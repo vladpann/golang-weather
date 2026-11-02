@@ -18,6 +18,7 @@ func newRL(t *testing.T, rpm, queue int) *RateLimiter {
 	rl, err := NewRateLimiter(
 		Config{RequestsPerMinute: rpm, QueueSize: queue},
 		&core_logger.Logger{Logger: logger},
+		nil, // metrics
 	)
 	if err != nil {
 		t.Fatal(err)
