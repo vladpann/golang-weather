@@ -96,22 +96,45 @@ https://77.223.99.64
 - **Валидация**: Валидация входных данных с помощью go-playground/validator
 - **Connection Pooling**: Эффективное управление подключениями к БД с помощью pgx/v5
 
-## Monitoring
+## Мониторинг
 
-The application exposes Prometheus metrics at `/metrics`:
+Prometheus метрики доступны на `/metrics`:
 
 ```bash
-curl http://localhost:8080/metrics
+curl http://localhost/metrics
 ```
 
-Metrics include:
+### Grafana Dashboard
+
+Визуализация метрик через Grafana:
+
+```bash
+# Запустить мониторинг
+docker compose up -d prometheus grafana
+
+# Открыть Grafana
+open http://localhost:3000
+```
+
+**Логин:** `admin` / **Пароль:** `admin`
+
+Дашборд **"Weather App - Metrics Overview"** загрузится автоматически и покажет:
+
+- HTTP request rate и latency (P50/P95/P99)
+- Requests in-flight
+- Rate limiter queue depth и rejections
+- Goroutines и memory usage
+
+**Подробная инструкция:** [docs/grafana-setup-ru.md](docs/grafana-setup-ru.md)
+
+### Доступные метрики
 
 - **HTTP metrics**: requests, latency, in-flight requests
 - **Upstream metrics**: OpenWeather API calls, errors, latency
 - **Queue metrics**: rate limiter depth, wait time, rejections
 - **Runtime metrics**: Go memory, GC, goroutines
 
-See [docs/metrics-ru.md](docs/metrics-ru.md) for detailed documentation.
+**Документация метрик:** [docs/metrics-ru.md](docs/metrics-ru.md)
 
 ## Получение API ключа OpenWeather
 

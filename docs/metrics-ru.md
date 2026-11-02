@@ -266,7 +266,7 @@ groups:
 
 Проверьте, что эндпойнт доступен:
 ```bash
-curl http://localhost/metrics
+curl http://localhost:8080/metrics
 ```
 
 ### Высокая cardinality

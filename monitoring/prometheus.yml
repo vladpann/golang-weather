@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'weather-app'
+    static_configs:
+      - targets: ['weather:5050']
+        labels:
+          app: 'weather'
+          environment: 'local'
+    metrics_path: '/metrics'
