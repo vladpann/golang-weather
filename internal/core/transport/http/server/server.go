@@ -39,6 +39,10 @@ func NewHTTPServer(
 	}
 }
 
+func (s *HTTPServer) Config() Config {
+	return s.config
+}
+
 func (s *HTTPServer) RegisterAPIRouters(routers ...*APIVersionRouter) {
 	for _, router := range routers {
 		prefix := "/api/" + string(router.apiVersion)
@@ -53,8 +57,12 @@ func (s *HTTPServer) RegisterHealth(liveness, readiness http.HandlerFunc) {
 
 func (s *HTTPServer) Run(ctx context.Context) error {
 	server := &http.Server{
-		Addr:    s.config.Addr,
-		Handler: s.router,
+		Addr:              s.config.Addr,
+		Handler:           s.router,
+		ReadHeaderTimeout: s.config.ReadHeaderTimeout,
+		ReadTimeout:       s.config.ReadTimeout,
+		WriteTimeout:      s.config.WriteTimeout,
+		IdleTimeout:       s.config.IdleTimeout,
 	}
 
 	ch := make(chan error, 1)

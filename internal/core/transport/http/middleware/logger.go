@@ -85,11 +85,18 @@ func Logger(logger *core_logger.Logger) Middleware {
 
 			var requestBody string
 			if !sensitive && r.Body != nil {
+				// Read body with size limit already enforced by MaxBytesReader middleware.
+				// If body exceeds limit, this will return an error and the handler chain stops.
 				bodyBytes, err := io.ReadAll(r.Body)
-				if err == nil {
-					requestBody = string(bodyBytes)
-					r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+				if err != nil {
+					// Body read error (possibly size limit exceeded)
+					l.Warn("failed to read request body for logging", zap.Error(err))
+					// Return error immediately - don't continue to handler
+					http.Error(w, "Request body too large or malformed", http.StatusRequestEntityTooLarge)
+					return
 				}
+				requestBody = string(bodyBytes)
+				r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 			}
 
 			wrappedWriter := newResponseWriter(w)

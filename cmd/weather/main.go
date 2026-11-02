@@ -112,9 +112,23 @@ func main() {
 	httpServer := core_http_server.NewHTTPServer(
 		httpConfig,
 		logger,
+		// Load shedding MUST be first to reject overload before any processing
+		core_http_middleware.LoadShed(
+			core_http_middleware.LoadShedConfig{
+				MaxConcurrentRequests: httpConfig.MaxConcurrentRequests,
+			},
+			logger,
+		),
+		// CORS and basic setup
 		core_http_middleware.CORS(httpConfig.AllowedOrigins),
 		core_http_middleware.RequestID(),
+		// Request deadline MUST be before any I/O operations
+		core_http_middleware.RequestDeadline(httpConfig.RequestDeadline),
+		// MaxBodySize MUST be before Logger to prevent unbounded reads
+		core_http_middleware.MaxBodySize(httpConfig.MaxBodyBytes),
+		// Logger reads body (now size-limited)
 		core_http_middleware.Logger(logger),
+		// Tracing and recovery
 		core_http_middleware.Trace(),
 		core_http_middleware.Panic(),
 	)

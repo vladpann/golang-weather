@@ -81,13 +81,18 @@ https://77.223.99.64
 ## Особенности
 
 - **Аутентификация**: Сессии на основе cookies с bcrypt хешированием паролей
-- **Rate Limiting**: Ограничение запросов к OpenWeather API (60 req/min по умолчанию)
+- **Rate Limiting**: Ограничение запросов к OpenWeather API (60 req/min по умолчанию) с управляемой очередью
+- **HTTP Timeouts & Limits**: Комплексная защита от медленных клиентов и исчерпания ресурсов
+  - ReadHeaderTimeout, ReadTimeout, WriteTimeout, IdleTimeout на уровне http.Server
+  - MaxBodySize для предотвращения memory exhaustion
+  - RequestDeadline охватывает DB, очередь rate limiter и upstream вызовы
+  - LoadShedding с контролируемым отклонением перегрузки (503)
 - **Cleanup Interval**: Автоочистка истекших сессий из БД (10h по умолчанию)
 - **ON DELETE CASCADE**: При удалении пользователя автоматически удаляются все его сессии и локации
 - **CORS**: Настроен для работы с frontend
 - **Логирование**: Структурированные логи с помощью zap
 - **Graceful Shutdown**: Корректное завершение работы сервера
-- **Middleware**: Request ID, Logger, Trace, Panic Recovery, CORS, Auth
+- **Middleware**: Load Shedding, Request Deadline, Max Body Size, Request ID, Logger, Trace, Panic Recovery, CORS, Auth
 - **Валидация**: Валидация входных данных с помощью go-playground/validator
 - **Connection Pooling**: Эффективное управление подключениями к БД с помощью pgx/v5
 
@@ -102,14 +107,47 @@ https://77.223.99.64
 
 Основные параметры конфигурации (см. `.env.example`):
 
+### HTTP Server
+
 - `HTTP_ADDR` - адрес HTTP сервера (по умолчанию :5050)
+- `HTTP_SHUTDOWN_TIMEOUT` - таймаут graceful shutdown (по умолчанию 30s)
+- `HTTP_ALLOWED_ORIGINS` - разрешенные origins для CORS
+
+### HTTP Timeouts (защита от медленных клиентов)
+
+- `HTTP_READ_HEADER_TIMEOUT` - максимальное время чтения заголовков (по умолчанию 10s)
+- `HTTP_READ_TIMEOUT` - максимальное время чтения запроса (по умолчанию 15s)
+- `HTTP_WRITE_TIMEOUT` - максимальное время записи ответа (по умолчанию 30s)
+- `HTTP_IDLE_TIMEOUT` - таймаут keep-alive соединений (по умолчанию 120s)
+
+### HTTP Limits (защита от исчерпания ресурсов)
+
+- `HTTP_MAX_BODY_BYTES` - максимальный размер тела запроса в байтах (по умолчанию 1MB)
+- `HTTP_REQUEST_DEADLINE` - общий deadline для запроса, охватывает DB + queue + upstream (по умолчанию 25s)
+- `HTTP_MAX_CONCURRENT_REQUESTS` - максимум одновременных запросов, load shedding порог (по умолчанию 500)
+
+### Database
+
 - `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` - настройки подключения к PostgreSQL
+
+### Sessions
+
 - `SESSION_TTL` - время жизни сессии (по умолчанию 24h)
 - `SESSION_CLEANUP_INTERVAL` - время автоочистки истекших сессий (по умолчанию 10h)
+
+### OpenWeather API
+
 - `OPENWEATHER_API_KEY` - API ключ OpenWeather
 - `OPENWEATHER_REQUESTS_PER_MINUTE` - лимит запросов к OpenWeather API (по умолчанию 60)
+- `OPENWEATHER_QUEUE_SIZE` - размер очереди rate limiter (по умолчанию 100)
+
+### Logger
+
 - `LOGGER_LEVEL` - уровень логирования (DEBUG, INFO, WARN, ERROR)
-- `ALLOWED_ORIGINS` - разрешенные origins для CORS
+- `LOGGER_FOLDER` - директория для логов
+
+Подробнее о HTTP timeouts и limits: [docs/http-timeouts-and-limits-ru.md](docs/http-timeouts-and-limits-ru.md)  
+Подробнее о rate limiting: [docs/rate-limiting-ru.md](docs/rate-limiting-ru.md)
 
 ## Быстрый старт
 
