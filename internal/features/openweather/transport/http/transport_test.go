@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -16,8 +17,8 @@ import (
 
 	"github.com/vladpann/backend/golang-weather/internal/core/domain"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
+	openweather_client "github.com/vladpann/backend/golang-weather/internal/features/openweather/client"
 	"github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
-	openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
 	openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
 )
 
@@ -39,14 +40,21 @@ func (m *MockLocationsService) GetLocation(ctx context.Context, id int64, userID
 type testEnv struct {
 	handler *openweather_transport_http.OpenWeatherHTTPHandler
 	logger  *core_logger.Logger
+	client  *openweather_client.Client
 }
 
 func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 	t.Helper()
 
-	config := openweather_service.Config{
-		APIBaseUrl:        upstreamURL,
+	clientConfig := openweather_client.Config{
+		APIBaseURL:        upstreamURL,
 		APIKey:            "test-api-key",
+		Timeout:           5 * time.Second,
+		MaxResponseSize:   1048576,
+		MaxRetries:        0, // Disable retries for tests to avoid delays
+		RetryDelay:        50 * time.Millisecond,
+		CacheTTL:          5 * time.Minute,
+		CacheCleanupInt:   10 * time.Minute,
 		RequestsPerMinute: 60,
 		QueueSize:         100,
 	}
@@ -54,22 +62,28 @@ func newTestEnv(t *testing.T, upstreamURL string) *testEnv {
 	zapLogger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	logger := &core_logger.Logger{Logger: zapLogger}
+
+	client, err := openweather_client.NewClient(clientConfig, logger)
+	require.NoError(t, err)
+	t.Cleanup(func() { client.Close() })
+
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
-		RequestsPerMinute: config.RequestsPerMinute,
-		QueueSize:         config.QueueSize,
-	}, &core_logger.Logger{Logger: zapLogger})
+		RequestsPerMinute: clientConfig.RequestsPerMinute,
+		QueueSize:         clientConfig.QueueSize,
+	}, logger)
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 
 	noopAuth := func(next http.Handler) http.Handler { return next }
 
 	handler := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		config,
+		client,
 		noopAuth,
 		rl,
 	)
 
-	return &testEnv{handler: handler, logger: &core_logger.Logger{Logger: zapLogger}}
+	return &testEnv{handler: handler, logger: logger, client: client}
 }
 
 func newTestEnvWithAuth(
@@ -79,9 +93,15 @@ func newTestEnvWithAuth(
 ) *testEnv {
 	t.Helper()
 
-	config := openweather_service.Config{
-		APIBaseUrl:        upstreamURL,
+	clientConfig := openweather_client.Config{
+		APIBaseURL:        upstreamURL,
 		APIKey:            "test-api-key",
+		Timeout:           5 * time.Second,
+		MaxResponseSize:   1048576,
+		MaxRetries:        0,
+		RetryDelay:        50 * time.Millisecond,
+		CacheTTL:          5 * time.Minute,
+		CacheCleanupInt:   10 * time.Minute,
 		RequestsPerMinute: 60,
 		QueueSize:         100,
 	}
@@ -89,20 +109,26 @@ func newTestEnvWithAuth(
 	zapLogger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	logger := &core_logger.Logger{Logger: zapLogger}
+
+	client, err := openweather_client.NewClient(clientConfig, logger)
+	require.NoError(t, err)
+	t.Cleanup(func() { client.Close() })
+
 	rl, err := ratelimiter.NewRateLimiter(ratelimiter.Config{
-		RequestsPerMinute: config.RequestsPerMinute,
-		QueueSize:         config.QueueSize,
-	}, &core_logger.Logger{Logger: zapLogger})
+		RequestsPerMinute: clientConfig.RequestsPerMinute,
+		QueueSize:         clientConfig.QueueSize,
+	}, logger)
 	require.NoError(t, err)
 	t.Cleanup(func() { rl.Close() })
 
 	handler := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		config,
+		client,
 		auth,
 		rl,
 	)
 
-	return &testEnv{handler: handler, logger: &core_logger.Logger{Logger: zapLogger}}
+	return &testEnv{handler: handler, logger: logger, client: client}
 }
 
 // doCoords отправляет GET запрос с координатами в query параметрах
@@ -122,15 +148,15 @@ func (e *testEnv) doCoords(t *testing.T, ctx context.Context, lat, lon float64) 
 }
 
 func TestGetOpenWeather_Success(t *testing.T) {
-	upstream := openweather_transport_http.OpenWeatherDTOResponse{
-		Coord: openweather_transport_http.Coord{Lon: 37.6156, Lat: 55.7522},
-		Weather: []openweather_transport_http.Weather{
+	upstream := openweather_client.WeatherResponse{
+		Coord: openweather_client.Coord{Lon: 37.6156, Lat: 55.7522},
+		Weather: []openweather_client.Weather{
 			{ID: 800, Main: "Clear", Description: "clear sky", Icon: "01d"},
 		},
-		Main: openweather_transport_http.Main{
+		Main: openweather_client.Main{
 			Temp: 273.15, FeelsLike: 270.0, Pressure: 1013, Humidity: 80,
 		},
-		Sys:  openweather_transport_http.Sys{Country: "RU"},
+		Sys:  openweather_client.Sys{Country: "RU"},
 		Name: "Moscow",
 		Cod:  200,
 	}
@@ -165,7 +191,7 @@ func TestGetOpenWeather_Success(t *testing.T) {
 	require.Equal(t, http.StatusOK, rr.Code)
 	assert.EqualValues(t, 1, atomic.LoadInt32(&calls))
 
-	var got openweather_transport_http.GetOpenWeatherResponse
+	var got openweather_client.WeatherResponse
 	require.NoError(t, json.NewDecoder(rr.Body).Decode(&got))
 
 	assert.Equal(t, "Moscow", got.Name)
@@ -180,16 +206,17 @@ func TestGetOpenWeather_Success(t *testing.T) {
 
 func TestGetOpenWeather_UpstreamErrors(t *testing.T) {
 	tests := []struct {
-		name   string
-		status int
-		body   string
+		name           string
+		status         int
+		body           string
+		expectedStatus int
 	}{
-		{"bad request", http.StatusBadRequest, `{"cod":"400","message":"Invalid coordinates"}`},
-		{"unauthorized", http.StatusUnauthorized, `{"cod":401,"message":"Invalid API key"}`},
-		{"not found", http.StatusNotFound, `{"cod":"404","message":"city not found"}`},
-		{"too many requests", http.StatusTooManyRequests, `{"cod":429,"message":"limit exceeded"}`},
-		{"internal error", http.StatusInternalServerError, `{"message":"oops"}`},
-		{"service unavailable", http.StatusServiceUnavailable, `{"message":"Service Unavailable"}`},
+		{"bad request", http.StatusBadRequest, `{"cod":"400","message":"Invalid coordinates"}`, http.StatusBadRequest},
+		{"unauthorized", http.StatusUnauthorized, `{"cod":401,"message":"Invalid API key"}`, http.StatusBadGateway},
+		{"not found", http.StatusNotFound, `{"cod":"404","message":"city not found"}`, http.StatusNotFound},
+		{"too many requests", http.StatusTooManyRequests, `{"cod":429,"message":"limit exceeded"}`, http.StatusServiceUnavailable},
+		{"internal error", http.StatusInternalServerError, `{"message":"oops"}`, http.StatusServiceUnavailable},
+		{"service unavailable", http.StatusServiceUnavailable, `{"message":"Service Unavailable"}`, http.StatusServiceUnavailable},
 	}
 
 	for _, tt := range tests {
@@ -205,7 +232,7 @@ func TestGetOpenWeather_UpstreamErrors(t *testing.T) {
 
 			rr := env.doCoords(t, context.Background(), 55.7522, 37.6156)
 
-			assert.Equal(t, http.StatusInternalServerError, rr.Code)
+			assert.Equal(t, tt.expectedStatus, rr.Code)
 
 			var resp map[string]any
 			require.NoError(t, json.NewDecoder(rr.Body).Decode(&resp))
@@ -226,7 +253,7 @@ func TestGetOpenWeather_UpstreamInvalidJSON(t *testing.T) {
 
 	rr := env.doCoords(t, context.Background(), 55.7522, 37.6156)
 
-	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, rr.Code)
 }
 
 func TestGetOpenWeather_UpstreamUnreachable(t *testing.T) {
@@ -238,7 +265,7 @@ func TestGetOpenWeather_UpstreamUnreachable(t *testing.T) {
 
 	rr := env.doCoords(t, context.Background(), 55.7522, 37.6156)
 
-	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, rr.Code)
 }
 
 func TestGetOpenWeather_InvalidRequest(t *testing.T) {
@@ -354,7 +381,7 @@ func TestOpenWeatherHTTPHandler_Routes(t *testing.T) {
 
 // TestSearchLocation_Success проверяет успешный поиск локации
 func TestSearchLocation_Success(t *testing.T) {
-	upstreamResponse := []openweather_transport_http.GeocodingResponse{
+	upstreamResponse := []openweather_client.GeocodingResponse{
 		{
 			Name:    "Moscow",
 			Lat:     55.7522,
@@ -398,7 +425,7 @@ func TestSearchLocation_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	var result []openweather_transport_http.GeocodingResponse
+	var result []openweather_client.GeocodingResponse
 	err := json.NewDecoder(rr.Body).Decode(&result)
 	require.NoError(t, err)
 
@@ -425,7 +452,7 @@ func TestSearchLocation_MissingCityName(t *testing.T) {
 
 	env.handler.SearchLocation(rr, req)
 
-	// ErrorResponse возвращает StatusInternalServerError
+	// Missing city_name should return 500 from core_errors.ErrCityNameRequired
 	assert.Equal(t, http.StatusInternalServerError, rr.Code)
 }
 
@@ -439,32 +466,32 @@ func TestSearchLocation_UpstreamErrors(t *testing.T) {
 		{
 			name:           "bad_request",
 			upstreamStatus: http.StatusBadRequest,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "unauthorized",
 			upstreamStatus: http.StatusUnauthorized,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusBadGateway,
 		},
 		{
 			name:           "not_found",
 			upstreamStatus: http.StatusNotFound,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusNotFound,
 		},
 		{
 			name:           "too_many_requests",
 			upstreamStatus: http.StatusTooManyRequests,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusServiceUnavailable,
 		},
 		{
 			name:           "internal_error",
 			upstreamStatus: http.StatusInternalServerError,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusServiceUnavailable,
 		},
 		{
 			name:           "service_unavailable",
 			upstreamStatus: http.StatusServiceUnavailable,
-			expectedStatus: http.StatusInternalServerError,
+			expectedStatus: http.StatusServiceUnavailable,
 		},
 	}
 
@@ -507,7 +534,7 @@ func TestSearchLocation_UpstreamInvalidJSON(t *testing.T) {
 
 	env.handler.SearchLocation(rr, req)
 
-	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, rr.Code)
 }
 
 // TestSearchLocation_UpstreamUnreachable проверяет обработку недоступного upstream
@@ -521,7 +548,7 @@ func TestSearchLocation_UpstreamUnreachable(t *testing.T) {
 
 	env.handler.SearchLocation(rr, req)
 
-	assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	assert.Equal(t, http.StatusBadGateway, rr.Code)
 }
 
 // TestSearchLocation_RateLimitRejected проверяет обработку превышения rate limit
@@ -558,7 +585,7 @@ func TestSearchLocation_SpecialCharacters(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode([]openweather_transport_http.GeocodingResponse{
+		json.NewEncoder(w).Encode([]openweather_client.GeocodingResponse{
 			{Name: "San Francisco", Lat: 37.7749, Lon: -122.4194, Country: "US"},
 		})
 	}))
@@ -582,7 +609,7 @@ func TestSearchLocation_EmptyResults(t *testing.T) {
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode([]openweather_transport_http.GeocodingResponse{})
+		json.NewEncoder(w).Encode([]openweather_client.GeocodingResponse{})
 	}))
 	defer upstreamServer.Close()
 
@@ -597,7 +624,7 @@ func TestSearchLocation_EmptyResults(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
-	var result []openweather_transport_http.GeocodingResponse
+	var result []openweather_client.GeocodingResponse
 	err := json.NewDecoder(rr.Body).Decode(&result)
 	require.NoError(t, err)
 	assert.Len(t, result, 0)

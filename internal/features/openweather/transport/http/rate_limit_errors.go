@@ -3,7 +3,6 @@ package openweather_transport_http
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
@@ -19,13 +18,9 @@ func (h *OpenWeatherHTTPHandler) handleRateLimitError(
 	case errors.Is(err, ratelimiter.ErrQueueFull):
 		responseHandler.JSONResponse(
 			map[string]interface{}{
-				"error": "Service temporarily unavailable",
-				"message": fmt.Sprintf(
-					"Rate limit queue is full (max queue size: %d). Please try again in a few seconds.",
-					h.config.QueueSize,
-				),
+				"error":   "Service temporarily unavailable",
+				"message": "Rate limit queue is full. Please try again in a few seconds.",
 				"rate_limit": map[string]interface{}{
-					"requests_per_minute": h.config.RequestsPerMinute,
 					"retry_after_seconds": 5,
 				},
 			},
@@ -38,7 +33,6 @@ func (h *OpenWeatherHTTPHandler) handleRateLimitError(
 				"error":   "Request timeout",
 				"message": "Request timed out while waiting for rate limit. Please try again.",
 				"rate_limit": map[string]interface{}{
-					"requests_per_minute": h.config.RequestsPerMinute,
 					"retry_after_seconds": 5,
 				},
 			},
@@ -58,13 +52,9 @@ func (h *OpenWeatherHTTPHandler) handleRateLimitError(
 		// Generic rate limit error
 		responseHandler.JSONResponse(
 			map[string]interface{}{
-				"error": "Rate limit exceeded",
-				"message": fmt.Sprintf(
-					"Too many requests. Rate limit: %d requests per minute. Please try again in a few seconds.",
-					h.config.RequestsPerMinute,
-				),
+				"error":   "Rate limit exceeded",
+				"message": "Too many requests. Please try again in a few seconds.",
 				"rate_limit": map[string]interface{}{
-					"requests_per_minute": h.config.RequestsPerMinute,
 					"retry_after_seconds": 5,
 				},
 			},

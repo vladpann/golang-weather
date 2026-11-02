@@ -1,25 +1,17 @@
 package openweather_transport_http
 
 import (
-	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
-	"net/url"
 
 	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 	core_logger "github.com/vladpann/backend/golang-weather/internal/core/logger"
 	core_http_response "github.com/vladpann/backend/golang-weather/internal/core/transport/http/response"
+	openweather_client "github.com/vladpann/backend/golang-weather/internal/features/openweather/client"
 	"go.uber.org/zap"
 )
 
-type GeocodingResponse struct {
-	Name       string            `json:"name"`
-	Lat        float64           `json:"lat"`
-	Lon        float64           `json:"lon"`
-	Country    string            `json:"country"`
-	State      string            `json:"state,omitempty"`
-	LocalNames map[string]string `json:"local_names,omitempty"`
-}
+type GeocodingResponse openweather_client.GeocodingResponse
 
 func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -40,42 +32,40 @@ func (h *OpenWeatherHTTPHandler) SearchLocation(rw http.ResponseWriter, r *http.
 		return
 	}
 
-	query := url.Values{}
-	query.Set("q", cityName)
-	query.Set("limit", "5")
-	query.Set("appid", h.config.APIKey)
+	log.Debug("searching locations", zap.String("city", cityName))
 
-	apiURL := fmt.Sprintf("%s/geo/1.0/direct?%s", h.config.APIBaseUrl, query.Encode())
-
-	log.Debug("calling OpenWeather Geocoding API", zap.String("city", cityName))
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	locations, err := h.client.SearchLocation(ctx, cityName, 5)
 	if err != nil {
-		responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to create HTTP request")
-		return
-	}
+		log.Warn("failed to search locations", zap.Error(err))
 
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		responseHandler.ErrorResponse(sanitizeRequestError(err), "failed to search locations")
-		return
-	}
-	defer resp.Body.Close()
+		var upstreamErr *openweather_client.UpstreamError
+		if errors.As(err, &upstreamErr) {
+			status := upstreamErr.HTTPStatusCode()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Debug("OpenWeather API error",
-			zap.Int("status", resp.StatusCode),
-			zap.String("city", cityName))
-		responseHandler.ErrorResponse(
-			fmt.Errorf("OpenWeather API returned status %d", resp.StatusCode),
-			"failed to search locations",
-		)
-		return
-	}
+			response := map[string]interface{}{
+				"error":   http.StatusText(status),
+				"message": "Unable to search locations from provider",
+			}
 
-	var locations []GeocodingResponse
-	if err := json.NewDecoder(resp.Body).Decode(&locations); err != nil {
-		responseHandler.ErrorResponse(err, "failed to decode geocoding response")
+			if upstreamErr.RetryAfter > 0 {
+				response["retry_after_seconds"] = upstreamErr.RetryAfter
+			}
+
+			switch {
+			case errors.Is(upstreamErr.Err, openweather_client.ErrRateLimitExceeded):
+				response["message"] = "Weather provider rate limit exceeded, please try again later"
+			case errors.Is(upstreamErr.Err, openweather_client.ErrServiceUnavailable):
+				response["message"] = "Weather provider is temporarily unavailable"
+			case errors.Is(upstreamErr.Err, openweather_client.ErrNotFound):
+				response["message"] = "No locations found"
+				status = http.StatusNotFound
+			}
+
+			responseHandler.JSONResponse(response, status)
+			return
+		}
+
+		responseHandler.ErrorResponse(err, "failed to search locations")
 		return
 	}
 

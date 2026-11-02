@@ -17,8 +17,8 @@ import (
 	locations_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/locations/repository/postgres"
 	locations_service "github.com/vladpann/backend/golang-weather/internal/features/locations/service"
 	locations_transport_http "github.com/vladpann/backend/golang-weather/internal/features/locations/transport/http"
+	openweather_client "github.com/vladpann/backend/golang-weather/internal/features/openweather/client"
 	openweather_ratelimiter "github.com/vladpann/backend/golang-weather/internal/features/openweather/ratelimiter"
-	openweather_service "github.com/vladpann/backend/golang-weather/internal/features/openweather/service"
 	openweather_transport_http "github.com/vladpann/backend/golang-weather/internal/features/openweather/transport/http"
 	sessions_repository_postgres "github.com/vladpann/backend/golang-weather/internal/features/sessions/repository/postgres"
 	sessions_service "github.com/vladpann/backend/golang-weather/internal/features/sessions/service"
@@ -86,11 +86,17 @@ func main() {
 	locationsTransportHTTP := locations_transport_http.NewLocationsHTTPHandler(locationsService, authMiddleware)
 
 	logger.Debug("initializing feature", zap.String("feature", "openweather"))
-	openWeatherConfig := openweather_service.NewConfigMust()
+	openWeatherClientConfig := openweather_client.NewConfigMust()
+
+	openWeatherClient, err := openweather_client.NewClient(openWeatherClientConfig, logger)
+	if err != nil {
+		logger.Fatal("failed to init open weather client", zap.Error(err))
+	}
+	defer openWeatherClient.Close()
 
 	openWeatherRateLimiterConfig := openweather_ratelimiter.Config{
-		RequestsPerMinute: openWeatherConfig.RequestsPerMinute,
-		QueueSize:         openWeatherConfig.QueueSize,
+		RequestsPerMinute: openWeatherClientConfig.RequestsPerMinute,
+		QueueSize:         openWeatherClientConfig.QueueSize,
 	}
 	openWeatherRateLimiter, err := openweather_ratelimiter.NewRateLimiter(
 		openWeatherRateLimiterConfig,
@@ -102,7 +108,7 @@ func main() {
 	defer openWeatherRateLimiter.Close()
 
 	openWeatherTransportHTTP := openweather_transport_http.NewOpenWeatherHTTPHandler(
-		openWeatherConfig,
+		openWeatherClient,
 		authMiddleware,
 		openWeatherRateLimiter,
 	)
