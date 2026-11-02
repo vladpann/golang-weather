@@ -192,27 +192,53 @@
           ? `${location.name}, ${country}`
           : location.name;
 
-        col.innerHTML = `
-          <div class="card h-100 position-relative weather-card">
-            <div class="position-absolute weather-card-delete-form">
-              <button class="btn-close" aria-label="Delete" onclick="deleteLocation(${location.id})"></button>
-            </div>
-            <img
-              class="card-img-top img-fluid"
-              src="https://openweathermap.org/img/wn/${weatherIcon}@4x.png"
-              alt="Weather icon"
-            />
-            <div class="card-body d-flex flex-column">
-              <h1 class="card-text">${tempCelsius}°C</h1>
-              <h3 class="card-title">${cityDisplay}</h3>
-              <p class="card-text mb-1">
-                Feels like <span>${feelsLikeCelsius}</span>°C.
-                <span>${capitalizedDescription}</span>
-              </p>
-              <p class="card-text mb-1">Humidity: ${weatherData.main.humidity}%</p>
-            </div>
-          </div>
-        `;
+        // Create card structure using DOM methods to prevent XSS
+        const card = document.createElement('div');
+        card.className = 'card h-100 position-relative weather-card';
+
+        const deleteDiv = document.createElement('div');
+        deleteDiv.className = 'position-absolute weather-card-delete-form';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-close';
+        deleteBtn.setAttribute('aria-label', 'Delete');
+        deleteBtn.onclick = () => deleteLocation(location.id);
+        deleteDiv.appendChild(deleteBtn);
+
+        const img = document.createElement('img');
+        img.className = 'card-img-top img-fluid';
+        img.src = `https://openweathermap.org/img/wn/${weatherIcon}@4x.png`;
+        img.alt = 'Weather icon';
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body d-flex flex-column';
+
+        const tempHeading = document.createElement('h1');
+        tempHeading.className = 'card-text';
+        tempHeading.textContent = `${tempCelsius}°C`;
+
+        const cityHeading = document.createElement('h3');
+        cityHeading.className = 'card-title';
+        cityHeading.textContent = cityDisplay;
+
+        const feelsLikePara = document.createElement('p');
+        feelsLikePara.className = 'card-text mb-1';
+        feelsLikePara.textContent = `Feels like ${feelsLikeCelsius}°C. ${capitalizedDescription}`;
+
+        const humidityPara = document.createElement('p');
+        humidityPara.className = 'card-text mb-1';
+        humidityPara.textContent = `Humidity: ${weatherData.main.humidity}%`;
+
+        // Assemble the card
+        cardBody.appendChild(tempHeading);
+        cardBody.appendChild(cityHeading);
+        cardBody.appendChild(feelsLikePara);
+        cardBody.appendChild(humidityPara);
+
+        card.appendChild(deleteDiv);
+        card.appendChild(img);
+        card.appendChild(cardBody);
+
+        col.appendChild(card);
 
         return col;
       }
