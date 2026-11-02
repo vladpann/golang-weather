@@ -1,0 +1,13 @@
+---
+# Hadolint configuration
+# Documentation: https://github.com/hadolint/hadolint
+
+# Ignore rules that don't fit our build strategy
+ignored:
+  # DL3018: We pin the Alpine base image version instead of individual packages.
+  # This is a common practice for Alpine-based images as package versions
+  # change frequently between Alpine releases.
+  - DL3018
+
+# Optional: Set failure threshold
+failure-threshold: error
