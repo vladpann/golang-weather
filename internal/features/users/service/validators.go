@@ -1,8 +1,6 @@
 package users_service
 
 import (
-	"fmt"
-
 	core_errors "github.com/vladpann/backend/golang-weather/internal/core/errors"
 )
 
@@ -14,9 +12,7 @@ type UserInput struct {
 
 func (i *UserInput) UserValidate() error {
 	if i.Login == "" || i.Password == "" {
-		return fmt.Errorf(
-			"login and password are required: %w", core_errors.ErrInvalidArgument,
-		)
+		return core_errors.NewValidationError("login and password are required")
 	}
 
 	if len(i.Password) < 4 || len(i.Password) > 72 {
