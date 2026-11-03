@@ -22,14 +22,14 @@ FROM alpine:${ALPINE_VERSION} AS runtime
 
 ARG VERSION=dev
 LABEL org.opencontainers.image.title="weather" \
-      org.opencontainers.image.version="${VERSION}"
+    org.opencontainers.image.version="${VERSION}"
 
 # ca-certificates — HTTPS OpenWeather, tzdata — TIME_ZONE (time.LoadLocation)
-RUN apk add --no-cache ca-certificates tzdata \
- && addgroup -S -g 10001 app \
- && adduser -S -u 10001 -G app -H -s /sbin/nologin app \
- && mkdir -p /app/out/logs \
- && chown -R 10001:10001 /app
+RUN apk add --no-cache ca-certificates tzdata wget \
+    && addgroup -S -g 10001 app \
+    && adduser -S -u 10001 -G app -H -s /sbin/nologin app \
+    && mkdir -p /app/out/logs \
+    && chown -R 10001:10001 /app
 
 WORKDIR /app
 COPY --from=build --chown=10001:10001 /out/weather /app/weather
@@ -42,6 +42,6 @@ USER 10001:10001
 EXPOSE 5050
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=3 \
-  CMD wget -q -O /dev/null http://127.0.0.1:5050/healthz || exit 1
+    CMD wget -q -O /dev/null http://127.0.0.1:5050/healthz || exit 1
 
 ENTRYPOINT ["/app/weather"]
