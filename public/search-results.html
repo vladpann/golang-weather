@@ -173,13 +173,7 @@
         addButton.setAttribute('data-lat', location.lat);
         addButton.setAttribute('data-lon', location.lon);
 
-        buttonDiv.appendChild(addButton);
-        cardBody.appendChild(buttonDiv);
-        card.appendChild(cardBody);
-        col.appendChild(card);
-
         // Add event listener to prevent double-clicking
-        const addButton = col.querySelector('.add-location-btn');
         addButton.addEventListener('click', function () {
           const name = this.getAttribute('data-name');
           const lat = parseFloat(this.getAttribute('data-lat'));
@@ -191,6 +185,11 @@
 
           addLocation(name, lat, lon, this);
         });
+
+        buttonDiv.appendChild(addButton);
+        cardBody.appendChild(buttonDiv);
+        card.appendChild(cardBody);
+        col.appendChild(card);
 
         return col;
       }
